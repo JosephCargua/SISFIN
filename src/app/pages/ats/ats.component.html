@@ -1,0 +1,68 @@
+<div class="ats-container">
+  <div class="page-header">
+    <h1>Anexo Transaccional Simplificado (ATS)</h1>
+  </div>
+
+  <div class="filters card">
+    <h2>Generar ATS</h2>
+    <form (ngSubmit)="generateATS()">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Año *</label>
+          <input
+            type="number"
+            [(ngModel)]="selectedYear"
+            name="year"
+            [min]="2020"
+            [max]="2030"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label>Mes *</label>
+          <select [(ngModel)]="selectedMonth" name="month" required>
+            <option *ngFor="let month of months" [value]="month.value">
+              {{ month.name }}
+            </option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>&nbsp;</label>
+          <button type="submit" class="btn btn-primary" [disabled]="loading">
+            <span class="material-icons">file_download</span>
+            Generar ATS
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="ats-list card">
+    <h2>ATS Generados</h2>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Período</th>
+            <th>Año</th>
+            <th>Mes</th>
+            <th>Estado</th>
+            <th>Fecha de Generación</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let ats of atsList">
+            <td>{{ ats.period }}</td>
+            <td>{{ ats.year }}</td>
+            <td>{{ months[ats.month - 1].name }}</td>
+            <td>
+              <span class="badge badge-success">{{ ats.status }}</span>
+            </td>
+            <td>{{ ats.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+

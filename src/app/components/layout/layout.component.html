@@ -1,0 +1,28 @@
+<div class="layout-container">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h1>Movimiento Juan XXIII</h1>
+      <p>Sistema Contable</p>
+    </div>
+    <nav class="sidebar-nav">
+      <a
+        *ngFor="let item of menuItems"
+        [routerLink]="item.route"
+        routerLinkActive="active"
+        class="nav-item"
+      >
+        <span class="material-icons">{{ item.icon }}</span>
+        <span>{{ item.label }}</span>
+      </a>
+    </nav>
+  </aside>
+  <main class="main-content">
+    <header class="top-bar">
+      <h2>Sistema Contable Del Movimiento Juan XXIII</h2>
+    </header>
+    <div class="content-area">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+</div>
+

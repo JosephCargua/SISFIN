@@ -1,0 +1,28 @@
+@use '../../styles/common.scss' as *;
+
+.period-locks-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #e2e8f0;
+  color: #475569;
+
+  &:hover {
+    background: #cbd5e1;
+  }
+
+  .material-icons {
+    font-size: 18px;
+  }
+}
+

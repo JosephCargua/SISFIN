@@ -1,0 +1,83 @@
+<div class="period-locks-container">
+  <div class="page-header">
+    <h1>Cierre de Período</h1>
+    <button class="btn btn-primary" (click)="showCreateForm = !showCreateForm">
+      <span class="material-icons">lock</span>
+      Bloquear Período
+    </button>
+  </div>
+
+  <div *ngIf="showCreateForm" class="create-form card">
+    <h2>Bloquear Período</h2>
+    <form (ngSubmit)="createLock()">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Año *</label>
+          <input
+            type="number"
+            [(ngModel)]="newLock.year"
+            name="year"
+            [min]="2020"
+            [max]="2030"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label>Mes *</label>
+          <select [(ngModel)]="newLock.month" name="month" required>
+            <option *ngFor="let month of months" [value]="month.value">
+              {{ month.name }}
+            </option>
+          </select>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="showCreateForm = false">
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary">Bloquear Período</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="locks-list card">
+    <h2>Períodos Bloqueados</h2>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Año</th>
+            <th>Mes</th>
+            <th>Estado</th>
+            <th>Bloqueado Por</th>
+            <th>Fecha de Bloqueo</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let lock of periodLocks">
+            <td>{{ lock.year }}</td>
+            <td>{{ months[lock.month - 1].name }}</td>
+            <td>
+              <span
+                class="badge"
+                [class.badge-success]="lock.isLocked"
+                [class.badge-danger]="!lock.isLocked"
+              >
+                {{ lock.isLocked ? 'Bloqueado' : 'Desbloqueado' }}
+              </span>
+            </td>
+            <td>{{ lock.lockedBy || '-' }}</td>
+            <td>{{ lock.lockedAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+            <td>
+              <button class="btn-icon" (click)="toggleLock(lock.id)" title="Cambiar Estado">
+                <span class="material-icons">{{ lock.isLocked ? 'lock_open' : 'lock' }}</span>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+

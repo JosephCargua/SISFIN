@@ -1,0 +1,151 @@
+<div class="trial-balance-container">
+  <div class="page-header">
+    <h1>Balance de Comprobación</h1>
+    <div class="header-actions">
+      <button type="button" class="btn btn-icon" title="Actualizar" (click)="consult()">
+        <span class="material-icons">refresh</span>
+      </button>
+      <button
+        type="button"
+        class="btn btn-icon"
+        title="Exportar Excel"
+        (click)="exportExcel()"
+        [disabled]="!flatRows.length"
+      >
+        <span class="material-icons">table_view</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="info-banner">
+    <span class="material-icons">info</span>
+    <span>
+      Importante: Para realizar una correcta sumatoria de saldos del debe y el
+      haber tiene que exportar el excel por cuentas auxiliares.
+    </span>
+  </div>
+
+  <div class="search-panel card">
+    <button type="button" class="search-panel-toggle" (click)="toggleSearchPanel()">
+      <span class="material-icons">{{
+        searchExpanded ? 'expand_less' : 'expand_more'
+      }}</span>
+      Búsqueda
+    </button>
+
+    <div class="search-form" *ngIf="searchExpanded">
+      <div class="search-grid">
+        <div class="form-group">
+          <label>Cuenta</label>
+          <div class="input-with-icon">
+            <span class="material-icons">search</span>
+            <select [(ngModel)]="filters.accountId" name="accountId">
+              <option value="">Todas las cuentas</option>
+              <option *ngFor="let acc of accounts" [value]="acc.id">
+                {{ acc.code }} - {{ acc.name }}
+              </option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Desde</label>
+          <input type="date" [(ngModel)]="filters.dateFrom" name="dateFrom" />
+        </div>
+        <div class="form-group">
+          <label>Hasta</label>
+          <input type="date" [(ngModel)]="filters.dateTo" name="dateTo" />
+        </div>
+        <div class="form-group form-action">
+          <label>&nbsp;</label>
+          <button type="button" class="btn btn-primary" (click)="consult()">
+            Consultar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="results-panel card" *ngIf="report">
+    <h2 class="movements-title">
+      Movimientos del {{ formatDateDisplay(report.startDate) }} al
+      {{ formatDateDisplay(report.endDate) }}
+    </h2>
+
+    <div *ngIf="loading" class="loading">Generando balance...</div>
+
+    <div class="table-container" *ngIf="!loading">
+      <table class="trial-balance-table">
+        <thead>
+          <tr class="header-group">
+            <th rowspan="2" class="col-account">Cuenta</th>
+            <th rowspan="2" class="col-money">Saldo Inicial</th>
+            <th colspan="2" class="col-group">Sumas</th>
+            <th colspan="2" class="col-group">Saldos</th>
+          </tr>
+          <tr class="header-sub">
+            <th class="col-money">Debe</th>
+            <th class="col-money">Haber</th>
+            <th class="col-money">Deudor</th>
+            <th class="col-money">Acreedor</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="flatRows.length === 0">
+            <td colspan="6" class="empty-row">Sin movimientos en el período</td>
+          </tr>
+          <tr
+            *ngFor="let row of flatRows"
+            [class.control-row]="row.hasChildren"
+          >
+            <td class="col-account">
+              <div
+                class="account-cell"
+                [style.padding-left.px]="row.depth * 20"
+              >
+                <button
+                  *ngIf="row.hasChildren"
+                  type="button"
+                  class="expand-btn"
+                  (click)="toggleExpand(row.id)"
+                >
+                  <span class="material-icons">{{
+                    isExpanded(row.id) ? 'remove' : 'add'
+                  }}</span>
+                </button>
+                <span *ngIf="!row.hasChildren" class="expand-spacer"></span>
+                <span class="account-label">
+                  <strong>{{ row.code }}</strong> {{ row.name }}
+                </span>
+              </div>
+            </td>
+            <td class="col-money">{{ formatCurrency(row.initialBalance) }}</td>
+            <td class="col-money">{{ formatCurrency(row.periodDebit) }}</td>
+            <td class="col-money">{{ formatCurrency(row.periodCredit) }}</td>
+            <td class="col-money">{{ formatCurrency(row.debtorBalance) }}</td>
+            <td class="col-money">{{ formatCurrency(row.creditorBalance) }}</td>
+          </tr>
+        </tbody>
+        <tfoot *ngIf="report.totals">
+          <tr class="totals-row">
+            <td class="col-account"><strong>TOTALES</strong></td>
+            <td class="col-money">
+              <strong>{{ formatCurrency(report.totals.initialBalance) }}</strong>
+            </td>
+            <td class="col-money">
+              <strong>{{ formatCurrency(report.totals.periodDebit) }}</strong>
+            </td>
+            <td class="col-money">
+              <strong>{{ formatCurrency(report.totals.periodCredit) }}</strong>
+            </td>
+            <td class="col-money">
+              <strong>{{ formatCurrency(report.totals.debtorBalance) }}</strong>
+            </td>
+            <td class="col-money">
+              <strong>{{ formatCurrency(report.totals.creditorBalance) }}</strong>
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+</div>

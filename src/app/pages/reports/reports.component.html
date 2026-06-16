@@ -1,0 +1,149 @@
+<div class="reports-container">
+  <div class="page-header">
+    <h1>Reportes Contables</h1>
+  </div>
+
+  <div class="report-selector card">
+    <h2>Seleccionar Reporte</h2>
+    <div class="form-group">
+      <label>Tipo de Reporte</label>
+      <select [(ngModel)]="reportType">
+        <option value="balance-sheet">Balance General</option>
+        <option value="income-statement">Estado de Resultados</option>
+      </select>
+    </div>
+
+    <div *ngIf="reportType === 'balance-sheet'" class="form-group">
+      <label>Fecha</label>
+      <input type="date" [(ngModel)]="date" />
+    </div>
+
+    <div *ngIf="reportType === 'income-statement'" class="form-row">
+      <div class="form-group">
+        <label>Fecha Inicio</label>
+        <input type="date" [(ngModel)]="startDate" />
+      </div>
+      <div class="form-group">
+        <label>Fecha Fin</label>
+        <input type="date" [(ngModel)]="endDate" />
+      </div>
+    </div>
+
+    <div *ngIf="reportType === 'income-statement'" class="signatures-section card">
+      <h3>Configuración de Firmas</h3>
+      
+      <div class="signatures-row">
+        <h4>Primera Fila</h4>
+        <div class="signature-group">
+          <div class="form-group">
+            <label>Nombre (Izquierda)</label>
+            <input type="text" [(ngModel)]="signatures.row1[0].name" />
+          </div>
+          <div class="form-group">
+            <label>Rol</label>
+            <input type="text" [(ngModel)]="signatures.row1[0].role" />
+          </div>
+          <div class="form-group">
+            <label>Organización</label>
+            <input type="text" [(ngModel)]="signatures.row1[0].org" />
+          </div>
+          <div class="form-group">
+            <label>Ubicación</label>
+            <input type="text" [(ngModel)]="signatures.row1[0].location" />
+          </div>
+        </div>
+
+        <div class="signature-group">
+          <div class="form-group">
+            <label>Nombre (Derecha)</label>
+            <input type="text" [(ngModel)]="signatures.row1[1].name" />
+          </div>
+          <div class="form-group">
+            <label>Rol</label>
+            <input type="text" [(ngModel)]="signatures.row1[1].role" />
+          </div>
+          <div class="form-group">
+            <label>Organización</label>
+            <input type="text" [(ngModel)]="signatures.row1[1].org" />
+          </div>
+          <div class="form-group">
+            <label>Ubicación</label>
+            <input type="text" [(ngModel)]="signatures.row1[1].location" />
+          </div>
+        </div>
+      </div>
+
+      <div class="signatures-row">
+        <h4>Segunda Fila</h4>
+        <div class="signature-group">
+          <div class="form-group">
+            <label>Nombre (Izquierda)</label>
+            <input type="text" [(ngModel)]="signatures.row2[0].name" />
+          </div>
+          <div class="form-group">
+            <label>Rol</label>
+            <input type="text" [(ngModel)]="signatures.row2[0].role" />
+          </div>
+          <div class="form-group">
+            <label>Organización</label>
+            <input type="text" [(ngModel)]="signatures.row2[0].org" />
+          </div>
+          <div class="form-group">
+            <label>Ubicación</label>
+            <input type="text" [(ngModel)]="signatures.row2[0].location" />
+          </div>
+        </div>
+
+        <div class="signature-group">
+          <div class="form-group">
+            <label>Nombre (Centro)</label>
+            <input type="text" [(ngModel)]="signatures.row2[1].name" />
+          </div>
+          <div class="form-group">
+            <label>Rol</label>
+            <input type="text" [(ngModel)]="signatures.row2[1].role" />
+          </div>
+          <div class="form-group">
+            <label>Organización</label>
+            <input type="text" [(ngModel)]="signatures.row2[1].org" />
+          </div>
+          <div class="form-group">
+            <label>Ubicación</label>
+            <input type="text" [(ngModel)]="signatures.row2[1].location" />
+          </div>
+        </div>
+
+        <div class="signature-group">
+          <div class="form-group">
+            <label>Nombre (Derecha)</label>
+            <input type="text" [(ngModel)]="signatures.row2[2].name" />
+          </div>
+          <div class="form-group">
+            <label>Rol</label>
+            <input type="text" [(ngModel)]="signatures.row2[2].role" />
+          </div>
+          <div class="form-group">
+            <label>Organización</label>
+            <input type="text" [(ngModel)]="signatures.row2[2].org" />
+          </div>
+          <div class="form-group">
+            <label>Ubicación</label>
+            <input type="text" [(ngModel)]="signatures.row2[2].location" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-danger" (click)="downloadPDF()">
+        <span class="material-icons">picture_as_pdf</span>
+        Descargar PDF
+      </button>
+      <button class="btn btn-success" (click)="downloadExcel()">
+        <span class="material-icons">table_chart</span>
+        Descargar Excel
+      </button>
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,14 @@
+@use '../../styles/common.scss' as *;
+
+.inventory-container {
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.page-header {
+  div {
+    display: flex;
+    gap: 12px;
+  }
+}
+

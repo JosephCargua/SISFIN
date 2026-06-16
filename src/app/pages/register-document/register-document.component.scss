@@ -1,0 +1,276 @@
+@use '../../styles/common.scss' as *;
+
+.register-document-container {
+  max-width: 1400px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 0;
+}
+
+.btn-guide {
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.info-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  color: #1e40af;
+  font-size: 14px;
+
+  .material-icons {
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+}
+
+.document-info h2 {
+  font-size: 16px;
+  margin-bottom: 16px;
+  color: #334155;
+}
+
+.doc-type-group {
+  grid-column: span 2;
+}
+
+.doc-type-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+
+  select {
+    flex: 1;
+    min-width: 120px;
+  }
+}
+
+.xml-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  margin: 0;
+  white-space: nowrap;
+
+  .material-icons {
+    font-size: 18px;
+  }
+}
+
+.field-hint {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.person-row {
+  display: flex;
+  gap: 8px;
+
+  select {
+    flex: 1;
+  }
+
+  .person-name {
+    flex: 1;
+  }
+}
+
+.due-days .due-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  input {
+    width: 80px;
+  }
+
+  span {
+    color: #64748b;
+    font-size: 14px;
+  }
+}
+
+.detail-section {
+  padding-top: 0;
+}
+
+.tabs {
+  display: flex;
+  border-bottom: 2px solid #e2e8f0;
+  margin: 0 -24px 20px;
+  padding: 0 24px;
+  gap: 4px;
+}
+
+.tab {
+  padding: 12px 20px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-weight: 500;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: color 0.2s;
+
+  &:hover {
+    color: #3b82f6;
+  }
+
+  &.active {
+    color: #3b82f6;
+    border-bottom-color: #3b82f6;
+  }
+}
+
+.detail-table {
+  font-size: 13px;
+
+  input,
+  select {
+    width: 100%;
+    min-width: 60px;
+    padding: 6px 8px;
+    font-size: 13px;
+  }
+
+  .col-product select {
+    min-width: 180px;
+  }
+
+  .subtotal-cell {
+    font-weight: 600;
+    text-align: right;
+    white-space: nowrap;
+  }
+}
+
+.empty-row {
+  text-align: center;
+  color: #94a3b8;
+  padding: 24px;
+}
+
+.btn-sm {
+  margin-top: 12px;
+  padding: 8px 16px;
+  font-size: 13px;
+}
+
+.footer-section {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 24px;
+  align-items: start;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.footer-left textarea {
+  width: 100%;
+  resize: vertical;
+}
+
+.attachments {
+  margin-top: 16px;
+
+  label {
+    display: block;
+    font-weight: 500;
+    color: #475569;
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+
+  .attach-hint {
+    display: block;
+    margin-top: 6px;
+    font-size: 12px;
+    color: #94a3b8;
+  }
+}
+
+.petty-cash {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #475569;
+    cursor: pointer;
+  }
+
+  select {
+    padding: 8px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+  }
+}
+
+.totals-panel {
+  padding: 20px;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 14px;
+  color: #475569;
+
+  span:last-child {
+    font-weight: 500;
+    color: #1e293b;
+  }
+}
+
+.ice-input {
+  width: 90px;
+  text-align: right;
+  padding: 4px 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+}
+
+.total-final {
+  border-bottom: none;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 2px solid #e2e8f0;
+
+  span:last-child {
+    color: #3b82f6;
+  }
+}
+
+.btn-save {
+  width: 100%;
+  margin-top: 16px;
+  padding: 12px;
+  font-size: 15px;
+}

@@ -1,0 +1,262 @@
+<div class="journal-entries-container">
+  <div class="page-header">
+    <h1>Libro Diario</h1>
+    <button class="btn btn-primary" (click)="toggleCreateForm()">
+      <span class="material-icons">add</span>
+      Nuevo Asiento
+    </button>
+  </div>
+
+  <div *ngIf="showCreateForm" class="create-form card">
+    <h2>Crear Nuevo Asiento Contable</h2>
+    
+    <div class="help-box">
+      <details>
+        <summary>
+          <span class="material-icons">help_outline</span>
+          ¿Cómo crear un asiento? (Click para ver ayuda)
+        </summary>
+        <div class="help-content">
+          <h4>Principio de Partida Doble</h4>
+          <p><strong>La suma de DÉBITOS debe igualar la suma de CRÉDITOS</strong></p>
+          
+          <h4>Pasos:</h4>
+          <ol>
+            <li>Completa fecha y descripción</li>
+            <li>Agrega líneas (mínimo 2):
+              <ul>
+                <li>Selecciona una cuenta</li>
+                <li>Ingresa monto en <strong>Débito</strong> O <strong>Crédito</strong> (no ambos)</li>
+              </ul>
+            </li>
+            <li>Verifica que los totales sean iguales</li>
+            <li>Crea el asiento (se guarda como BORRADOR)</li>
+            <li>POSTEA el asiento para hacerlo oficial</li>
+          </ol>
+
+          <h4>Ejemplo: Compra de mercaderías por $500</h4>
+          <table class="example-table">
+            <thead>
+              <tr>
+                <th>Cuenta</th>
+                <th>Débito</th>
+                <th>Crédito</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1.3.01 - Inventario</td>
+                <td>500.00</td>
+                <td>-</td>
+              </tr>
+              <tr>
+                <td>1.1.01 - Caja</td>
+                <td>-</td>
+                <td>500.00</td>
+              </tr>
+              <tr class="total-row">
+                <td><strong>TOTALES</strong></td>
+                <td><strong>500.00</strong></td>
+                <td><strong>500.00</strong></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h4>Estados:</h4>
+          <ul>
+            <li><strong>BORRADOR:</strong> Puedes editarlo, NO aparece en reportes</li>
+            <li><strong>POSTEADO:</strong> Ya no se puede editar, SÍ aparece en reportes</li>
+            <li><strong>ANULADO:</strong> Cancelado, NO aparece en reportes</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+    <form (ngSubmit)="createEntry()">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Fecha *</label>
+          <input type="date" [(ngModel)]="newEntry.date" name="date" required />
+        </div>
+        <div class="form-group">
+          <label>Descripción</label>
+          <input
+            type="text"
+            [(ngModel)]="newEntry.description"
+            name="description"
+            placeholder="Descripción del asiento"
+          />
+        </div>
+      </div>
+
+      <div class="lines-section">
+        <div class="lines-header">
+          <h3>Líneas del Asiento</h3>
+          <button type="button" class="btn btn-secondary btn-sm" (click)="addLine()">
+            <span class="material-icons">add</span>
+            Agregar Línea
+          </button>
+        </div>
+
+        <div class="lines-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Cuenta</th>
+                <th>Débito</th>
+                <th>Crédito</th>
+                <th>Descripción</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let line of newEntry.lines; let i = index">
+                <td>
+                  <select [(ngModel)]="line.accountId" [name]="'account' + i" required>
+                    <option value="">Seleccione...</option>
+                    <option *ngFor="let account of accounts" [value]="account.id">
+                      {{ account.code }} - {{ account.name }}
+                    </option>
+                  </select>
+                </td>
+                <td>
+                  <input
+                    type="number"
+                    [(ngModel)]="line.debit"
+                    [name]="'debit' + i"
+                    step="0.01"
+                    min="0"
+                    (input)="line.credit = 0"
+                  />
+                </td>
+                <td>
+                  <input
+                    type="number"
+                    [(ngModel)]="line.credit"
+                    [name]="'credit' + i"
+                    step="0.01"
+                    min="0"
+                    (input)="line.debit = 0"
+                  />
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    [(ngModel)]="line.description"
+                    [name]="'desc' + i"
+                    placeholder="Descripción"
+                  />
+                </td>
+                <td>
+                  <button
+                    *ngIf="newEntry.lines.length > 2"
+                    type="button"
+                    class="btn-icon"
+                    (click)="removeLine(i)"
+                  >
+                    <span class="material-icons">delete</span>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr class="totals-row">
+                <td><strong>Totales</strong></td>
+                <td><strong>{{ getTotalDebit() | number: '1.2-2' }}</strong></td>
+                <td><strong>{{ getTotalCredit() | number: '1.2-2' }}</strong></td>
+                <td colspan="2">
+                  <span
+                    [class.text-success]="getDifference() <= 0.01"
+                    [class.text-danger]="getDifference() > 0.01"
+                  >
+                    Diferencia: {{ getDifference() | number: '1.2-2' }}
+                  </span>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="toggleCreateForm()">
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="!validateDoubleEntry() || getDifference() > 0.01"
+        >
+          Crear Asiento
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="entries-list card">
+    <div class="list-header">
+      <h2>Asientos Contables</h2>
+      <select [(ngModel)]="statusFilter" (change)="loadEntries()">
+        <option value="">Todos los estados</option>
+        <option [value]="JournalEntryStatus.DRAFT">Borrador</option>
+        <option [value]="JournalEntryStatus.POSTED">Posteado</option>
+        <option [value]="JournalEntryStatus.CANCELLED">Anulado</option>
+      </select>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Número</th>
+            <th>Fecha</th>
+            <th>Descripción</th>
+            <th>Débito</th>
+            <th>Crédito</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let entry of entries">
+            <td>{{ entry.entryNumber }}</td>
+            <td>{{ entry.date | date: 'dd/MM/yyyy' }}</td>
+            <td>{{ entry.description || '-' }}</td>
+            <td>{{ entry.totalDebit | number: '1.2-2' }}</td>
+            <td>{{ entry.totalCredit | number: '1.2-2' }}</td>
+            <td>
+              <span
+                class="badge"
+                [class.badge-warning]="entry.status === JournalEntryStatus.DRAFT"
+                [class.badge-success]="entry.status === JournalEntryStatus.POSTED"
+                [class.badge-danger]="entry.status === JournalEntryStatus.CANCELLED"
+              >
+                {{ statusLabels[entry.status] }}
+              </span>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <button
+                  *ngIf="entry.status === JournalEntryStatus.DRAFT"
+                  class="btn-icon btn-success"
+                  (click)="postEntry(entry.id)"
+                  title="Postear"
+                >
+                  <span class="material-icons">check</span>
+                </button>
+                <button
+                  *ngIf="entry.status !== JournalEntryStatus.CANCELLED"
+                  class="btn-icon btn-danger"
+                  (click)="cancelEntry(entry.id)"
+                  title="Anular"
+                >
+                  <span class="material-icons">cancel</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+

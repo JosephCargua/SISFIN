@@ -1,0 +1,473 @@
+<div class="register-purchase-expense-container">
+  <div class="page-header">
+    <h1>Registrar Documento</h1>
+    <a routerLink="/journal-entries" class="btn btn-secondary btn-guide">
+      Guía para Intermitentes
+    </a>
+  </div>
+
+  <div class="info-banner">
+    <span class="material-icons">info</span>
+    <span>
+      Importante: De acuerdo con la normativa del SRI, los documentos electrónicos
+      deben ser autorizados en el momento de su emisión.
+    </span>
+  </div>
+
+  <section class="card document-info">
+    <h2>Información del Documento</h2>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Fecha de Emisión</label>
+        <input type="date" [(ngModel)]="issueDate" name="issueDate" />
+      </div>
+      <div class="form-group span-2">
+        <label>Tipo de Documento</label>
+        <div class="doc-type-row">
+          <select [(ngModel)]="personType" name="personType">
+            <option *ngFor="let opt of personTypeOptions" [value]="opt.value">
+              {{ opt.label }}
+            </option>
+          </select>
+          <label class="btn btn-secondary btn-sm xml-btn">
+            <span class="material-icons">upload_file</span>
+            Cargar XML
+            <input
+              type="file"
+              accept=".xml,application/xml,text/xml"
+              hidden
+              (change)="onXmlSelected($event)"
+              [disabled]="parsingXml"
+            />
+          </label>
+          <select [(ngModel)]="documentCategory" name="documentCategory">
+            <option *ngFor="let opt of documentCategoryOptions" [value]="opt.value">
+              {{ opt.label }}
+            </option>
+          </select>
+        </div>
+        <span class="field-hint" *ngIf="parsingXml">Procesando XML...</span>
+      </div>
+      <div class="form-group">
+        <label># de Documento <span class="required">*</span></label>
+        <input
+          type="text"
+          [(ngModel)]="documentNumber"
+          name="documentNumber"
+          placeholder="001-001-000000001"
+        />
+      </div>
+      <div class="form-group span-2">
+        <label>Autorización</label>
+        <input
+          type="text"
+          [(ngModel)]="authorization"
+          name="authorization"
+          placeholder="Clave de acceso"
+        />
+      </div>
+      <div class="form-group span-2">
+        <label>Persona <span class="required">*</span></label>
+        <div class="input-with-actions">
+          <input
+            type="text"
+            [(ngModel)]="personName"
+            name="personName"
+            placeholder="Buscar persona..."
+            readonly
+          />
+          <button type="button" class="btn-icon" title="Estadísticas" disabled>
+            <span class="material-icons">bar_chart</span>
+          </button>
+          <button type="button" class="btn-icon" title="Buscar" (click)="openPersonSearch()">
+            <span class="material-icons">search</span>
+          </button>
+          <a routerLink="/payables" class="btn-icon" title="Agregar persona">
+            <span class="material-icons">add</span>
+          </a>
+        </div>
+        <select
+          #personSelect
+          class="person-picker"
+          [class.visible]="showPersonPicker"
+          [(ngModel)]="personId"
+          name="personId"
+          (ngModelChange)="onPersonSelected()"
+          (blur)="showPersonPicker = false"
+        >
+          <option value="">Seleccionar proveedor...</option>
+          <option *ngFor="let s of suppliers" [value]="s.id">
+            {{ s.identification }} - {{ s.name }}
+          </option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Referencia</label>
+        <input type="text" [(ngModel)]="reference" name="reference" />
+      </div>
+      <div class="form-group">
+        <label>Vencimiento</label>
+        <div class="inline-suffix">
+          <input type="number" [(ngModel)]="dueDays" name="dueDays" min="0" />
+          <span>días</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Orden Compra/Venta</label>
+        <div class="input-with-icon">
+          <input
+            type="text"
+            [(ngModel)]="purchaseOrderRef"
+            name="purchaseOrderRef"
+            placeholder="Buscar orden..."
+          />
+          <span class="material-icons">search</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card detail-section">
+    <div class="tabs" role="tablist">
+      <button type="button" class="tab" [class.active]="activeTab === 'services'" (click)="setTab('services')">Servicios</button>
+      <button type="button" class="tab" [class.active]="activeTab === 'accounts'" (click)="setTab('accounts')">Cuentas</button>
+      <button type="button" class="tab" [class.active]="activeTab === 'costCenter'" (click)="setTab('costCenter')">Centro de Costo</button>
+      <button type="button" class="tab" [class.active]="activeTab === 'retention'" (click)="setTab('retention')">Retención</button>
+      <button type="button" class="tab" [class.active]="activeTab === 'payment'" (click)="setTab('payment')">Formas de Pago</button>
+    </div>
+
+    <!-- SERVICIOS -->
+    <div class="tab-panel" *ngIf="activeTab === 'services'">
+      <div class="table-scroll">
+        <table class="detail-table services-table">
+          <thead>
+            <tr>
+              <th class="col-qty">Cant.</th>
+              <th class="col-product">Producto</th>
+              <th class="col-unit">Unidad</th>
+              <th class="col-price">Precio U.</th>
+              <th class="col-iva">IVA</th>
+              <th class="col-ret">Ret. IR</th>
+              <th class="col-ret">Ret. IVA</th>
+              <th class="col-disc">Desc.</th>
+              <th class="col-disc">Desc.</th>
+              <th class="col-subtotal">Subtotal</th>
+              <th class="col-action"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let line of serviceLines; let i = index">
+              <td><input type="number" [(ngModel)]="line.quantity" [name]="'sqty' + i" min="0" step="0.01" (ngModelChange)="onServiceLineChange(line)" /></td>
+              <td>
+                <div class="input-with-icon">
+                  <select [(ngModel)]="line.productId" [name]="'sprod' + i" (ngModelChange)="onProductSelected(line)">
+                    <option value="">---</option>
+                    <option *ngFor="let p of products" [value]="p.id">{{ p.code }} - {{ p.name }}</option>
+                  </select>
+                  <button type="button" class="btn-icon-sm" title="Buscar"><span class="material-icons">search</span></button>
+                  <a routerLink="/inventory" class="btn-icon-sm" title="Agregar"><span class="material-icons">add</span></a>
+                </div>
+              </td>
+              <td><select [(ngModel)]="line.unit" [name]="'sunit' + i"><option [value]="line.unit">{{ line.unit }}</option><option value="UND">UND</option><option value="KG">KG</option><option value="LT">LT</option></select></td>
+              <td><input type="number" [(ngModel)]="line.unitPrice" [name]="'sprice' + i" step="0.01" min="0" (ngModelChange)="onServiceLineChange(line)" /></td>
+              <td>
+                <select [(ngModel)]="line.ivaRate" [name]="'siva' + i" (ngModelChange)="onServiceLineChange(line)">
+                  <option *ngFor="let opt of ivaOptions" [ngValue]="opt.value">{{ opt.label }}</option>
+                </select>
+              </td>
+              <td><div class="input-with-icon"><input type="text" [(ngModel)]="line.retIr" [name]="'sretIr' + i" /><span class="material-icons">search</span></div></td>
+              <td><div class="input-with-icon"><input type="text" [(ngModel)]="line.retIva" [name]="'sretIva' + i" /><span class="material-icons">search</span></div></td>
+              <td><input type="number" [(ngModel)]="line.discountPercent" [name]="'sdiscPct' + i" step="0.01" min="0" (ngModelChange)="onServiceLineChange(line)" /><span class="suffix">%</span></td>
+              <td><span class="money-readonly">{{ formatCurrency(line.discount) }}</span></td>
+              <td class="subtotal-cell">{{ formatCurrency(line.subtotal) }}</td>
+              <td><button type="button" class="btn-icon btn-danger" (click)="removeServiceLine(i)" title="Eliminar"><span class="material-icons">delete</span></button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <button type="button" class="btn btn-outline btn-sm" (click)="addServiceLine()">
+        <span class="material-icons">add</span> Agregar detalle
+      </button>
+    </div>
+
+    <!-- CUENTAS -->
+    <div class="tab-panel" *ngIf="activeTab === 'accounts'">
+      <div class="table-scroll">
+        <table class="detail-table accounts-table">
+          <thead>
+            <tr>
+              <th class="col-qty">Cant.</th>
+              <th class="col-account">Cuenta</th>
+              <th class="col-price">Valor U.</th>
+              <th class="col-iva">IVA</th>
+              <th class="col-ice">% ICE</th>
+              <th class="col-ret">Ret. IR</th>
+              <th class="col-ret">Ret. IVA</th>
+              <th class="col-disc">% Desc.</th>
+              <th class="col-disc">Desc.</th>
+              <th class="col-subtotal">Subtotal</th>
+              <th class="col-action"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let line of accountLines; let i = index">
+              <td><input type="number" [(ngModel)]="line.quantity" [name]="'aqty' + i" min="0" step="0.01" (ngModelChange)="onAccountLineChange(line)" /></td>
+              <td>
+                <div class="input-with-icon">
+                  <select [(ngModel)]="line.accountId" [name]="'aacc' + i" (ngModelChange)="onAccountSelected(line)">
+                    <option value="">---</option>
+                    <option *ngFor="let a of accounts" [value]="a.id">{{ a.code }} - {{ a.name }}</option>
+                  </select>
+                  <span class="material-icons">search</span>
+                </div>
+              </td>
+              <td><input type="number" [(ngModel)]="line.unitValue" [name]="'aval' + i" step="0.01" min="0" (ngModelChange)="onAccountLineChange(line)" /></td>
+              <td>
+                <select [(ngModel)]="line.ivaRate" [name]="'aiva' + i" (ngModelChange)="onAccountLineChange(line)">
+                  <option *ngFor="let opt of ivaOptions" [ngValue]="opt.value">{{ opt.label }}</option>
+                </select>
+              </td>
+              <td><input type="number" [(ngModel)]="line.icePercent" [name]="'aice' + i" step="0.01" min="0" /></td>
+              <td><div class="input-with-icon"><input type="text" [(ngModel)]="line.retIr" [name]="'aretIr' + i" /><span class="material-icons">search</span></div></td>
+              <td><div class="input-with-icon"><input type="text" [(ngModel)]="line.retIva" [name]="'aretIva' + i" /><span class="material-icons">search</span></div></td>
+              <td><input type="number" [(ngModel)]="line.discountPercent" [name]="'adiscPct' + i" step="0.01" min="0" (ngModelChange)="onAccountLineChange(line)" /><span class="suffix">%</span></td>
+              <td><span class="money-readonly">{{ formatCurrency(line.discount) }}</span></td>
+              <td class="subtotal-cell">{{ formatCurrency(line.subtotal) }}</td>
+              <td><button type="button" class="btn-icon btn-danger" (click)="removeAccountLine(i)"><span class="material-icons">delete</span></button></td>
+            </tr>
+            <tr *ngIf="accountLines.length === 0">
+              <td colspan="11" class="empty-row">Sin detalles de cuenta</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <button type="button" class="btn btn-outline btn-sm" (click)="addAccountLine()">
+        <span class="material-icons">add</span> Agregar detalle
+      </button>
+    </div>
+
+    <!-- CENTRO DE COSTO -->
+    <div class="tab-panel" *ngIf="activeTab === 'costCenter'">
+      <div class="table-scroll">
+        <table class="detail-table costcenter-table">
+          <thead>
+            <tr>
+              <th class="col-qty">Cant.</th>
+              <th class="col-wide">Producto/Cuenta</th>
+              <th class="col-subtotal">Subtotal</th>
+              <th class="col-search">Proyecto</th>
+              <th class="col-search">Centro Costo</th>
+              <th class="col-action"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let line of costCenterLines; let i = index">
+              <td><input type="number" [(ngModel)]="line.quantity" [name]="'ccqty' + i" min="0" step="0.01" /></td>
+              <td>
+                <select [(ngModel)]="line.itemId" [name]="'ccitem' + i" (ngModelChange)="onCostCenterItemSelected(line)">
+                  <option value="">Seleccionar...</option>
+                  <optgroup label="Cuentas">
+                    <option *ngFor="let a of accounts" [value]="a.id">{{ a.code }} - {{ a.name }}</option>
+                  </optgroup>
+                  <optgroup label="Productos">
+                    <option *ngFor="let p of products" [value]="p.id">{{ p.code }} - {{ p.name }}</option>
+                  </optgroup>
+                </select>
+              </td>
+              <td><input type="number" [(ngModel)]="line.subtotal" [name]="'ccsub' + i" step="0.01" min="0" /></td>
+              <td>
+                <div class="input-with-icon">
+                  <input type="text" [(ngModel)]="line.projectRef" [name]="'ccproj' + i" placeholder="Buscar..." />
+                  <span class="material-icons">search</span>
+                </div>
+              </td>
+              <td>
+                <div class="input-with-icon">
+                  <select [(ngModel)]="line.costCenterId" [name]="'cccc' + i" (ngModelChange)="onCostCenterSelected(line)">
+                    <option value="">Buscar...</option>
+                    <option *ngFor="let cc of costCenters" [value]="cc.id">{{ cc.code }} - {{ cc.name }}</option>
+                  </select>
+                  <span class="material-icons">search</span>
+                </div>
+              </td>
+              <td><button type="button" class="btn-icon btn-danger" (click)="removeCostCenterLine(i)"><span class="material-icons">delete</span></button></td>
+            </tr>
+            <tr *ngIf="costCenterLines.length === 0">
+              <td colspan="6" class="empty-row">Sin detalles de centro de costo</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <button type="button" class="btn btn-outline btn-sm" (click)="addCostCenterLine()">
+        <span class="material-icons">add</span> Agregar detalle
+      </button>
+    </div>
+
+    <!-- RETENCIÓN -->
+    <div class="tab-panel" *ngIf="activeTab === 'retention'">
+      <div class="retention-header form-grid">
+        <div class="form-group">
+          <label>Emisión</label>
+          <input type="date" [(ngModel)]="retentionEmissionDate" name="retEmissionDate" />
+        </div>
+        <div class="form-group">
+          <label>P. Fiscal</label>
+          <div class="fiscal-period">
+            <select [(ngModel)]="retentionFiscalMonth" name="retMonth">
+              <option *ngFor="let m of monthOptions" [ngValue]="m.value">{{ m.label }}</option>
+            </select>
+            <select [(ngModel)]="retentionFiscalYear" name="retYear">
+              <option *ngFor="let y of [2024, 2025, 2026, 2027]" [ngValue]="y">{{ y }}</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Tipo de emisión</label>
+          <select [(ngModel)]="retentionEmissionType" name="retEmissionType">
+            <option *ngFor="let opt of retentionEmissionTypeOptions" [value]="opt.value">{{ opt.label }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Documento</label>
+          <input type="text" [(ngModel)]="retentionDocumentNumber" name="retDocNum" />
+        </div>
+        <div class="form-group span-2">
+          <label>Autorización</label>
+          <input type="text" [(ngModel)]="retentionAuthorization" name="retAuth" />
+        </div>
+      </div>
+      <div class="table-scroll">
+        <table class="detail-table retention-table">
+          <thead>
+            <tr>
+              <th>Gasto</th>
+              <th>Retención</th>
+              <th>Tipo</th>
+              <th>Cod.SRI</th>
+              <th>Base</th>
+              <th>%</th>
+              <th>Valor</th>
+              <th class="col-action"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let line of retentionLines; let i = index">
+              <td><input type="text" [(ngModel)]="line.expense" [name]="'rexp' + i" /></td>
+              <td><input type="text" [(ngModel)]="line.retentionName" [name]="'rname' + i" /></td>
+              <td>
+                <select [(ngModel)]="line.retentionType" [name]="'rtype' + i">
+                  <option *ngFor="let opt of retentionTypeOptions" [value]="opt.value">{{ opt.label }}</option>
+                </select>
+              </td>
+              <td><input type="text" [(ngModel)]="line.sriCode" [name]="'rsri' + i" /></td>
+              <td><input type="number" [(ngModel)]="line.base" [name]="'rbase' + i" step="0.01" min="0" (ngModelChange)="onRetentionChange(line)" /></td>
+              <td><input type="number" [(ngModel)]="line.percentage" [name]="'rpct' + i" step="0.01" min="0" (ngModelChange)="onRetentionChange(line)" /></td>
+              <td class="subtotal-cell">{{ formatCurrency(line.amount) }}</td>
+              <td><button type="button" class="btn-icon btn-danger" (click)="removeRetentionLine(i)"><span class="material-icons">delete</span></button></td>
+            </tr>
+            <tr *ngIf="retentionLines.length === 0">
+              <td colspan="8" class="empty-row">Sin retenciones</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <button type="button" class="btn btn-outline btn-sm" (click)="addRetentionLine()">
+        <span class="material-icons">add</span> Agregar retención
+      </button>
+    </div>
+
+    <!-- FORMAS DE PAGO -->
+    <div class="tab-panel payment-panel" *ngIf="activeTab === 'payment'">
+      <div class="payment-layout">
+        <div class="payment-table-wrap">
+          <div class="table-scroll">
+            <table class="detail-table payment-table">
+              <thead>
+                <tr>
+                  <th>Forma de pago</th>
+                  <th class="col-term">Plazo</th>
+                  <th class="col-unit">Unid. de tiempo</th>
+                  <th class="col-price">Valor</th>
+                  <th class="col-action"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let line of paymentLines; let i = index">
+                  <td>
+                    <select [(ngModel)]="line.paymentMethod" [name]="'payMeth' + i">
+                      <option *ngFor="let opt of paymentMethodOptions" [value]="opt.value">{{ opt.label }}</option>
+                    </select>
+                  </td>
+                  <td><input type="number" [(ngModel)]="line.term" [name]="'payTerm' + i" min="0" /></td>
+                  <td>
+                    <select [(ngModel)]="line.timeUnit" [name]="'payUnit' + i">
+                      <option *ngFor="let opt of timeUnitOptions" [value]="opt.value">{{ opt.label }}</option>
+                    </select>
+                  </td>
+                  <td><input type="number" [(ngModel)]="line.amount" [name]="'payAmt' + i" step="0.01" min="0" /></td>
+                  <td><button type="button" class="btn-icon btn-danger" (click)="removePaymentLine(i)"><span class="material-icons">delete</span></button></td>
+                </tr>
+                <tr *ngIf="paymentLines.length === 0">
+                  <td colspan="5" class="empty-row">Sin formas de pago</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <button type="button" class="btn btn-outline btn-sm" (click)="addPaymentLine()">
+            <span class="material-icons">add</span> Agregar forma de pago
+          </button>
+        </div>
+        <div class="totals-panel inline-totals">
+          <div class="total-row"><span>Subtotal 15%</span><span>{{ formatCurrency(totals.subtotal15) }}</span></div>
+          <div class="total-row"><span>Subtotal 5%</span><span>{{ formatCurrency(totals.subtotal5) }}</span></div>
+          <div class="total-row"><span>Subtotal 0%</span><span>{{ formatCurrency(totals.subtotal0) }}</span></div>
+          <div class="total-row"><span>Descuento</span><span>{{ formatCurrency(totals.discount) }}</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="footer-section">
+    <div class="footer-left card">
+      <div class="form-group">
+        <label>Descripción</label>
+        <textarea [(ngModel)]="description" name="description" rows="4" placeholder="Notas del documento..."></textarea>
+      </div>
+      <div class="attachments">
+        <label>Adjuntos</label>
+        <button type="button" class="btn btn-secondary" disabled>Administrar Adjuntos</button>
+        <span class="attach-hint">Formatos: jpeg, jpg o pdf</span>
+      </div>
+      <div class="petty-cash">
+        <label class="checkbox-label">
+          <input type="checkbox" [(ngModel)]="payWithPettyCash" name="pettyCash" />
+          Pagar con Caja Chica
+        </label>
+        <select *ngIf="payWithPettyCash" [(ngModel)]="pettyCashAccountId" name="pettyCashAccountId">
+          <option value="">Seleccionar caja...</option>
+          <option *ngFor="let c of cashAccounts" [value]="c.id">{{ c.name }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="totals-panel card">
+      <div class="total-row"><span>Subtotal 15%</span><span>{{ formatCurrency(totals.subtotal15) }}</span></div>
+      <div class="total-row"><span>Subtotal 5%</span><span>{{ formatCurrency(totals.subtotal5) }}</span></div>
+      <div class="total-row"><span>Subtotal 0%</span><span>{{ formatCurrency(totals.subtotal0) }}</span></div>
+      <div class="total-row"><span>Descuento</span><span>{{ formatCurrency(totals.discount) }}</span></div>
+      <div class="total-row"><span>IVA 15%</span><span>{{ formatCurrency(totals.iva15) }}</span></div>
+      <div class="total-row"><span>IVA 5%</span><span>{{ formatCurrency(totals.iva5) }}</span></div>
+      <div class="total-row">
+        <span>ICE</span>
+        <input type="number" [(ngModel)]="ice" name="ice" step="0.01" min="0" (ngModelChange)="recalcTotals()" class="ice-input" />
+      </div>
+      <div class="total-row total-final">
+        <span>Total</span>
+        <span>{{ formatCurrency(totals.total) }}</span>
+      </div>
+      <button type="button" class="btn btn-primary btn-save" (click)="save()" [disabled]="saving">
+        {{ saving ? 'Guardando...' : 'Guardar' }}
+      </button>
+    </div>
+  </section>
+</div>

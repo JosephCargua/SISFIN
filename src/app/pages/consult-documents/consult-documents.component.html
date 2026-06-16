@@ -1,0 +1,230 @@
+<div class="consult-documents-container">
+  <div class="page-header">
+    <h1>Consultar documentos</h1>
+    <div class="header-actions">
+      <button type="button" class="btn btn-icon" title="Actualizar" (click)="search()">
+        <span class="material-icons">refresh</span>
+      </button>
+      <button
+        type="button"
+        class="btn btn-icon"
+        title="Exportar Excel"
+        (click)="exportExcel()"
+        [disabled]="!documents.length"
+      >
+        <span class="material-icons">table_view</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="search-panel card">
+    <button type="button" class="search-panel-toggle" (click)="toggleSearchPanel()">
+      <span class="material-icons">{{
+        searchExpanded ? 'expand_less' : 'expand_more'
+      }}</span>
+      Búsqueda
+    </button>
+
+    <div class="search-form" *ngIf="searchExpanded">
+      <div class="search-grid">
+        <div class="form-group">
+          <label>Documento</label>
+          <input
+            type="text"
+            [(ngModel)]="filters.documentNumber"
+            name="documentNumber"
+            placeholder="Buscar por número de documento"
+          />
+        </div>
+        <div class="form-group">
+          <label>Persona</label>
+          <div class="input-with-icon">
+            <span class="material-icons">search</span>
+            <input
+              type="text"
+              [(ngModel)]="filters.person"
+              name="person"
+              placeholder="Buscar persona"
+            />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Tipo Documento</label>
+          <select [(ngModel)]="filters.documentTypeCode" name="documentTypeCode">
+            <option *ngFor="let t of documentTypes" [value]="t.value">
+              {{ t.label }}
+            </option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Estado</label>
+          <select [(ngModel)]="filters.reviewStatus" name="reviewStatus">
+            <option *ngFor="let s of statusOptions" [value]="s.value">
+              {{ s.label }}
+            </option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Procesamiento</label>
+          <select [(ngModel)]="filters.processingStatus" name="processingStatus">
+            <option *ngFor="let p of processingOptions" [value]="p.value">
+              {{ p.label }}
+            </option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Orden Compra/Venta</label>
+          <div class="input-with-icon">
+            <span class="material-icons">search</span>
+            <input
+              type="text"
+              [(ngModel)]="filters.purchaseOrder"
+              name="purchaseOrder"
+              placeholder="Buscar orden"
+            />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Desde</label>
+          <input type="date" [(ngModel)]="filters.dateFrom" name="dateFrom" />
+        </div>
+        <div class="form-group">
+          <label>Hasta</label>
+          <input type="date" [(ngModel)]="filters.dateTo" name="dateTo" />
+        </div>
+        <div class="form-group">
+          <label>Tipo</label>
+          <select [(ngModel)]="filters.personType" name="personType">
+            <option *ngFor="let pt of personTypes" [value]="pt.value">
+              {{ pt.label }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="quick-filters">
+        <span class="quick-filters-label">Filtros rápidos:</span>
+        <button
+          type="button"
+          *ngFor="let qf of quickFilters"
+          class="quick-filter-link"
+          [class.active]="filters.quickFilter === qf.key"
+          (click)="applyQuickFilter(qf.key)"
+        >
+          {{ qf.label }}
+        </button>
+      </div>
+
+      <div class="search-actions">
+        <button type="button" class="btn btn-secondary" (click)="clearFilters()">
+          Limpiar
+        </button>
+        <button type="button" class="btn btn-primary" (click)="search()">
+          <span class="material-icons">search</span>
+          Buscar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="results-panel card">
+    <div *ngIf="loading" class="loading">Cargando documentos...</div>
+
+    <div class="table-container" *ngIf="!loading">
+      <table>
+        <thead>
+          <tr>
+            <th class="col-check">
+              <input
+                type="checkbox"
+                [checked]="isAllSelected()"
+                (change)="toggleSelectAll($event)"
+              />
+            </th>
+            <th>Emisión</th>
+            <th>Persona</th>
+            <th>Documento</th>
+            <th class="col-actions">Acciones</th>
+            <th class="col-money">Neto</th>
+            <th class="col-money">Imp.</th>
+            <th class="col-money">Total</th>
+            <th class="col-money">Ret.</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="documents.length === 0">
+            <td colspan="9" class="empty-row">No se encontraron documentos</td>
+          </tr>
+          <tr *ngFor="let doc of documents">
+            <td>
+              <input
+                type="checkbox"
+                [checked]="selectedIds.has(doc.id)"
+                (change)="toggleSelect(doc.id)"
+              />
+            </td>
+            <td>{{ doc.issueDate | date: 'dd/MM/yyyy' }}</td>
+            <td class="person-cell">
+              <div class="person-info">
+                <span class="material-icons person-icon">person</span>
+                <div>
+                  <span class="person-name">{{ doc.supplierName }}</span>
+                  <span class="person-type">{{ doc.personTypeLabel }}</span>
+                </div>
+              </div>
+            </td>
+            <td class="document-cell">
+              <a
+                class="doc-link"
+                [routerLink]="['/electronic-invoices']"
+                [queryParams]="{ highlight: doc.id }"
+              >
+                {{ doc.documentLabel }}
+              </a>
+              <span class="doc-status" [ngClass]="getStatusClass(doc)">
+                <span class="status-dot"></span>
+                {{ doc.statusLabel }}
+              </span>
+            </td>
+            <td class="actions-cell">
+              <button
+                type="button"
+                class="btn-icon"
+                title="Editar"
+                [routerLink]="['/electronic-invoices']"
+              >
+                <span class="material-icons">edit</span>
+              </button>
+              <a
+                class="btn-icon"
+                title="Registro electrónico"
+                [routerLink]="['/electronic-invoices']"
+              >
+                <span class="material-icons">upload_file</span>
+              </a>
+              <button
+                type="button"
+                class="btn-icon"
+                title="Ver"
+                (click)="viewDocument(doc)"
+              >
+                <span class="material-icons">visibility</span>
+              </button>
+              <button type="button" class="btn-icon" title="Enviar">
+                <span class="material-icons">mail</span>
+              </button>
+            </td>
+            <td class="col-money">{{ formatCurrency(doc.netAmount) }}</td>
+            <td class="col-money">{{ formatCurrency(doc.taxAmount) }}</td>
+            <td class="col-money">{{ formatCurrency(doc.total) }}</td>
+            <td class="col-money">{{ formatCurrency(doc.retentionAmount) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-footer" *ngIf="!loading">
+      <span>Total: {{ documents.length }} documento(s)</span>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,417 @@
+<div class="electronic-registration-container">
+  <div class="page-header">
+    <h1>Registro Electrónico</h1>
+    <label class="btn btn-primary upload-btn">
+      <span class="material-icons">upload_file</span>
+      Subir XML / Documento
+      <input
+        type="file"
+        accept=".xml,application/xml,text/xml,*/*"
+        multiple
+        hidden
+        (change)="onFileSelected($event)"
+        [disabled]="uploading"
+      />
+    </label>
+  </div>
+
+  <div
+    class="upload-zone"
+    [class.drag-over]="dragOver"
+    (drop)="onDrop($event)"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave()"
+  >
+    <span class="material-icons upload-icon">cloud_upload</span>
+    <p>Arrastre archivos XML o documentos aquí, o use el botón de subida</p>
+    <span class="upload-hint" *ngIf="uploading">Procesando archivos...</span>
+    <span class="upload-error" *ngIf="uploadError">{{ uploadError }}</span>
+  </div>
+
+  <div class="tabs">
+    <button
+      type="button"
+      class="tab"
+      [class.active]="activeTab === 'partial'"
+      (click)="setTab('partial')"
+    >
+      Parciales ({{ partialDocuments.length }})
+    </button>
+    <button
+      type="button"
+      class="tab"
+      [class.active]="activeTab === 'pending'"
+      (click)="setTab('pending')"
+    >
+      Por procesar ({{ pendingDocuments.length }})
+    </button>
+  </div>
+
+  <div class="info-banner" *ngIf="activeTab === 'partial'">
+    <span class="material-icons">info</span>
+    <span>
+      Información: Tus comprobantes han sido procesados parcialmente y necesitan
+      de tu revisión para completar la carga correctamente.
+    </span>
+  </div>
+
+  <div class="documents-list card">
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th class="col-check">
+              <input
+                type="checkbox"
+                [checked]="isAllSelected()"
+                (change)="toggleSelectAll($event)"
+              />
+            </th>
+            <th>F. Emisión</th>
+            <th>F. Autorización</th>
+            <th>N° Documento</th>
+            <th>Proveedor</th>
+            <th>Documento</th>
+            <th>Estado</th>
+            <th>Motivo</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="activeDocuments.length === 0">
+            <td colspan="9" class="empty-row">
+              No hay documentos en esta sección
+            </td>
+          </tr>
+          <ng-container *ngFor="let doc of activeDocuments">
+            <tr [class.row-expanded]="isExpanded(doc.id)">
+              <td>
+                <input
+                  type="checkbox"
+                  [checked]="selectedIds.has(doc.id)"
+                  (change)="toggleSelect(doc.id)"
+                />
+              </td>
+              <td>{{ doc.issueDate | date: 'dd/MM/yyyy' }}</td>
+              <td>
+                {{
+                  doc.authorizationDate
+                    ? (doc.authorizationDate | date: 'dd/MM/yyyy')
+                    : '-'
+                }}
+              </td>
+              <td>{{ doc.documentNumber }}</td>
+              <td class="supplier-cell">{{ doc.supplierName }}</td>
+              <td>
+                <button
+                  type="button"
+                  class="doc-link"
+                  (click)="viewXml(doc)"
+                  [title]="doc.fileName || ''"
+                >
+                  {{ doc.documentLabel }}
+                </button>
+              </td>
+              <td>
+                <span
+                  class="status-badge"
+                  [ngClass]="getReviewClass(doc.reviewStatus)"
+                >
+                  {{ getReviewLabel(doc.reviewStatus) }}
+                </span>
+              </td>
+              <td class="reason-cell">{{ doc.reason || '-' }}</td>
+              <td class="actions-cell">
+                <button
+                  type="button"
+                  class="btn-icon btn-expand"
+                  [title]="isExpanded(doc.id) ? 'Contraer' : 'Expandir opciones'"
+                  (click)="toggleExpand(doc.id)"
+                >
+                  <span class="material-icons">{{
+                    isExpanded(doc.id) ? 'keyboard_arrow_up' : 'keyboard_arrow_down'
+                  }}</span>
+                </button>
+                <button
+                  type="button"
+                  class="btn-icon"
+                  title="Ver detalle"
+                  (click)="viewXml(doc)"
+                >
+                  <span class="material-icons">description</span>
+                </button>
+                <button
+                  type="button"
+                  class="btn-icon btn-danger"
+                  title="Eliminar"
+                  (click)="deleteDocument(doc.id)"
+                >
+                  <span class="material-icons">delete</span>
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="isExpanded(doc.id)" class="expand-row">
+              <td colspan="9">
+                <div class="homologation-panel">
+                  <div class="panel-top-actions">
+                    <button
+                      type="button"
+                      class="btn btn-primary btn-homologate-top"
+                      [disabled]="homologatingId === doc.id"
+                      (click)="homologate(doc.id)"
+                    >
+                      <span class="material-icons">sync</span>
+                      {{
+                        homologatingId === doc.id ? 'Procesando...' : 'Homologar'
+                      }}
+                    </button>
+                  </div>
+                  <div class="homologation-columns">
+                    <div class="homologation-col">
+                      <div class="form-group">
+                        <label>Cuenta Por Pagar *</label>
+                        <select
+                          [(ngModel)]="getForm(doc.id).payableAccountId"
+                          [name]="'payable_' + doc.id"
+                        >
+                          <option value="">Buscar cuenta...</option>
+                          <option *ngFor="let acc of accounts" [value]="acc.id">
+                            {{ acc.code }} - {{ acc.name }}
+                          </option>
+                        </select>
+                      </div>
+                      <div class="form-group">
+                        <label>Cuenta Propina</label>
+                        <select
+                          [(ngModel)]="getForm(doc.id).tipAccountId"
+                          [name]="'tip_' + doc.id"
+                        >
+                          <option value="">Seleccionar...</option>
+                          <option *ngFor="let acc of accounts" [value]="acc.id">
+                            {{ acc.code }} - {{ acc.name }}
+                          </option>
+                        </select>
+                      </div>
+                      <div class="form-group">
+                        <label>Centro de Costo</label>
+                        <select
+                          [(ngModel)]="getForm(doc.id).costCenterId"
+                          [name]="'cost_' + doc.id"
+                        >
+                          <option value="">Buscar centro...</option>
+                          <option *ngFor="let cc of costCenters" [value]="cc.id">
+                            {{ cc.code }} - {{ cc.name }}
+                          </option>
+                        </select>
+                      </div>
+                      <div class="form-group">
+                        <label>Cuenta Recurrente</label>
+                        <select
+                          [(ngModel)]="getForm(doc.id).recurringAccountId"
+                          [name]="'recurring_' + doc.id"
+                          [disabled]="!getForm(doc.id).useRecurringAccount"
+                        >
+                          <option value="">Seleccionar...</option>
+                          <option *ngFor="let acc of accounts" [value]="acc.id">
+                            {{ acc.code }} - {{ acc.name }}
+                          </option>
+                        </select>
+                      </div>
+                      <label class="checkbox-label">
+                        <input
+                          type="checkbox"
+                          [(ngModel)]="getForm(doc.id).useRecurringAccount"
+                          [name]="'useRecurring_' + doc.id"
+                        />
+                        Usar Cuenta Recurrente
+                      </label>
+                    </div>
+
+                    <div class="homologation-col">
+                      <h4 class="section-title">
+                        Generación de retenciones en documento
+                      </h4>
+                      <div class="form-group">
+                        <label>Retención IR</label>
+                        <select
+                          [(ngModel)]="getForm(doc.id).retentionIrCode"
+                          [name]="'retIr_' + doc.id"
+                        >
+                          <option value="">Seleccionar...</option>
+                          <option
+                            *ngFor="let code of retentionIrCodes"
+                            [value]="code.code"
+                          >
+                            {{ code.code }} - {{ code.description }}
+                          </option>
+                        </select>
+                      </div>
+                      <div class="form-group">
+                        <label>Retención IVA</label>
+                        <select
+                          [(ngModel)]="getForm(doc.id).retentionIvaCode"
+                          [name]="'retIva_' + doc.id"
+                        >
+                          <option value="">Seleccionar...</option>
+                          <option
+                            *ngFor="let code of retentionIvaCodes"
+                            [value]="code.code"
+                          >
+                            {{ code.code }} - {{ code.description }}
+                          </option>
+                        </select>
+                      </div>
+                      <label class="checkbox-label">
+                        <input
+                          type="checkbox"
+                          [(ngModel)]="getForm(doc.id).generateRetention"
+                          [name]="'genRet_' + doc.id"
+                        />
+                        Generar Retención
+                      </label>
+                      <label class="checkbox-label">
+                        <input
+                          type="checkbox"
+                          [(ngModel)]="getForm(doc.id).updatePersonData"
+                          [name]="'updPerson_' + doc.id"
+                        />
+                        Actualizar datos en la persona
+                      </label>
+                    </div>
+                  </div>
+
+                  <div class="product-homologation-section">
+                    <h3 class="product-homologation-title">
+                      Homologación de Productos y Cuentas
+                    </h3>
+
+                    <ng-container *ngIf="getPendingLineItem(doc.id) as line; else allHomologated">
+                      <div class="product-homologation-grid">
+                        <div class="product-homologation-side">
+                          <h4>Mis Productos y Cuentas Contables</h4>
+                          <div class="form-group">
+                            <label>Código</label>
+                            <input
+                              type="text"
+                              [(ngModel)]="getLineForm(doc.id, line.id).internalCode"
+                              [name]="'intCode_' + line.id"
+                              placeholder="Código interno"
+                            />
+                          </div>
+                          <div class="mapping-type-group">
+                            <label class="radio-label">
+                              <input
+                                type="radio"
+                                [name]="'mapType_' + line.id"
+                                value="ACCOUNT"
+                                [(ngModel)]="getLineForm(doc.id, line.id).mappingType"
+                              />
+                              Cuentas
+                            </label>
+                            <label class="radio-label">
+                              <input
+                                type="radio"
+                                [name]="'mapType_' + line.id"
+                                value="PRODUCT"
+                                [(ngModel)]="getLineForm(doc.id, line.id).mappingType"
+                              />
+                              Productos
+                            </label>
+                          </div>
+                          <div class="form-group">
+                            <label>Unidad</label>
+                            <select
+                              [(ngModel)]="getLineForm(doc.id, line.id).unit"
+                              [name]="'unit_' + line.id"
+                            >
+                              <option *ngFor="let u of units" [value]="u">
+                                {{ u }}
+                              </option>
+                            </select>
+                          </div>
+                          <div class="form-group">
+                            <label>Producto / Cuenta</label>
+                            <select
+                              *ngIf="getLineForm(doc.id, line.id).mappingType === 'PRODUCT'"
+                              [(ngModel)]="getLineForm(doc.id, line.id).mappedProductId"
+                              [name]="'product_' + line.id"
+                            >
+                              <option value="">Buscar producto...</option>
+                              <option *ngFor="let p of products" [value]="p.id">
+                                {{ p.code }} - {{ p.name }}
+                              </option>
+                            </select>
+                            <select
+                              *ngIf="getLineForm(doc.id, line.id).mappingType === 'ACCOUNT'"
+                              [(ngModel)]="getLineForm(doc.id, line.id).mappedAccountId"
+                              [name]="'accountMap_' + line.id"
+                            >
+                              <option value="">Buscar cuenta...</option>
+                              <option *ngFor="let acc of accounts" [value]="acc.id">
+                                {{ acc.code }} - {{ acc.name }}
+                              </option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div class="product-homologation-side supplier-side">
+                          <h4>Productos de mi Proveedor</h4>
+                          <p class="supplier-hint">
+                            (Se listan sólo aquellos productos que no están
+                            homologados)
+                          </p>
+                          <div class="readonly-field">
+                            <label>Código</label>
+                            <span>{{ line.supplierCode }}</span>
+                          </div>
+                          <div class="readonly-field">
+                            <label>Producto</label>
+                            <span>{{ line.supplierDescription }}</span>
+                          </div>
+                          <div class="readonly-field">
+                            <label>Iva</label>
+                            <span>{{ line.ivaLabel }}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="accept-line-actions">
+                        <button
+                          type="button"
+                          class="btn btn-primary btn-accept"
+                          [disabled]="acceptingLineId === line.id"
+                          (click)="acceptLineItem(doc.id, line)"
+                        >
+                          <span class="material-icons">check</span>
+                          {{
+                            acceptingLineId === line.id
+                              ? 'Guardando...'
+                              : 'Aceptar'
+                          }}
+                        </button>
+                      </div>
+                      <p class="pending-items-note" *ngIf="getPendingLineItemsCount(doc.id) > 1">
+                        Pendientes: {{ getPendingLineItemsCount(doc.id) }} productos por homologar
+                      </p>
+                    </ng-container>
+
+                    <ng-template #allHomologated>
+                      <p class="all-homologated-msg">
+                        <span class="material-icons">check_circle</span>
+                        Todos los productos del proveedor han sido homologados.
+                        Puede presionar Homologar para finalizar el documento.
+                      </p>
+                    </ng-template>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-footer">
+      <span> Página 1 de 1 — Total: {{ activeDocuments.length }} </span>
+    </div>
+  </div>
+</div>

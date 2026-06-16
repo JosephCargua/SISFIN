@@ -1,0 +1,199 @@
+<div class="banking-container">
+  <div class="page-header">
+    <h1>Bancos y Caja</h1>
+    <div>
+      <button class="btn btn-secondary" (click)="showCashAccountForm = !showCashAccountForm">
+        <span class="material-icons">account_balance</span>
+        Caja
+      </button>
+      <button class="btn btn-secondary" (click)="showBankAccountForm = !showBankAccountForm">
+        <span class="material-icons">account_balance</span>
+        Banco
+      </button>
+      <button class="btn btn-primary" (click)="showTransactionForm = !showTransactionForm">
+        <span class="material-icons">add</span>
+        Transacción
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="showBankAccountForm" class="create-form card">
+    <h2>Crear Cuenta Bancaria</h2>
+    <form (ngSubmit)="createBankAccount()">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Número de Cuenta *</label>
+          <input
+            type="text"
+            [(ngModel)]="newBankAccount.accountNumber"
+            name="accountNumber"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label>Banco *</label>
+          <input type="text" [(ngModel)]="newBankAccount.bankName" name="bankName" required />
+        </div>
+        <div class="form-group">
+          <label>Tipo de Cuenta *</label>
+          <select [(ngModel)]="newBankAccount.accountType" name="accountType" required>
+            <option value="CHECKING">Corriente</option>
+            <option value="SAVINGS">Ahorros</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Saldo Inicial</label>
+          <input
+            type="number"
+            [(ngModel)]="newBankAccount.initialBalance"
+            name="initialBalance"
+            step="0.01"
+          />
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="showBankAccountForm = false">
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary">Crear Cuenta</button>
+      </div>
+    </form>
+  </div>
+
+  <div *ngIf="showCashAccountForm" class="create-form card">
+    <h2>Crear Caja</h2>
+    <form (ngSubmit)="createCashAccount()">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nombre *</label>
+          <input type="text" [(ngModel)]="newCashAccount.name" name="name" required />
+        </div>
+        <div class="form-group">
+          <label>Ubicación</label>
+          <input type="text" [(ngModel)]="newCashAccount.location" name="location" />
+        </div>
+        <div class="form-group">
+          <label>Saldo Inicial</label>
+          <input
+            type="number"
+            [(ngModel)]="newCashAccount.initialBalance"
+            name="initialBalance"
+            step="0.01"
+          />
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="showCashAccountForm = false">
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary">Crear Caja</button>
+      </div>
+    </form>
+  </div>
+
+  <div *ngIf="showTransactionForm" class="create-form card">
+    <h2>Registrar Transacción</h2>
+    <form (ngSubmit)="createTransaction()">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Cuenta Bancaria *</label>
+          <select [(ngModel)]="newTransaction.bankAccountId" name="bankAccountId" required>
+            <option value="">Seleccione...</option>
+            <option *ngFor="let account of bankAccounts" [value]="account.id">
+              {{ account.bankName }} - {{ account.accountNumber }}
+            </option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Tipo *</label>
+          <select [(ngModel)]="newTransaction.type" name="type" required>
+            <option value="DEPOSIT">Depósito</option>
+            <option value="WITHDRAWAL">Retiro</option>
+            <option value="TRANSFER">Transferencia</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Fecha *</label>
+          <input type="date" [(ngModel)]="newTransaction.date" name="date" required />
+        </div>
+        <div class="form-group">
+          <label>Monto *</label>
+          <input
+            type="number"
+            [(ngModel)]="newTransaction.amount"
+            name="amount"
+            step="0.01"
+            min="0"
+            required
+          />
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="showTransactionForm = false">
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary">Registrar Transacción</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="accounts-summary card">
+    <h2>Resumen de Cuentas</h2>
+    <div class="summary-grid">
+      <div class="summary-item">
+        <h3>Cuentas Bancarias</h3>
+        <p class="summary-value">{{ bankAccounts.length }}</p>
+        <p class="summary-total">
+          Total: ${{ getTotalBankBalance() | number: '1.2-2' }}
+        </p>
+      </div>
+      <div class="summary-item">
+        <h3>Cajas</h3>
+        <p class="summary-value">{{ cashAccounts.length }}</p>
+        <p class="summary-total">
+          Total: ${{ getTotalCashBalance() | number: '1.2-2' }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="transactions-list card">
+    <h2>Transacciones</h2>
+    <div class="form-group">
+      <label>Filtrar por Cuenta</label>
+      <select [(ngModel)]="selectedAccountId" (change)="onAccountFilterChange()">
+        <option value="">Todas</option>
+        <option *ngFor="let account of bankAccounts" [value]="account.id">
+          {{ account.bankName }} - {{ account.accountNumber }}
+        </option>
+      </select>
+    </div>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Cuenta</th>
+            <th>Tipo</th>
+            <th>Monto</th>
+            <th>Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let transaction of transactions">
+            <td>{{ transaction.date | date: 'dd/MM/yyyy' }}</td>
+            <td>{{ transaction.bankAccount?.accountNumber }}</td>
+            <td>
+              <span class="badge">
+                {{ transaction.type === 'DEPOSIT' ? 'Depósito' : transaction.type === 'WITHDRAWAL' ? 'Retiro' : 'Transferencia' }}
+              </span>
+            </td>
+            <td>{{ transaction.amount | number: '1.2-2' }}</td>
+            <td>{{ transaction.description || '-' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+

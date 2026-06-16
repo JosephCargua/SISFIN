@@ -1,0 +1,91 @@
+<div class="cost-centers-container">
+  <div class="page-header">
+    <h1>Centros de Costo</h1>
+    <button class="btn btn-primary" (click)="showCreateForm = !showCreateForm">
+      <span class="material-icons">add</span>
+      Nuevo Centro de Costo
+    </button>
+  </div>
+
+  <div *ngIf="showCreateForm" class="create-form card">
+    <h2>Crear Centro de Costo</h2>
+    <form (ngSubmit)="createCostCenter()">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Código *</label>
+          <input type="text" [(ngModel)]="newCostCenter.code" name="code" required />
+        </div>
+        <div class="form-group">
+          <label>Nombre *</label>
+          <input type="text" [(ngModel)]="newCostCenter.name" name="name" required />
+        </div>
+        <div class="form-group">
+          <label>Centro Padre</label>
+          <select [(ngModel)]="newCostCenter.parentId" name="parentId">
+            <option [value]="null">Ninguno</option>
+            <option *ngFor="let center of costCenters" [value]="center.id">
+              {{ center.code }} - {{ center.name }}
+            </option>
+          </select>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="showCreateForm = false">
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary">Crear Centro de Costo</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="cost-centers-list card">
+    <h2>Lista de Centros de Costo</h2>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Nombre</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let center of costCenters">
+            <td>{{ center.code }}</td>
+            <td>{{ center.name }}</td>
+            <td>
+              <span
+                class="badge"
+                [class.badge-success]="center.isActive"
+                [class.badge-danger]="!center.isActive"
+              >
+                {{ center.isActive ? 'Activo' : 'Inactivo' }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="hierarchy-view card">
+    <h2>Vista Jerárquica</h2>
+    <div class="hierarchy-tree">
+      <div *ngFor="let center of costCentersHierarchy" class="tree-item">
+        <div class="tree-node">
+          <span class="tree-code">{{ center.code }}</span>
+          <span class="tree-name">{{ center.name }}</span>
+        </div>
+        <div *ngIf="center.children && center.children.length > 0" class="tree-children">
+          <div *ngFor="let child of center.children" class="tree-item child">
+            <div class="tree-node">
+              <span class="tree-code">{{ child.code }}</span>
+              <span class="tree-name">{{ child.name }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

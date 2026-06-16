@@ -1,0 +1,184 @@
+<div class="accounts-container">
+  <div class="page-header">
+    <h1>Plan de Cuentas</h1>
+    <button class="btn btn-primary" (click)="toggleCreateForm()">
+      <span class="material-icons">add</span>
+      Nueva Cuenta
+    </button>
+  </div>
+
+  <div *ngIf="showCreateForm" class="create-form card">
+    <h2>Crear Nueva Cuenta</h2>
+    
+    <div class="info-box" *ngIf="newAccount.parentId">
+      <p><strong>⚠️ Importante:</strong></p>
+      <p>Si seleccionas una cuenta padre, asegúrate de que sea una <strong>Cuenta de Control</strong>.</p>
+      <p>Las cuentas de movimiento no pueden tener cuentas hijas.</p>
+    </div>
+
+    <form (ngSubmit)="createAccount()">
+      <div class="form-group">
+        <label>Código *</label>
+        <input
+          type="text"
+          [(ngModel)]="newAccount.code"
+          name="code"
+          placeholder="Ej: 1.1.01"
+          required
+        />
+        <small>Ejemplo: 1.1.01 (niveles separados por punto)</small>
+      </div>
+
+      <div class="form-group">
+        <label>Nombre *</label>
+        <input
+          type="text"
+          [(ngModel)]="newAccount.name"
+          name="name"
+          placeholder="Nombre de la cuenta"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Tipo de Cuenta *</label>
+        <select [(ngModel)]="newAccount.type" name="type" required>
+          <option *ngFor="let type of accountTypes" [value]="type">
+            {{ accountTypeLabels[type] }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>
+          <input
+            type="checkbox"
+            [(ngModel)]="newAccount.isControlAccount"
+            name="isControlAccount"
+          />
+          Cuenta de Control
+        </label>
+        <small>
+          Las cuentas de control agrupan otras cuentas y NO se usan en asientos.
+          Si vas a crear cuentas hijas, marca esta opción.
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label>Cuenta Padre (Opcional)</label>
+        <select [(ngModel)]="newAccount.parentId" name="parentId">
+          <option [value]="null">Ninguna (Cuenta Raíz)</option>
+          <option *ngFor="let account of accounts" [value]="account.id">
+            {{ account.code }} - {{ account.name }}
+            {{ account.isControlAccount ? '(Control)' : '(Movimiento)' }}
+          </option>
+        </select>
+        <small>
+          Solo puedes seleccionar cuentas de Control como padre.
+          Si seleccionas una cuenta de Movimiento, recibirás un error.
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label>Descripción</label>
+        <textarea
+          [(ngModel)]="newAccount.description"
+          name="description"
+          rows="3"
+        ></textarea>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="toggleCreateForm()">
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary">Crear Cuenta</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="accounts-list card">
+    <h2>Lista de Cuentas</h2>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Nombre</th>
+            <th>Tipo</th>
+            <th>Control</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let account of accounts">
+            <td>{{ account.code }}</td>
+            <td>{{ account.name }}</td>
+            <td>{{ accountTypeLabels[account.type] }}</td>
+            <td>
+              <span
+                class="badge"
+                [class.badge-success]="account.isControlAccount"
+                [class.badge-secondary]="!account.isControlAccount"
+              >
+                {{ account.isControlAccount ? 'Sí' : 'No' }}
+              </span>
+            </td>
+            <td>
+              <span
+                class="badge"
+                [class.badge-success]="account.isActive"
+                [class.badge-danger]="!account.isActive"
+              >
+                {{ account.isActive ? 'Activa' : 'Inactiva' }}
+              </span>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <button
+                  *ngIf="account.isActive"
+                  class="btn-icon btn-danger"
+                  (click)="deactivateAccount(account)"
+                  title="Desactivar"
+                >
+                  <span class="material-icons">block</span>
+                </button>
+                <button
+                  *ngIf="!account.isActive"
+                  class="btn-icon btn-success"
+                  (click)="activateAccount(account)"
+                  title="Activar"
+                >
+                  <span class="material-icons">check_circle</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="hierarchy-view card">
+    <h2>Vista Jerárquica</h2>
+    <div class="hierarchy-tree">
+      <div *ngFor="let account of accountsHierarchy" class="tree-item">
+        <div class="tree-node">
+          <span class="tree-code">{{ account.code }}</span>
+          <span class="tree-name">{{ account.name }}</span>
+          <span class="tree-badge" *ngIf="account.isControlAccount">[Control]</span>
+        </div>
+        <div *ngIf="account.children && account.children.length > 0" class="tree-children">
+          <div *ngFor="let child of account.children" class="tree-item child">
+            <div class="tree-node">
+              <span class="tree-code">{{ child.code }}</span>
+              <span class="tree-name">{{ child.name }}</span>
+              <span class="tree-badge" *ngIf="child.isControlAccount">[Control]</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

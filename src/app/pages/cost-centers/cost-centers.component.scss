@@ -1,0 +1,46 @@
+@use '../../styles/common.scss' as *;
+
+.cost-centers-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.hierarchy-tree {
+  .tree-item {
+    margin-bottom: 8px;
+
+    .tree-node {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 12px;
+      background: #f8fafc;
+      border-radius: 6px;
+      border-left: 3px solid #3b82f6;
+
+      .tree-code {
+        font-weight: 600;
+        color: #3b82f6;
+        min-width: 100px;
+      }
+
+      .tree-name {
+        color: #1e293b;
+      }
+    }
+
+    &.child {
+      margin-left: 32px;
+
+      .tree-node {
+        border-left-color: #94a3b8;
+        background: #ffffff;
+
+        .tree-code {
+          color: #64748b;
+        }
+      }
+    }
+  }
+}
+

@@ -1,0 +1,310 @@
+<div class="dashboard-container">
+  <div class="dashboard-tabs">
+    <button
+      type="button"
+      class="dashboard-tab"
+      [class.active]="activeTab === 'shortcuts'"
+      (click)="setTab('shortcuts')"
+    >
+      Accesos directos
+    </button>
+    <button
+      type="button"
+      class="dashboard-tab"
+      [class.active]="activeTab === 'indicators'"
+      (click)="setTab('indicators')"
+    >
+      Indicadores
+    </button>
+  </div>
+
+  <section *ngIf="activeTab === 'shortcuts'" class="shortcuts-panel">
+    <h2 class="shortcuts-heading">¿Qué deseas hacer?</h2>
+    <div class="shortcuts-grid">
+      <a
+        *ngFor="let item of shortcuts"
+        class="shortcut-card"
+        [routerLink]="item.route"
+        [queryParams]="item.queryParams || null"
+      >
+        <span class="shortcut-icon-wrap">
+          <span class="material-icons">{{ item.icon }}</span>
+        </span>
+        <span class="shortcut-label">{{ item.label }}</span>
+      </a>
+    </div>
+  </section>
+
+  <section *ngIf="activeTab === 'indicators'" class="indicators-panel">
+    <div class="indicators-header">
+      <h2>Indicadores financieros</h2>
+      <button type="button" class="btn btn-secondary" (click)="loadDashboardData()">
+        <span class="material-icons">refresh</span>
+        Actualizar
+      </button>
+    </div>
+
+    <div *ngIf="loading" class="loading">
+      <p>Cargando indicadores...</p>
+    </div>
+
+    <div *ngIf="error" class="error">
+      <p>{{ error }}</p>
+    </div>
+
+    <div *ngIf="dashboardData && !loading" class="dashboard-content">
+      <div class="summary-cards">
+        <div class="summary-card card-primary">
+          <div class="card-icon">
+            <span class="material-icons">account_balance</span>
+          </div>
+          <div class="card-content">
+            <h3>Total Activos</h3>
+            <p class="card-value">
+              {{ formatCurrency(dashboardData.summary.totalAssets) }}
+            </p>
+          </div>
+        </div>
+
+        <div class="summary-card card-success">
+          <div class="card-icon">
+            <span class="material-icons">trending_up</span>
+          </div>
+          <div class="card-content">
+            <h3>Ingresos del Mes</h3>
+            <p class="card-value">
+              {{ formatCurrency(dashboardData.summary.totalIncome) }}
+            </p>
+          </div>
+        </div>
+
+        <div class="summary-card card-danger">
+          <div class="card-icon">
+            <span class="material-icons">trending_down</span>
+          </div>
+          <div class="card-content">
+            <h3>Gastos del Mes</h3>
+            <p class="card-value">
+              {{ formatCurrency(dashboardData.summary.totalExpenses) }}
+            </p>
+          </div>
+        </div>
+
+        <div
+          class="summary-card"
+          [class.card-success]="dashboardData.summary.netIncome >= 0"
+          [class.card-danger]="dashboardData.summary.netIncome < 0"
+        >
+          <div class="card-icon">
+            <span class="material-icons">{{
+              dashboardData.summary.netIncome >= 0
+                ? 'arrow_upward'
+                : 'arrow_downward'
+            }}</span>
+          </div>
+          <div class="card-content">
+            <h3>Utilidad Neta</h3>
+            <p class="card-value">
+              {{ formatCurrency(dashboardData.summary.netIncome) }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="balance-section">
+        <div class="balance-card card">
+          <h2>
+            <span class="material-icons">account_balance</span>
+            Efectivo y Bancos
+          </h2>
+          <div class="balance-total">
+            <span class="label">Total Disponible:</span>
+            <span class="value">{{
+              formatCurrency(dashboardData.summary.totalCash)
+            }}</span>
+          </div>
+          <div class="balance-details">
+            <div
+              class="balance-item"
+              *ngFor="let account of dashboardData.bankAccounts.accounts"
+            >
+              <span class="account-name">{{ account.name }}</span>
+              <span class="account-balance">{{
+                formatCurrency(account.balance)
+              }}</span>
+            </div>
+            <div
+              class="balance-item"
+              *ngFor="let account of dashboardData.cashAccounts.accounts"
+            >
+              <span class="account-name">{{ account.name }}</span>
+              <span class="account-balance">{{
+                formatCurrency(account.balance)
+              }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="balance-card card">
+          <h2>
+            <span class="material-icons">account_balance_wallet</span>
+            Cuentas por Cobrar
+          </h2>
+          <div class="balance-total">
+            <span class="value">{{
+              formatCurrency(dashboardData.summary.totalReceivables)
+            }}</span>
+          </div>
+        </div>
+
+        <div class="balance-card card">
+          <h2>
+            <span class="material-icons">payment</span>
+            Cuentas por Pagar
+          </h2>
+          <div class="balance-total">
+            <span class="value">{{
+              formatCurrency(dashboardData.summary.totalPayables)
+            }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="balance-sheet-section card">
+        <h2>
+          <span class="material-icons">assessment</span>
+          Balance General ({{ dashboardData.date | date: 'dd/MM/yyyy' }})
+        </h2>
+        <div class="balance-sheet-grid">
+          <div class="balance-column">
+            <h3>Activos</h3>
+            <div class="balance-items">
+              <div
+                class="balance-item"
+                *ngFor="let asset of dashboardData.balanceSheet.assets"
+              >
+                <span class="account-code">{{ asset.code }}</span>
+                <span class="account-name">{{ asset.name }}</span>
+                <span class="account-balance">{{
+                  formatCurrency(asset.balance)
+                }}</span>
+              </div>
+              <div class="balance-total-item">
+                <span class="total-label">Total Activos:</span>
+                <span class="total-value">{{
+                  formatCurrency(dashboardData.balanceSheet.totalAssets)
+                }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="balance-column">
+            <h3>Pasivos</h3>
+            <div class="balance-items">
+              <div
+                class="balance-item"
+                *ngFor="let liability of dashboardData.balanceSheet.liabilities"
+              >
+                <span class="account-code">{{ liability.code }}</span>
+                <span class="account-name">{{ liability.name }}</span>
+                <span class="account-balance">{{
+                  formatCurrency(liability.balance)
+                }}</span>
+              </div>
+              <div class="balance-total-item">
+                <span class="total-label">Total Pasivos:</span>
+                <span class="total-value">{{
+                  formatCurrency(dashboardData.balanceSheet.totalLiabilities)
+                }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="balance-column">
+            <h3>Patrimonio</h3>
+            <div class="balance-items">
+              <div
+                class="balance-item"
+                *ngFor="let equity of dashboardData.balanceSheet.equity"
+              >
+                <span class="account-code">{{ equity.code }}</span>
+                <span class="account-name">{{ equity.name }}</span>
+                <span class="account-balance">{{
+                  formatCurrency(equity.balance)
+                }}</span>
+              </div>
+              <div class="balance-total-item">
+                <span class="total-label">Total Patrimonio:</span>
+                <span class="total-value">{{
+                  formatCurrency(dashboardData.balanceSheet.totalEquity)
+                }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="income-statement-section card">
+        <h2>
+          <span class="material-icons">bar_chart</span>
+          Estado de Resultados (Mes Actual)
+        </h2>
+        <div class="income-statement-grid">
+          <div class="income-column">
+            <h3>Ingresos</h3>
+            <div class="balance-items">
+              <div
+                class="balance-item"
+                *ngFor="let income of dashboardData.incomeStatement.income"
+              >
+                <span class="account-code">{{ income.code }}</span>
+                <span class="account-name">{{ income.name }}</span>
+                <span class="account-balance">{{
+                  formatCurrency(income.balance)
+                }}</span>
+              </div>
+              <div class="balance-total-item">
+                <span class="total-label">Total Ingresos:</span>
+                <span class="total-value">{{
+                  formatCurrency(dashboardData.incomeStatement.totalIncome)
+                }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="expense-column">
+            <h3>Gastos</h3>
+            <div class="balance-items">
+              <div
+                class="balance-item"
+                *ngFor="let expense of dashboardData.incomeStatement.expenses"
+              >
+                <span class="account-code">{{ expense.code }}</span>
+                <span class="account-name">{{ expense.name }}</span>
+                <span class="account-balance">{{
+                  formatCurrency(expense.balance)
+                }}</span>
+              </div>
+              <div class="balance-total-item">
+                <span class="total-label">Total Gastos:</span>
+                <span class="total-value">{{
+                  formatCurrency(dashboardData.incomeStatement.totalExpenses)
+                }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="net-income">
+          <span class="net-label">Utilidad Neta:</span>
+          <span
+            class="net-value"
+            [class.positive]="dashboardData.summary.netIncome >= 0"
+            [class.negative]="dashboardData.summary.netIncome < 0"
+          >
+            {{ formatCurrency(dashboardData.summary.netIncome) }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

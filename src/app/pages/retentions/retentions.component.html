@@ -1,0 +1,125 @@
+<div class="retentions-container">
+  <div class="page-header">
+    <h1>Retenciones</h1>
+    <button class="btn btn-primary" (click)="showCreateForm = !showCreateForm">
+      <span class="material-icons">add</span>
+      Nueva Retención
+    </button>
+  </div>
+
+  <div *ngIf="showCreateForm" class="create-form card">
+    <h2>Crear Retención</h2>
+    <form (ngSubmit)="createRetention()">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Fecha de Emisión *</label>
+          <input type="date" [(ngModel)]="newRetention.issueDate" name="issueDate" required />
+        </div>
+        <div class="form-group">
+          <label>Código de Retención *</label>
+          <select [(ngModel)]="newRetention.retentionCode" name="retentionCode" required>
+            <option *ngFor="let code of retentionCodes" [value]="code.code">
+              {{ code.code }} - {{ code.name }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Identificación del Proveedor *</label>
+          <input
+            type="text"
+            [(ngModel)]="newRetention.supplierIdentification"
+            name="supplierIdentification"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label>Nombre del Proveedor *</label>
+          <input
+            type="text"
+            [(ngModel)]="newRetention.supplierName"
+            name="supplierName"
+            required
+          />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Base Imponible *</label>
+          <input
+            type="number"
+            [(ngModel)]="newRetention.retentionBase"
+            name="retentionBase"
+            step="0.01"
+            min="0"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label>Porcentaje de Retención *</label>
+          <input
+            type="number"
+            [(ngModel)]="newRetention.retentionPercentage"
+            name="retentionPercentage"
+            step="0.01"
+            min="0"
+            max="100"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label>Monto de Retención</label>
+          <input
+            type="text"
+            [value]="calculateRetentionAmount() | number: '1.2-2'"
+            readonly
+            class="readonly"
+          />
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="showCreateForm = false">
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary">Crear Retención</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="retentions-list card">
+    <h2>Listado de Retenciones</h2>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Número</th>
+            <th>Fecha</th>
+            <th>Proveedor</th>
+            <th>Código</th>
+            <th>Base</th>
+            <th>Monto</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let retention of retentions">
+            <td>{{ retention.retentionNumber }}</td>
+            <td>{{ retention.issueDate | date: 'dd/MM/yyyy' }}</td>
+            <td>{{ retention.supplierName }}</td>
+            <td>{{ retention.retentionCode }}</td>
+            <td>{{ retention.retentionBase | number: '1.2-2' }}</td>
+            <td>{{ retention.retentionAmount | number: '1.2-2' }}</td>
+            <td>
+              <span class="badge badge-success">{{ retention.status }}</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+

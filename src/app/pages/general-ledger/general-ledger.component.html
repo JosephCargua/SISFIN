@@ -1,0 +1,104 @@
+<div class="general-ledger-container">
+  <div class="page-header">
+    <h1>Libro Mayor</h1>
+  </div>
+
+  <div class="filters card">
+    <h2>Filtros</h2>
+    <form (ngSubmit)="generateLedger()">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Cuenta *</label>
+          <select [(ngModel)]="selectedAccountId" name="accountId" required>
+            <option value="">Seleccione una cuenta...</option>
+            <option *ngFor="let account of accounts" [value]="account.id">
+              {{ account.code }} - {{ account.name }}
+            </option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Fecha Inicio *</label>
+          <input type="date" [(ngModel)]="startDate" name="startDate" required />
+        </div>
+        <div class="form-group">
+          <label>Fecha Fin *</label>
+          <input type="date" [(ngModel)]="endDate" name="endDate" required />
+        </div>
+        <div class="form-group">
+          <label>&nbsp;</label>
+          <button type="submit" class="btn btn-primary" [disabled]="loading">
+            <span class="material-icons">search</span>
+            Generar Libro Mayor
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div *ngIf="loading" class="loading card">
+    <p>Cargando...</p>
+  </div>
+
+  <div *ngIf="ledgerData && !loading" class="ledger-results card">
+    <div class="ledger-header">
+      <h2>
+        Libro Mayor - {{ ledgerData.account?.code }} -
+        {{ ledgerData.account?.name }}
+      </h2>
+      <p>
+        Período: {{ startDate | date: 'dd/MM/yyyy' }} -
+        {{ endDate | date: 'dd/MM/yyyy' }}
+      </p>
+    </div>
+
+    <div *ngIf="ledgerData.movements && ledgerData.movements.length > 0" class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Número</th>
+            <th>Descripción</th>
+            <th>Débito</th>
+            <th>Crédito</th>
+            <th>Saldo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let movement of ledgerData.movements">
+            <td>{{ movement.journalEntry?.date | date: 'dd/MM/yyyy' }}</td>
+            <td>{{ movement.journalEntry?.entryNumber }}</td>
+            <td>{{ movement.description || '-' }}</td>
+            <td class="text-right">{{ movement.debit | number: '1.2-2' }}</td>
+            <td class="text-right">{{ movement.credit | number: '1.2-2' }}</td>
+            <td class="text-right balance">
+              {{ movement.balance | number: '1.2-2' }}
+            </td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr class="totals-row">
+            <td colspan="5"><strong>Saldo Final</strong></td>
+            <td class="text-right balance">
+              <strong>{{ ledgerData.finalBalance | number: '1.2-2' }}</strong>
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div *ngIf="!ledgerData.movements || ledgerData.movements.length === 0" class="no-data">
+      <p>
+        <strong>No se encontraron movimientos</strong>
+      </p>
+      <p>
+        Para generar un libro mayor, necesitas:
+      </p>
+      <ul>
+        <li>Crear asientos contables en el <strong>Libro Diario</strong></li>
+        <li><strong>Postear</strong> los asientos (no pueden estar en borrador)</li>
+        <li>Asegurarte de que las fechas de los asientos estén dentro del rango seleccionado</li>
+      </ul>
+    </div>
+  </div>
+</div>
+

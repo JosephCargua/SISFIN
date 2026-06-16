@@ -1,0 +1,198 @@
+<div class="inventory-container">
+  <div class="page-header">
+    <h1>Inventario</h1>
+    <div>
+      <button class="btn btn-secondary" (click)="showMovementForm = !showMovementForm">
+        <span class="material-icons">swap_vert</span>
+        Movimiento
+      </button>
+      <button class="btn btn-primary" (click)="showProductForm = !showProductForm">
+        <span class="material-icons">add</span>
+        Nuevo Producto
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="showProductForm" class="create-form card">
+    <h2>Crear Producto</h2>
+    <form (ngSubmit)="createProduct()">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Código *</label>
+          <input type="text" [(ngModel)]="newProduct.code" name="code" required />
+        </div>
+        <div class="form-group">
+          <label>Nombre *</label>
+          <input type="text" [(ngModel)]="newProduct.name" name="name" required />
+        </div>
+        <div class="form-group">
+          <label>Unidad *</label>
+          <input type="text" [(ngModel)]="newProduct.unit" name="unit" required />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Stock Inicial</label>
+          <input
+            type="number"
+            [(ngModel)]="newProduct.initialStock"
+            name="initialStock"
+            min="0"
+          />
+        </div>
+        <div class="form-group">
+          <label>Costo Inicial</label>
+          <input
+            type="number"
+            [(ngModel)]="newProduct.initialCost"
+            name="initialCost"
+            step="0.01"
+            min="0"
+          />
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="showProductForm = false">
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary">Crear Producto</button>
+      </div>
+    </form>
+  </div>
+
+  <div *ngIf="showMovementForm" class="create-form card">
+    <h2>Registrar Movimiento</h2>
+    <form (ngSubmit)="createMovement()">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Producto *</label>
+          <select [(ngModel)]="newMovement.productId" name="productId" required>
+            <option value="">Seleccione...</option>
+            <option *ngFor="let product of products" [value]="product.id">
+              {{ product.code }} - {{ product.name }}
+            </option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Tipo *</label>
+          <select [(ngModel)]="newMovement.type" name="type" required>
+            <option value="IN">Entrada</option>
+            <option value="OUT">Salida</option>
+            <option value="ADJUSTMENT">Ajuste</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Fecha *</label>
+          <input type="date" [(ngModel)]="newMovement.date" name="date" required />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Cantidad *</label>
+          <input
+            type="number"
+            [(ngModel)]="newMovement.quantity"
+            name="quantity"
+            min="0"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label>Costo Unitario *</label>
+          <input
+            type="number"
+            [(ngModel)]="newMovement.unitCost"
+            name="unitCost"
+            step="0.01"
+            min="0"
+            required
+          />
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="showMovementForm = false">
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary">Registrar Movimiento</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="products-list card">
+    <h2>Productos</h2>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Nombre</th>
+            <th>Unidad</th>
+            <th>Stock</th>
+            <th>Costo Promedio</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let product of products">
+            <td>{{ product.code }}</td>
+            <td>{{ product.name }}</td>
+            <td>{{ product.unit }}</td>
+            <td>{{ product.currentStock }}</td>
+            <td>{{ product.averageCost | number: '1.2-2' }}</td>
+            <td>
+              <span
+                class="badge"
+                [class.badge-success]="product.isActive"
+                [class.badge-danger]="!product.isActive"
+              >
+                {{ product.isActive ? 'Activo' : 'Inactivo' }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="movements-list card">
+    <h2>Movimientos de Inventario</h2>
+    <div class="form-group">
+      <label>Filtrar por Producto</label>
+      <select [(ngModel)]="selectedProductId" (change)="onProductFilterChange()">
+        <option value="">Todos</option>
+        <option *ngFor="let product of products" [value]="product.id">
+          {{ product.code }} - {{ product.name }}
+        </option>
+      </select>
+    </div>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Producto</th>
+            <th>Tipo</th>
+            <th>Cantidad</th>
+            <th>Costo Unitario</th>
+            <th>Costo Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let movement of movements">
+            <td>{{ movement.date | date: 'dd/MM/yyyy' }}</td>
+            <td>{{ movement.product?.name }}</td>
+            <td>
+              <span class="badge">
+                {{ movement.type === 'IN' ? 'Entrada' : movement.type === 'OUT' ? 'Salida' : 'Ajuste' }}
+              </span>
+            </td>
+            <td>{{ movement.quantity }}</td>
+            <td>{{ movement.unitCost | number: '1.2-2' }}</td>
+            <td>{{ movement.totalCost | number: '1.2-2' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+

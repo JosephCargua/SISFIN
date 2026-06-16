@@ -1,0 +1,143 @@
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { AccountService } from '../../core/services/account.service';
+import { Account, AccountType, CreateAccountDto } from '../../models/account.model';
+
+@Component({
+  selector: 'app-accounts',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './accounts.component.html',
+  styleUrl: './accounts.component.scss',
+})
+export class AccountsComponent implements OnInit {
+  accounts: Account[] = [];
+  accountsHierarchy: Account[] = [];
+  showCreateForm = false;
+  accountTypes = Object.values(AccountType);
+  accountTypeLabels: Record<AccountType, string> = {
+    [AccountType.ASSET]: 'Activo',
+    [AccountType.LIABILITY]: 'Pasivo',
+    [AccountType.EQUITY]: 'Patrimonio',
+    [AccountType.INCOME]: 'Ingresos',
+    [AccountType.EXPENSE]: 'Gastos',
+  };
+
+  newAccount: CreateAccountDto = {
+    code: '',
+    name: '',
+    type: AccountType.ASSET,
+    parentId: null,
+    isControlAccount: false,
+  };
+
+  constructor(private accountService: AccountService) {}
+
+  ngOnInit() {
+    this.loadAccounts();
+    this.loadHierarchy();
+  }
+
+  loadAccounts() {
+    this.accountService.getAll().subscribe({
+      next: (data) => {
+        this.accounts = data;
+      },
+      error: (error) => {
+        console.error('Error loading accounts:', error);
+        alert('Error al cargar las cuentas');
+      },
+    });
+  }
+
+  loadHierarchy() {
+    this.accountService.getHierarchy().subscribe({
+      next: (data) => {
+        this.accountsHierarchy = data;
+      },
+      error: (error) => {
+        console.error('Error loading hierarchy:', error);
+      },
+    });
+  }
+
+  createAccount() {
+    if (!this.newAccount.code || !this.newAccount.name) {
+      alert('Por favor complete todos los campos requeridos');
+      return;
+    }
+
+    this.accountService.create(this.newAccount).subscribe({
+      next: () => {
+        alert('Cuenta creada exitosamente');
+        this.showCreateForm = false;
+        this.resetForm();
+        this.loadAccounts();
+        this.loadHierarchy();
+      },
+      error: (error) => {
+        console.error('Error creating account:', error);
+        alert(error.error?.message || 'Error al crear la cuenta');
+      },
+    });
+  }
+
+  resetForm() {
+    this.newAccount = {
+      code: '',
+      name: '',
+      type: AccountType.ASSET,
+      parentId: null,
+      isControlAccount: false,
+    };
+  }
+
+  toggleCreateForm() {
+    this.showCreateForm = !this.showCreateForm;
+    if (!this.showCreateForm) {
+      this.resetForm();
+    }
+  }
+
+  deactivateAccount(account: Account) {
+    if (
+      confirm(
+        `¿Está seguro de desactivar la cuenta "${account.code} - ${account.name}"?\n\n` +
+          'Nota: No se puede desactivar una cuenta que:\n' +
+          '- Tenga cuentas hijas activas\n' +
+          '- Tenga movimientos en asientos posteados',
+      )
+    ) {
+      this.accountService.deactivate(account.id).subscribe({
+        next: () => {
+          alert('Cuenta desactivada exitosamente');
+          this.loadAccounts();
+          this.loadHierarchy();
+        },
+        error: (error) => {
+          console.error('Error deactivating account:', error);
+          alert(
+            error.error?.message ||
+              'Error al desactivar la cuenta. Verifique que no tenga cuentas hijas activas ni movimientos.',
+          );
+        },
+      });
+    }
+  }
+
+  activateAccount(account: Account) {
+    this.accountService.activate(account.id).subscribe({
+      next: () => {
+        alert('Cuenta activada exitosamente');
+        this.loadAccounts();
+        this.loadHierarchy();
+      },
+      error: (error) => {
+        console.error('Error activating account:', error);
+        alert(error.error?.message || 'Error al activar la cuenta');
+      },
+    });
+  }
+}
+

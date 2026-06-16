@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/styles.scss"],
+  "sourcesContent": ["@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');\r\n\r\n* {\r\n  margin: 0;\r\n  padding: 0;\r\n  box-sizing: border-box;\r\n}\r\n\r\nbody {\r\n  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;\r\n  -webkit-font-smoothing: antialiased;\r\n  -moz-osx-font-smoothing: grayscale;\r\n  color: #1e293b;\r\n  background: #f8fafc;\r\n}\r\n\r\n.material-icons {\r\n  font-family: 'Material Icons';\r\n  font-weight: normal;\r\n  font-style: normal;\r\n  font-size: 24px;\r\n  line-height: 1;\r\n  letter-spacing: normal;\r\n  text-transform: none;\r\n  display: inline-block;\r\n  white-space: nowrap;\r\n  word-wrap: normal;\r\n  direction: ltr;\r\n  -webkit-font-feature-settings: 'liga';\r\n  -webkit-font-smoothing: antialiased;\r\n}\r\n"],
+  "mappings": ";;;AAEA;AACE,UAAA;AACA,WAAA;AACA,cAAA;;AAGF;AACE;IAAA,OAAA;IAAA,aAAA;IAAA,kBAAA;IAAA,UAAA;IAAA,MAAA;IAAA;AACA,0BAAA;AACA,2BAAA;AACA,SAAA;AACA,cAAA;;AAGF,CAAA;AACE,eAAA;AACA,eAAA;AACA,cAAA;AACA,aAAA;AACA,eAAA;AACA,kBAAA;AACA,kBAAA;AACA,WAAA;AACA,eAAA;AACA,aAAA;AACA,aAAA;AACA,iCAAA;AACA,0BAAA;;",
+  "names": []
+}

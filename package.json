@@ -2,12 +2,12 @@
   "name": "sisfin",
   "version": "0.0.0",
   "scripts": {
-    "ng": "ng",
+    "ng": "node ./node_modules/@angular/cli/bin/ng.js",
     "postinstall": "node scripts/fix-vite-client.mjs",
-    "start": "ng serve",
-    "build": "ng build",
-    "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "start": "node ./node_modules/@angular/cli/bin/ng.js serve",
+    "build": "node ./node_modules/@angular/cli/bin/ng.js build",
+    "watch": "node ./node_modules/@angular/cli/bin/ng.js build --watch --configuration development",
+    "test": "node ./node_modules/@angular/cli/bin/ng.js test"
   },
   "private": true,
   "dependencies": {

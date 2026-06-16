@@ -1,4 +1,4 @@
-@import '../../styles/common.scss';
+@use '../../styles/common.scss' as *;
 
 .electronic-registration-container {
   max-width: 1400px;

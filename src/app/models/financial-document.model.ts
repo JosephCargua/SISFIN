@@ -16,6 +16,10 @@ export type FinancialDocumentLineType =
   | 'RETENTION'
   | 'PAYMENT';
 
+export type RetentionEmissionType = 'PHYSICAL' | 'ELECTRONIC';
+
+export type PaymentTimeUnit = 'DAYS' | 'MONTHS';
+
 export interface ServiceLine {
   quantity: number;
   productId: string;
@@ -24,10 +28,26 @@ export interface ServiceLine {
   unit: string;
   unitPrice: number;
   ivaRate: number;
-  retIr: number;
-  retIva: number;
+  retIr: string;
+  retIva: string;
+  discountPercent: number;
   discount: number;
   extraDiscount: number;
+  subtotal: number;
+}
+
+export interface AccountDetailLine {
+  quantity: number;
+  accountId: string;
+  accountCode: string;
+  accountName: string;
+  unitValue: number;
+  ivaRate: number;
+  icePercent: number;
+  retIr: string;
+  retIva: string;
+  discountPercent: number;
+  discount: number;
   subtotal: number;
 }
 
@@ -40,6 +60,16 @@ export interface AccountLine {
   description: string;
 }
 
+export interface CostCenterDetailLine {
+  quantity: number;
+  itemId: string;
+  itemLabel: string;
+  subtotal: number;
+  projectRef: string;
+  costCenterId: string;
+  costCenterName: string;
+}
+
 export interface CostCenterLine {
   costCenterId: string;
   costCenterName: string;
@@ -48,16 +78,21 @@ export interface CostCenterLine {
 }
 
 export interface RetentionLine {
+  expense: string;
+  retentionName: string;
   retentionType: string;
-  percentage: number;
+  sriCode: string;
   base: number;
+  percentage: number;
   amount: number;
 }
 
 export interface PaymentLine {
   paymentMethod: string;
+  term: number;
+  timeUnit: PaymentTimeUnit;
   amount: number;
-  reference: string;
+  reference?: string;
 }
 
 export interface FinancialDocumentLinePayload {
@@ -84,6 +119,14 @@ export interface CreateFinancialDocumentDto {
   payWithPettyCash?: boolean;
   pettyCashAccountId?: string;
   ice?: number;
+  retentionMeta?: {
+    emissionDate: string;
+    fiscalMonth: number;
+    fiscalYear: number;
+    emissionType: RetentionEmissionType;
+    documentNumber: string;
+    authorization: string;
+  };
   lines: FinancialDocumentLinePayload[];
 }
 

@@ -1,4 +1,4 @@
-@import '../../styles/common.scss';
+@use '../../styles/common.scss' as *;
 
 .register-document-container {
   max-width: 1400px;

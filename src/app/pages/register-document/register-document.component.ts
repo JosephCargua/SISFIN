@@ -179,8 +179,9 @@ export class RegisterDocumentComponent implements OnInit {
       unit: 'UND',
       unitPrice: 0,
       ivaRate: 15,
-      retIr: 0,
-      retIva: 0,
+      retIr: '',
+      retIva: '',
+      discountPercent: 0,
       discount: 0,
       extraDiscount: 0,
       subtotal: 0,
@@ -300,7 +301,10 @@ export class RegisterDocumentComponent implements OnInit {
 
   addRetentionLine() {
     this.retentionLines.push({
+      expense: '',
+      retentionName: '',
       retentionType: 'IR',
+      sriCode: '',
       percentage: 0,
       base: 0,
       amount: 0,
@@ -318,6 +322,8 @@ export class RegisterDocumentComponent implements OnInit {
   addPaymentLine() {
     this.paymentLines.push({
       paymentMethod: 'TRANSFER',
+      term: 0,
+      timeUnit: 'DAYS',
       amount: 0,
       reference: '',
     });

@@ -1,4 +1,4 @@
-@import '../../styles/common.scss';
+@use '../../styles/common.scss' as *;
 
 .consult-documents-container {
   max-width: 1400px;

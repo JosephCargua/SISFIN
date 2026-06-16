@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { FinancialDocumentService } from '../../core/services/financial-document.service';
 import { PayablesService } from '../../core/services/payables.service';
 import { AccountService } from '../../core/services/account.service';
@@ -9,12 +10,13 @@ import { AutomationService } from '../../core/services/automation.service';
 import { BankingService } from '../../core/services/banking.service';
 import {
   ServiceLine,
-  AccountLine,
-  CostCenterLine,
+  AccountDetailLine,
+  CostCenterDetailLine,
   RetentionLine,
   PaymentLine,
   DocumentPersonType,
   DocumentCategory,
+  RetentionEmissionType,
   FinancialDocumentLinePayload,
 } from '../../models/financial-document.model';
 import { Supplier } from '../../models/payables.model';
@@ -28,14 +30,17 @@ type DetailTab = 'services' | 'accounts' | 'costCenter' | 'retention' | 'payment
 @Component({
   selector: 'app-register-purchase-expense',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './register-purchase-expense.component.html',
   styleUrl: './register-purchase-expense.component.scss',
 })
 export class RegisterPurchaseExpenseComponent implements OnInit {
+  @ViewChild('personSelect') personSelect?: ElementRef<HTMLSelectElement>;
+
   activeTab: DetailTab = 'services';
   saving = false;
   parsingXml = false;
+  showPersonPicker = false;
 
   issueDate = new Date().toISOString().split('T')[0];
   personType: DocumentPersonType = 'SUPPLIER';
@@ -46,16 +51,23 @@ export class RegisterPurchaseExpenseComponent implements OnInit {
   personName = '';
   personIdentification = '';
   reference = '';
-  dueDays = 30;
+  dueDays = 0;
   purchaseOrderRef = '';
   description = '';
   payWithPettyCash = false;
   pettyCashAccountId = '';
   ice = 0;
 
+  retentionEmissionDate = new Date().toISOString().split('T')[0];
+  retentionFiscalMonth = new Date().getMonth() + 1;
+  retentionFiscalYear = new Date().getFullYear();
+  retentionEmissionType: RetentionEmissionType = 'PHYSICAL';
+  retentionDocumentNumber = '';
+  retentionAuthorization = '';
+
   serviceLines: ServiceLine[] = [];
-  accountLines: AccountLine[] = [];
-  costCenterLines: CostCenterLine[] = [];
+  accountLines: AccountDetailLine[] = [];
+  costCenterLines: CostCenterDetailLine[] = [];
   retentionLines: RetentionLine[] = [];
   paymentLines: PaymentLine[] = [];
 
@@ -87,11 +99,46 @@ export class RegisterPurchaseExpenseComponent implements OnInit {
     { value: 0, label: '0%' },
   ];
 
+  monthOptions = [
+    { value: 1, label: 'enero' },
+    { value: 2, label: 'febrero' },
+    { value: 3, label: 'marzo' },
+    { value: 4, label: 'abril' },
+    { value: 5, label: 'mayo' },
+    { value: 6, label: 'junio' },
+    { value: 7, label: 'julio' },
+    { value: 8, label: 'agosto' },
+    { value: 9, label: 'septiembre' },
+    { value: 10, label: 'octubre' },
+    { value: 11, label: 'noviembre' },
+    { value: 12, label: 'diciembre' },
+  ];
+
+  retentionEmissionTypeOptions = [
+    { value: 'PHYSICAL' as RetentionEmissionType, label: 'Física' },
+    { value: 'ELECTRONIC' as RetentionEmissionType, label: 'Electrónica' },
+  ];
+
+  retentionTypeOptions = [
+    { value: 'RENTA', label: 'Renta' },
+    { value: 'IVA', label: 'IVA' },
+    { value: 'ISD', label: 'ISD' },
+  ];
+
   paymentMethodOptions = [
-    { value: 'CASH', label: 'Efectivo' },
-    { value: 'TRANSFER', label: 'Transferencia' },
-    { value: 'CHECK', label: 'Cheque' },
-    { value: 'CARD', label: 'Tarjeta' },
+    { value: '20', label: 'Otros con Utilización del Sistema Financiero' },
+    { value: '01', label: 'Sin utilización del Sistema Financiero' },
+    { value: '15', label: 'Compensación de Deudas' },
+    { value: '16', label: 'Tarjeta de débito' },
+    { value: '17', label: 'Dinero Electrónico' },
+    { value: '18', label: 'Tarjeta Prepago' },
+    { value: '19', label: 'Tarjeta de crédito' },
+    { value: '21', label: 'Endoso de títulos' },
+  ];
+
+  timeUnitOptions = [
+    { value: 'DAYS', label: 'días' },
+    { value: 'MONTHS', label: 'meses' },
   ];
 
   totals = {
@@ -116,6 +163,7 @@ export class RegisterPurchaseExpenseComponent implements OnInit {
 
   ngOnInit() {
     this.loadLookups();
+    this.addServiceLine();
   }
 
   loadLookups() {
@@ -140,11 +188,17 @@ export class RegisterPurchaseExpenseComponent implements OnInit {
     this.activeTab = tab;
   }
 
+  openPersonSearch() {
+    this.showPersonPicker = true;
+    setTimeout(() => this.personSelect?.nativeElement.focus(), 0);
+  }
+
   onPersonSelected() {
     const supplier = this.suppliers.find((s) => s.id === this.personId);
     if (supplier) {
       this.personName = supplier.name;
       this.personIdentification = supplier.identification;
+      this.showPersonPicker = false;
     }
   }
 
@@ -174,23 +228,37 @@ export class RegisterPurchaseExpenseComponent implements OnInit {
           .filter((l) => l.lineType === 'SERVICE')
           .map((l) => {
             const d = l.data as Record<string, number | string>;
+            const quantity = Number(d['quantity']) || 1;
+            const unitPrice = Number(d['unitPrice']) || 0;
+            const discount = Number(d['discount']) || 0;
+            const extraDiscount = Number(d['extraDiscount']) || 0;
+            const gross = quantity * unitPrice;
+            const discountPercent =
+              gross > 0 ? this.round2((discount / gross) * 100) : 0;
+
             return {
-              quantity: Number(d['quantity']) || 1,
+              quantity,
               productId: '',
               productCode: String(d['productCode'] || ''),
               productName: String(d['productName'] || ''),
               unit: String(d['unit'] || 'UND'),
-              unitPrice: Number(d['unitPrice']) || 0,
+              unitPrice,
               ivaRate: Number(d['ivaRate']) || 0,
-              retIr: Number(d['retIr']) || 0,
-              retIva: Number(d['retIva']) || 0,
-              discount: Number(d['discount']) || 0,
-              extraDiscount: Number(d['extraDiscount']) || 0,
+              retIr: String(d['retIr'] || ''),
+              retIva: String(d['retIva'] || ''),
+              discountPercent,
+              discount,
+              extraDiscount,
               subtotal: Number(d['subtotal']) || 0,
             };
           });
 
-        this.serviceLines.forEach((line) => this.recalcServiceLine(line));
+        if (this.serviceLines.length === 0) {
+          this.addServiceLine();
+        } else {
+          this.serviceLines.forEach((line) => this.recalcServiceLine(line));
+        }
+
         this.recalcTotals();
         this.parsingXml = false;
         input.value = '';
@@ -212,8 +280,9 @@ export class RegisterPurchaseExpenseComponent implements OnInit {
       unit: 'UND',
       unitPrice: 0,
       ivaRate: 15,
-      retIr: 0,
-      retIva: 0,
+      retIr: '',
+      retIva: '',
+      discountPercent: 0,
       discount: 0,
       extraDiscount: 0,
       subtotal: 0,
@@ -241,14 +310,125 @@ export class RegisterPurchaseExpenseComponent implements OnInit {
   }
 
   recalcServiceLine(line: ServiceLine) {
-    const base =
-      line.quantity * line.unitPrice - line.discount - line.extraDiscount;
-    line.subtotal = Math.round(base * 100) / 100;
+    const gross = line.quantity * line.unitPrice;
+    line.discount = this.round2((gross * line.discountPercent) / 100);
+    const base = gross - line.discount - line.extraDiscount;
+    line.subtotal = this.round2(Math.max(base, 0));
   }
 
   onServiceLineChange(line: ServiceLine) {
     this.recalcServiceLine(line);
     this.recalcTotals();
+  }
+
+  addAccountLine() {
+    const line: AccountDetailLine = {
+      quantity: 1,
+      accountId: '',
+      accountCode: '',
+      accountName: '',
+      unitValue: 0,
+      ivaRate: 15,
+      icePercent: 0,
+      retIr: '',
+      retIva: '',
+      discountPercent: 0,
+      discount: 0,
+      subtotal: 0,
+    };
+    this.accountLines.push(line);
+    this.recalcAccountLine(line);
+  }
+
+  removeAccountLine(index: number) {
+    this.accountLines.splice(index, 1);
+  }
+
+  onAccountSelected(line: AccountDetailLine) {
+    const account = this.accounts.find((a) => a.id === line.accountId);
+    if (account) {
+      line.accountCode = account.code;
+      line.accountName = account.name;
+    }
+  }
+
+  recalcAccountLine(line: AccountDetailLine) {
+    const gross = line.quantity * line.unitValue;
+    line.discount = this.round2((gross * line.discountPercent) / 100);
+    line.subtotal = this.round2(Math.max(gross - line.discount, 0));
+  }
+
+  onAccountLineChange(line: AccountDetailLine) {
+    this.recalcAccountLine(line);
+  }
+
+  addCostCenterLine() {
+    this.costCenterLines.push({
+      quantity: 1,
+      itemId: '',
+      itemLabel: '',
+      subtotal: 0,
+      projectRef: '',
+      costCenterId: '',
+      costCenterName: '',
+    });
+  }
+
+  removeCostCenterLine(index: number) {
+    this.costCenterLines.splice(index, 1);
+  }
+
+  onCostCenterItemSelected(line: CostCenterDetailLine) {
+    const account = this.accounts.find((a) => a.id === line.itemId);
+    if (account) {
+      line.itemLabel = `${account.code} - ${account.name}`;
+      return;
+    }
+
+    const product = this.products.find((p) => p.id === line.itemId);
+    if (product) {
+      line.itemLabel = `${product.code} - ${product.name}`;
+    }
+  }
+
+  onCostCenterSelected(line: CostCenterDetailLine) {
+    const cc = this.costCenters.find((c) => c.id === line.costCenterId);
+    if (cc) {
+      line.costCenterName = cc.name;
+    }
+  }
+
+  addRetentionLine() {
+    this.retentionLines.push({
+      expense: '',
+      retentionName: '',
+      retentionType: 'RENTA',
+      sriCode: '',
+      base: 0,
+      percentage: 0,
+      amount: 0,
+    });
+  }
+
+  removeRetentionLine(index: number) {
+    this.retentionLines.splice(index, 1);
+  }
+
+  onRetentionChange(line: RetentionLine) {
+    line.amount = this.round2((line.base * line.percentage) / 100);
+  }
+
+  addPaymentLine() {
+    this.paymentLines.push({
+      paymentMethod: '20',
+      term: 0,
+      timeUnit: 'DAYS',
+      amount: 0,
+    });
+  }
+
+  removePaymentLine(index: number) {
+    this.paymentLines.splice(index, 1);
   }
 
   recalcTotals() {
@@ -262,7 +442,7 @@ export class RegisterPurchaseExpenseComponent implements OnInit {
     for (const line of this.serviceLines) {
       const lineDiscount = line.discount + line.extraDiscount;
       discount += lineDiscount;
-      const base = line.quantity * line.unitPrice - lineDiscount;
+      const base = line.subtotal;
 
       if (line.ivaRate === 15) {
         subtotal15 += base;
@@ -288,78 +468,6 @@ export class RegisterPurchaseExpenseComponent implements OnInit {
       ice: this.ice,
       total: this.round2(total),
     };
-  }
-
-  addAccountLine() {
-    this.accountLines.push({
-      accountId: '',
-      accountCode: '',
-      accountName: '',
-      debit: 0,
-      credit: 0,
-      description: '',
-    });
-  }
-
-  removeAccountLine(index: number) {
-    this.accountLines.splice(index, 1);
-  }
-
-  onAccountSelected(line: AccountLine) {
-    const account = this.accounts.find((a) => a.id === line.accountId);
-    if (account) {
-      line.accountCode = account.code;
-      line.accountName = account.name;
-    }
-  }
-
-  addCostCenterLine() {
-    this.costCenterLines.push({
-      costCenterId: '',
-      costCenterName: '',
-      amount: 0,
-      percentage: 0,
-    });
-  }
-
-  removeCostCenterLine(index: number) {
-    this.costCenterLines.splice(index, 1);
-  }
-
-  onCostCenterSelected(line: CostCenterLine) {
-    const cc = this.costCenters.find((c) => c.id === line.costCenterId);
-    if (cc) {
-      line.costCenterName = cc.name;
-    }
-  }
-
-  addRetentionLine() {
-    this.retentionLines.push({
-      retentionType: 'IR',
-      percentage: 0,
-      base: 0,
-      amount: 0,
-    });
-  }
-
-  removeRetentionLine(index: number) {
-    this.retentionLines.splice(index, 1);
-  }
-
-  onRetentionChange(line: RetentionLine) {
-    line.amount = this.round2((line.base * line.percentage) / 100);
-  }
-
-  addPaymentLine() {
-    this.paymentLines.push({
-      paymentMethod: 'TRANSFER',
-      amount: 0,
-      reference: '',
-    });
-  }
-
-  removePaymentLine(index: number) {
-    this.paymentLines.splice(index, 1);
   }
 
   buildLines(): FinancialDocumentLinePayload[] {
@@ -440,6 +548,19 @@ export class RegisterPurchaseExpenseComponent implements OnInit {
           ? this.pettyCashAccountId || undefined
           : undefined,
         ice: this.ice,
+        retentionMeta:
+          this.retentionLines.length > 0 ||
+          this.retentionDocumentNumber ||
+          this.retentionAuthorization
+            ? {
+                emissionDate: this.retentionEmissionDate,
+                fiscalMonth: this.retentionFiscalMonth,
+                fiscalYear: this.retentionFiscalYear,
+                emissionType: this.retentionEmissionType,
+                documentNumber: this.retentionDocumentNumber,
+                authorization: this.retentionAuthorization,
+              }
+            : undefined,
         lines: this.buildLines(),
       })
       .subscribe({
@@ -465,18 +586,33 @@ export class RegisterPurchaseExpenseComponent implements OnInit {
     this.personName = '';
     this.personIdentification = '';
     this.reference = '';
-    this.dueDays = 30;
+    this.dueDays = 0;
     this.purchaseOrderRef = '';
     this.description = '';
     this.payWithPettyCash = false;
     this.pettyCashAccountId = '';
     this.ice = 0;
+    this.retentionEmissionDate = this.issueDate;
+    this.retentionFiscalMonth = new Date().getMonth() + 1;
+    this.retentionFiscalYear = new Date().getFullYear();
+    this.retentionEmissionType = 'PHYSICAL';
+    this.retentionDocumentNumber = '';
+    this.retentionAuthorization = '';
     this.serviceLines = [];
     this.accountLines = [];
     this.costCenterLines = [];
     this.retentionLines = [];
     this.paymentLines = [];
+    this.addServiceLine();
     this.recalcTotals();
+  }
+
+  formatCurrency(amount: number): string {
+    return new Intl.NumberFormat('es-EC', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+    }).format(amount);
   }
 
   private round2(value: number): number {

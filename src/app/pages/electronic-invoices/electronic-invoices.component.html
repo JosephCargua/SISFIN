@@ -170,52 +170,48 @@
                     <div class="homologation-col">
                       <div class="form-group">
                         <label>Cuenta Por Pagar *</label>
-                        <select
+                        <app-searchable-select
                           [(ngModel)]="getForm(doc.id).payableAccountId"
                           [name]="'payable_' + doc.id"
-                        >
-                          <option value="">Buscar cuenta...</option>
-                          <option *ngFor="let acc of accounts" [value]="acc.id">
-                            {{ acc.code }} - {{ acc.name }}
-                          </option>
-                        </select>
+                          [options]="accounts"
+                          [bindLabel]="accountLabelFn"
+                          bindValue="id"
+                          placeholder="Buscar cuenta..."
+                        ></app-searchable-select>
                       </div>
                       <div class="form-group">
                         <label>Cuenta Propina</label>
-                        <select
+                        <app-searchable-select
                           [(ngModel)]="getForm(doc.id).tipAccountId"
                           [name]="'tip_' + doc.id"
-                        >
-                          <option value="">Seleccionar...</option>
-                          <option *ngFor="let acc of accounts" [value]="acc.id">
-                            {{ acc.code }} - {{ acc.name }}
-                          </option>
-                        </select>
+                          [options]="accounts"
+                          [bindLabel]="accountLabelFn"
+                          bindValue="id"
+                          placeholder="Seleccionar..."
+                        ></app-searchable-select>
                       </div>
                       <div class="form-group">
                         <label>Centro de Costo</label>
-                        <select
+                        <app-searchable-select
                           [(ngModel)]="getForm(doc.id).costCenterId"
                           [name]="'cost_' + doc.id"
-                        >
-                          <option value="">Buscar centro...</option>
-                          <option *ngFor="let cc of costCenters" [value]="cc.id">
-                            {{ cc.code }} - {{ cc.name }}
-                          </option>
-                        </select>
+                          [options]="costCenters"
+                          [bindLabel]="costCenterLabelFn"
+                          bindValue="id"
+                          placeholder="Buscar centro..."
+                        ></app-searchable-select>
                       </div>
                       <div class="form-group">
                         <label>Cuenta Recurrente</label>
-                        <select
+                        <app-searchable-select
                           [(ngModel)]="getForm(doc.id).recurringAccountId"
                           [name]="'recurring_' + doc.id"
                           [disabled]="!getForm(doc.id).useRecurringAccount"
-                        >
-                          <option value="">Seleccionar...</option>
-                          <option *ngFor="let acc of accounts" [value]="acc.id">
-                            {{ acc.code }} - {{ acc.name }}
-                          </option>
-                        </select>
+                          [options]="accounts"
+                          [bindLabel]="accountLabelFn"
+                          bindValue="id"
+                          placeholder="Seleccionar..."
+                        ></app-searchable-select>
                       </div>
                       <label class="checkbox-label">
                         <input
@@ -233,33 +229,25 @@
                       </h4>
                       <div class="form-group">
                         <label>Retención IR</label>
-                        <select
+                        <app-searchable-select
                           [(ngModel)]="getForm(doc.id).retentionIrCode"
                           [name]="'retIr_' + doc.id"
-                        >
-                          <option value="">Seleccionar...</option>
-                          <option
-                            *ngFor="let code of retentionIrCodes"
-                            [value]="code.code"
-                          >
-                            {{ code.code }} - {{ code.description }}
-                          </option>
-                        </select>
+                          [options]="retentionIrCodes"
+                          [bindLabel]="retentionLabelFn"
+                          bindValue="code"
+                          placeholder="Seleccionar..."
+                        ></app-searchable-select>
                       </div>
                       <div class="form-group">
                         <label>Retención IVA</label>
-                        <select
+                        <app-searchable-select
                           [(ngModel)]="getForm(doc.id).retentionIvaCode"
                           [name]="'retIva_' + doc.id"
-                        >
-                          <option value="">Seleccionar...</option>
-                          <option
-                            *ngFor="let code of retentionIvaCodes"
-                            [value]="code.code"
-                          >
-                            {{ code.code }} - {{ code.description }}
-                          </option>
-                        </select>
+                          [options]="retentionIvaCodes"
+                          [bindLabel]="retentionLabelFn"
+                          bindValue="code"
+                          placeholder="Seleccionar..."
+                        ></app-searchable-select>
                       </div>
                       <label class="checkbox-label">
                         <input
@@ -331,26 +319,24 @@
                           </div>
                           <div class="form-group">
                             <label>Producto / Cuenta</label>
-                            <select
+                            <app-searchable-select
                               *ngIf="getLineForm(doc.id, line.id).mappingType === 'PRODUCT'"
                               [(ngModel)]="getLineForm(doc.id, line.id).mappedProductId"
                               [name]="'product_' + line.id"
-                            >
-                              <option value="">Buscar producto...</option>
-                              <option *ngFor="let p of products" [value]="p.id">
-                                {{ p.code }} - {{ p.name }}
-                              </option>
-                            </select>
-                            <select
+                              [options]="products"
+                              [bindLabel]="productLabelFn"
+                              bindValue="id"
+                              placeholder="Buscar producto..."
+                            ></app-searchable-select>
+                            <app-searchable-select
                               *ngIf="getLineForm(doc.id, line.id).mappingType === 'ACCOUNT'"
                               [(ngModel)]="getLineForm(doc.id, line.id).mappedAccountId"
                               [name]="'accountMap_' + line.id"
-                            >
-                              <option value="">Buscar cuenta...</option>
-                              <option *ngFor="let acc of accounts" [value]="acc.id">
-                                {{ acc.code }} - {{ acc.name }}
-                              </option>
-                            </select>
+                              [options]="accounts"
+                              [bindLabel]="accountLabelFn"
+                              bindValue="id"
+                              placeholder="Buscar cuenta..."
+                            ></app-searchable-select>
                           </div>
                         </div>
 

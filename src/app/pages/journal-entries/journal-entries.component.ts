@@ -120,34 +120,65 @@ export class JournalEntriesComponent implements OnInit {
   }
 
   postEntry(id: string) {
-    if (confirm('¿Está seguro de postear este asiento?')) {
-      this.journalEntryService.post(id).subscribe({
-        next: () => {
-          alert('Asiento posteado exitosamente');
-          this.loadEntries();
-        },
-        error: (error) => {
-          console.error('Error posting entry:', error);
-          alert(error.error?.message || 'Error al postear el asiento');
-        },
+    import('sweetalert2').then(module => {
+      const Swal = module.default;
+      Swal.fire({
+        title: '¿Está seguro de postear este asiento?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, postear',
+        cancelButtonText: 'Cancelar'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.journalEntryService.post(id).subscribe({
+            next: () => {
+              alert('Asiento posteado exitosamente');
+              this.loadEntries();
+            },
+            error: (error) => {
+              console.error('Error posting entry:', error);
+              alert(error.error?.message || 'Error al postear el asiento');
+            },
+          });
+        }
       });
-    }
+    });
   }
 
   cancelEntry(id: string) {
-    const reason = prompt('Ingrese la razón de anulación:');
-    if (reason) {
-      this.journalEntryService.cancel(id, reason).subscribe({
-        next: () => {
-          alert('Asiento anulado exitosamente');
-          this.loadEntries();
-        },
-        error: (error) => {
-          console.error('Error cancelling entry:', error);
-          alert(error.error?.message || 'Error al anular el asiento');
-        },
+    import('sweetalert2').then(module => {
+      const Swal = module.default;
+      Swal.fire({
+        title: 'Anular asiento',
+        input: 'text',
+        inputLabel: 'Ingrese la razón de anulación:',
+        inputPlaceholder: 'Razón...',
+        showCancelButton: true,
+        confirmButtonText: 'Anular',
+        cancelButtonText: 'Cancelar',
+        inputValidator: (value) => {
+          if (!value) {
+            return '¡Debe ingresar una razón!';
+          }
+          return null;
+        }
+      }).then((result) => {
+        if (result.isConfirmed && result.value) {
+          this.journalEntryService.cancel(id, result.value).subscribe({
+            next: () => {
+              alert('Asiento anulado exitosamente');
+              this.loadEntries();
+            },
+            error: (error) => {
+              console.error('Error cancelling entry:', error);
+              alert(error.error?.message || 'Error al anular el asiento');
+            },
+          });
+        }
       });
-    }
+    });
   }
 
   getTotalDebit(): number {

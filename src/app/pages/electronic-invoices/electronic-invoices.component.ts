@@ -73,11 +73,15 @@ export class ElectronicInvoicesComponent implements OnInit {
       ),
     }).subscribe({
       next: ({ accounts, products, costCenters, retentionCodes }) => {
-        this.accounts = accounts;
-        this.products = products;
-        this.costCenters = costCenters;
-        this.retentionIrCodes = retentionCodes.filter((c) => c.type === 'SOURCE');
-        this.retentionIvaCodes = retentionCodes.filter((c) => c.type === 'IVA');
+        this.accounts = accounts.map(a => ({ ...a, label: `${a.code} - ${a.name}` }));
+        this.products = products.map(p => ({ ...p, label: `${p.code} - ${p.name}` }));
+        this.costCenters = costCenters.map(c => ({ ...c, label: `${c.code} - ${c.name}` }));
+        this.retentionIrCodes = retentionCodes
+          .filter((c) => c.type === 'SOURCE')
+          .map(r => ({ ...r, label: `${r.code} - ${r.description}` }));
+        this.retentionIvaCodes = retentionCodes
+          .filter((c) => c.type === 'IVA')
+          .map(r => ({ ...r, label: `${r.code} - ${r.description}` }));
       },
       error: (err) => console.error('Error loading catalogs:', err),
     });
@@ -146,11 +150,6 @@ export class ElectronicInvoicesComponent implements OnInit {
       updatePersonData: false,
     };
   }
-
-  accountLabelFn = (acc: AccountOption) => `${acc.code} - ${acc.name}`;
-  costCenterLabelFn = (cc: CostCenterOption) => `${cc.code} - ${cc.name}`;
-  productLabelFn = (p: ProductOption) => `${p.code} - ${p.name}`;
-  retentionLabelFn = (r: RetentionCodeOption) => `${r.code} - ${r.description}`;
 
   accountLabel(id: string): string {
     const account = this.accounts.find((a) => a.id === id);

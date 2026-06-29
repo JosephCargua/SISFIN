@@ -51,12 +51,14 @@ export interface AccountOption {
   id: string;
   code: string;
   name: string;
+  label?: string;
 }
 
 export interface CostCenterOption {
   id: string;
   code: string;
   name: string;
+  label?: string;
 }
 
 export interface RetentionCodeOption {
@@ -64,6 +66,7 @@ export interface RetentionCodeOption {
   description: string;
   rate: number;
   type: string;
+  label?: string;
 }
 
 export type LineMappingType = 'PRODUCT' | 'ACCOUNT';
@@ -96,6 +99,7 @@ export interface ProductOption {
   id: string;
   code: string;
   name: string;
+  label?: string;
 }
 
 export interface DocumentHomologationForm {

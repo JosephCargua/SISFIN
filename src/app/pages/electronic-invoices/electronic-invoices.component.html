@@ -174,7 +174,6 @@
                           [(ngModel)]="getForm(doc.id).payableAccountId"
                           [name]="'payable_' + doc.id"
                           [options]="accounts"
-                          [bindLabel]="accountLabelFn"
                           bindValue="id"
                           placeholder="Buscar cuenta..."
                         ></app-searchable-select>
@@ -185,7 +184,6 @@
                           [(ngModel)]="getForm(doc.id).tipAccountId"
                           [name]="'tip_' + doc.id"
                           [options]="accounts"
-                          [bindLabel]="accountLabelFn"
                           bindValue="id"
                           placeholder="Seleccionar..."
                         ></app-searchable-select>
@@ -196,7 +194,6 @@
                           [(ngModel)]="getForm(doc.id).costCenterId"
                           [name]="'cost_' + doc.id"
                           [options]="costCenters"
-                          [bindLabel]="costCenterLabelFn"
                           bindValue="id"
                           placeholder="Buscar centro..."
                         ></app-searchable-select>
@@ -208,7 +205,6 @@
                           [name]="'recurring_' + doc.id"
                           [disabled]="!getForm(doc.id).useRecurringAccount"
                           [options]="accounts"
-                          [bindLabel]="accountLabelFn"
                           bindValue="id"
                           placeholder="Seleccionar..."
                         ></app-searchable-select>
@@ -233,7 +229,6 @@
                           [(ngModel)]="getForm(doc.id).retentionIrCode"
                           [name]="'retIr_' + doc.id"
                           [options]="retentionIrCodes"
-                          [bindLabel]="retentionLabelFn"
                           bindValue="code"
                           placeholder="Seleccionar..."
                         ></app-searchable-select>
@@ -244,7 +239,6 @@
                           [(ngModel)]="getForm(doc.id).retentionIvaCode"
                           [name]="'retIva_' + doc.id"
                           [options]="retentionIvaCodes"
-                          [bindLabel]="retentionLabelFn"
                           bindValue="code"
                           placeholder="Seleccionar..."
                         ></app-searchable-select>
@@ -324,7 +318,6 @@
                               [(ngModel)]="getLineForm(doc.id, line.id).mappedProductId"
                               [name]="'product_' + line.id"
                               [options]="products"
-                              [bindLabel]="productLabelFn"
                               bindValue="id"
                               placeholder="Buscar producto..."
                             ></app-searchable-select>
@@ -333,7 +326,6 @@
                               [(ngModel)]="getLineForm(doc.id, line.id).mappedAccountId"
                               [name]="'accountMap_' + line.id"
                               [options]="accounts"
-                              [bindLabel]="accountLabelFn"
                               bindValue="id"
                               placeholder="Buscar cuenta..."
                             ></app-searchable-select>

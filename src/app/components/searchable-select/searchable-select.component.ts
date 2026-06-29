@@ -26,9 +26,9 @@ import { FormsModule, NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/f
           class="dropdown-item" 
           *ngFor="let item of filteredOptions"
           (click)="selectItem(item)"
-          [class.selected]="item.value === value"
+          [class.selected]="getValue(item) === value"
         >
-          {{ item.label }}
+          {{ getLabel(item) }}
         </div>
         <div class="dropdown-item empty" *ngIf="filteredOptions.length === 0">
           No hay resultados

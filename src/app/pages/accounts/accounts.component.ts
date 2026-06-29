@@ -101,29 +101,36 @@ export class AccountsComponent implements OnInit {
   }
 
   deactivateAccount(account: Account) {
-    if (
-      confirm(
-        `¿Está seguro de desactivar la cuenta "${account.code} - ${account.name}"?\n\n` +
-          'Nota: No se puede desactivar una cuenta que:\n' +
-          '- Tenga cuentas hijas activas\n' +
-          '- Tenga movimientos en asientos posteados',
-      )
-    ) {
-      this.accountService.deactivate(account.id).subscribe({
-        next: () => {
-          alert('Cuenta desactivada exitosamente');
-          this.loadAccounts();
-          this.loadHierarchy();
-        },
-        error: (error) => {
-          console.error('Error deactivating account:', error);
-          alert(
-            error.error?.message ||
-              'Error al desactivar la cuenta. Verifique que no tenga cuentas hijas activas ni movimientos.',
-          );
-        },
+    import('sweetalert2').then(module => {
+      const Swal = module.default;
+      Swal.fire({
+        title: `¿Está seguro de desactivar la cuenta "${account.code} - ${account.name}"?`,
+        html: `Nota: No se puede desactivar una cuenta que:<br/>- Tenga cuentas hijas activas<br/>- Tenga movimientos en asientos posteados`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, desactivar',
+        cancelButtonText: 'Cancelar'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.accountService.deactivate(account.id).subscribe({
+            next: () => {
+              alert('Cuenta desactivada exitosamente');
+              this.loadAccounts();
+              this.loadHierarchy();
+            },
+            error: (error) => {
+              console.error('Error deactivating account:', error);
+              alert(
+                error.error?.message ||
+                  'Error al desactivar la cuenta. Verifique que no tenga cuentas hijas activas ni movimientos.',
+              );
+            },
+          });
+        }
       });
-    }
+    });
   }
 
   activateAccount(account: Account) {

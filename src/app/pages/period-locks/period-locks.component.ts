@@ -67,17 +67,30 @@ export class PeriodLocksComponent implements OnInit {
   }
 
   toggleLock(id: string) {
-    if (confirm('¿Está seguro de cambiar el estado del bloqueo?')) {
-      this.automationService.toggleLock(id).subscribe({
-        next: () => {
-          alert('Estado actualizado exitosamente');
-          this.loadPeriodLocks();
-        },
-        error: (error) => {
-          alert(error.error?.message || 'Error al actualizar el estado');
-        },
+    import('sweetalert2').then(module => {
+      const Swal = module.default;
+      Swal.fire({
+        title: '¿Está seguro de cambiar el estado del bloqueo?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, cambiar',
+        cancelButtonText: 'Cancelar'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.automationService.toggleLock(id).subscribe({
+            next: () => {
+              alert('Estado actualizado exitosamente');
+              this.loadPeriodLocks();
+            },
+            error: (error) => {
+              alert(error.error?.message || 'Error al actualizar el estado');
+            },
+          });
+        }
       });
-    }
+    });
   }
 
   resetForm() {

@@ -15,13 +15,14 @@ import {
   ProductOption,
   RetentionCodeOption,
 } from '../../models/electronic-registration.model';
+import { SearchableSelectComponent } from '../../components/searchable-select/searchable-select.component';
 
 type TabKey = 'partial' | 'pending';
 
 @Component({
   selector: 'app-electronic-invoices',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, SearchableSelectComponent],
   templateUrl: './electronic-invoices.component.html',
   styleUrl: './electronic-invoices.component.scss',
 })
@@ -145,6 +146,11 @@ export class ElectronicInvoicesComponent implements OnInit {
       updatePersonData: false,
     };
   }
+
+  accountLabelFn = (acc: AccountOption) => `${acc.code} - ${acc.name}`;
+  costCenterLabelFn = (cc: CostCenterOption) => `${cc.code} - ${cc.name}`;
+  productLabelFn = (p: ProductOption) => `${p.code} - ${p.name}`;
+  retentionLabelFn = (r: RetentionCodeOption) => `${r.code} - ${r.description}`;
 
   accountLabel(id: string): string {
     const account = this.accounts.find((a) => a.id === id);
@@ -379,15 +385,29 @@ export class ElectronicInvoicesComponent implements OnInit {
   }
 
   deleteDocument(id: string) {
-    if (!confirm('¿Eliminar este documento del registro?')) return;
-    this.registrationService.deleteDocument(id).subscribe({
-      next: () => {
-        if (this.expandedId === id) this.expandedId = null;
-        this.homologationForms.delete(id);
-        this.lineItemsByDoc.delete(id);
-        this.loadDocuments();
-      },
-      error: (err) => alert(err.error?.message || 'Error al eliminar'),
+    import('sweetalert2').then(module => {
+      const Swal = module.default;
+      Swal.fire({
+        title: '¿Eliminar este documento del registro?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.registrationService.deleteDocument(id).subscribe({
+            next: () => {
+              if (this.expandedId === id) this.expandedId = null;
+              this.homologationForms.delete(id);
+              this.lineItemsByDoc.delete(id);
+              this.loadDocuments();
+            },
+            error: (err) => alert(err.error?.message || 'Error al eliminar'),
+          });
+        }
+      });
     });
   }
 

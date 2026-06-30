@@ -1,28 +1,65 @@
-<div class="layout-container">
-  <aside class="sidebar">
+<div class="layout-container" [class.mobile-open]="isMobile && sidebarOpen">
+  <div class="sidebar-overlay" *ngIf="isMobile && sidebarOpen" (click)="toggleSidebar()"></div>
+  
+  <aside class="sidebar" [class.open]="sidebarOpen">
     <div class="sidebar-header">
-      <h1>Movimiento Juan XXIII</h1>
-      <p>Sistema Contable</p>
+      <div class="header-titles">
+        <h1>Movimiento Juan XXIII</h1>
+        <p>Sistema Contable</p>
+      </div>
+      <button class="btn-close-mobile" *ngIf="isMobile" (click)="toggleSidebar()">
+        <span class="material-icons">close</span>
+      </button>
     </div>
     <nav class="sidebar-nav">
-      <a
-        *ngFor="let item of menuItems"
-        [routerLink]="item.route"
-        routerLinkActive="active"
-        class="nav-item"
-      >
-        <span class="material-icons">{{ item.icon }}</span>
-        <span>{{ item.label }}</span>
-      </a>
+      <ng-container *ngFor="let item of menuItems">
+        <!-- Item without children -->
+        <a *ngIf="!item.children"
+           [routerLink]="item.route"
+           routerLinkActive="active"
+           [routerLinkActiveOptions]="{exact: true}"
+           class="nav-item">
+          <span class="material-icons">{{ item.icon }}</span>
+          <span>{{ item.label }}</span>
+        </a>
+        
+        <!-- Item with children (Group) -->
+        <div *ngIf="item.children" class="nav-group" [class.expanded]="item.expanded">
+          <button class="nav-group-header" (click)="toggleGroup(item)">
+            <div class="nav-group-title">
+              <span class="material-icons">{{ item.icon }}</span>
+              <span>{{ item.label }}</span>
+            </div>
+            <span class="material-icons toggle-icon">
+              {{ item.expanded ? 'expand_less' : 'expand_more' }}
+            </span>
+          </button>
+          
+          <div class="nav-group-children" *ngIf="item.expanded">
+            <a *ngFor="let child of item.children"
+               [routerLink]="child.route"
+               routerLinkActive="active"
+               class="nav-item child-item">
+              <span class="material-icons" *ngIf="child.icon">{{ child.icon }}</span>
+              <span>{{ child.label }}</span>
+            </a>
+          </div>
+        </div>
+      </ng-container>
     </nav>
   </aside>
+  
   <main class="main-content">
     <header class="top-bar">
-      <h2>Sistema Contable Del Movimiento Juan XXIII</h2>
+      <div class="top-bar-left">
+        <button class="btn-menu" *ngIf="isMobile" (click)="toggleSidebar()">
+          <span class="material-icons">menu</span>
+        </button>
+        <h2>Sistema Contable Del Movimiento Juan XXIII</h2>
+      </div>
     </header>
     <div class="content-area">
       <router-outlet></router-outlet>
     </div>
   </main>
 </div>
-

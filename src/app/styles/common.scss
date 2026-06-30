@@ -75,11 +75,13 @@
 
 .table-container {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
+  min-width: 800px;
 
   thead {
     background: #f1f5f9;

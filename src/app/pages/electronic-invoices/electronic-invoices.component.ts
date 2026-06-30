@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
@@ -366,6 +367,15 @@ export class ElectronicInvoicesComponent implements OnInit {
         next: () => {
           this.homologatingId = null;
           this.expandedId = null;
+          Swal.fire({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            icon: 'success',
+            title: 'La factura fue procesada correctamente'
+          });
           this.loadDocuments();
         },
         error: (err) => {

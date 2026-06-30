@@ -3,7 +3,7 @@ export type DocumentReviewStatus =
   | 'NOT_REVIEWED'
   | 'PENDING_REVIEW';
 
-export type DocumentProcessingStatus = 'PARTIAL' | 'PENDING_PROCESS';
+export type DocumentProcessingStatus = 'PARTIAL' | 'PENDING_PROCESS' | 'PROCESSED';
 
 export interface ElectronicDocumentRegistration {
   id: string;

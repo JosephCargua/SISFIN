@@ -257,20 +257,20 @@ export class ElectronicInvoicesComponent implements OnInit {
     });
   }
 
-  onFileSelected(event: Event) {
+  async onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files?.length) {
-      this.uploadFiles(Array.from(input.files));
+      await this.processFiles(Array.from(input.files));
       input.value = '';
     }
   }
 
-  onDrop(event: DragEvent) {
+  async onDrop(event: DragEvent) {
     event.preventDefault();
     this.dragOver = false;
     const files = event.dataTransfer?.files;
     if (files?.length) {
-      this.uploadFiles(Array.from(files));
+      await this.processFiles(Array.from(files));
     }
   }
 
@@ -283,9 +283,81 @@ export class ElectronicInvoicesComponent implements OnInit {
     this.dragOver = false;
   }
 
-  uploadFiles(files: File[]) {
+  async processFiles(files: File[]) {
     this.uploading = true;
     this.uploadError = '';
+    
+    try {
+      const finalFiles: File[] = [];
+      
+      for (const file of files) {
+        if (file.name.toLowerCase().endsWith('.txt')) {
+          const text = await file.text();
+          const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+          if (lines.length > 0) lines.shift(); // Remove header
+          
+          for (const line of lines) {
+            const cols = line.split('\t');
+            if (cols.length < 11) continue;
+            
+            const [ruc, razonSocial, tipo, serie, clave, fAuto, fEmi, idReceptor, valSinImp, iva, total] = cols;
+            const parts = serie.split('-');
+            const estab = parts[0] || '001';
+            const ptoEmi = parts[1] || '001';
+            const secuencial = parts[2] || '000000001';
+            
+            const xml = `
+            <factura>
+              <infoTributaria>
+                <ruc>${ruc}</ruc>
+                <razonSocial><![CDATA[${razonSocial}]]></razonSocial>
+                <codDoc>01</codDoc>
+                <estab>${estab}</estab>
+                <ptoEmi>${ptoEmi}</ptoEmi>
+                <secuencial>${secuencial}</secuencial>
+                <claveAcceso>${clave}</claveAcceso>
+              </infoTributaria>
+              <infoFactura>
+                <fechaEmision>${fEmi}</fechaEmision>
+                <importeTotal>${total}</importeTotal>
+              </infoFactura>
+              <detalles>
+                <detalle>
+                  <codigoPrincipal>TXT</codigoPrincipal>
+                  <descripcion>Consolidado TXT</descripcion>
+                  <cantidad>1</cantidad>
+                  <precioUnitario>${valSinImp}</precioUnitario>
+                  <impuestos>
+                    <impuesto>
+                      <tarifa>${iva}</tarifa>
+                    </impuesto>
+                  </impuestos>
+                </detalle>
+              </detalles>
+            </factura>`;
+            
+            const xmlBlob = new Blob([xml], { type: 'application/xml' });
+            const xmlFile = new File([xmlBlob], `${clave}.xml`, { type: 'application/xml' });
+            finalFiles.push(xmlFile);
+          }
+        } else {
+          finalFiles.push(file);
+        }
+      }
+      
+      if (finalFiles.length > 0) {
+        this.uploadFiles(finalFiles);
+      } else {
+        this.uploading = false;
+        this.uploadError = 'No se encontraron facturas válidas en el archivo TXT.';
+      }
+    } catch (e) {
+      this.uploading = false;
+      this.uploadError = 'Error al leer el archivo TXT.';
+    }
+  }
+
+  uploadFiles(files: File[]) {
     let completed = 0;
     let hadError = false;
 
@@ -301,8 +373,7 @@ export class ElectronicInvoicesComponent implements OnInit {
         error: (err) => {
           hadError = true;
           completed++;
-          this.uploadError =
-            err.error?.message || `Error al subir ${file.name}`;
+          this.uploadError = err.error?.message || `Error al subir ${file.name}`;
           if (completed === files.length) {
             this.uploading = false;
             this.loadDocuments();

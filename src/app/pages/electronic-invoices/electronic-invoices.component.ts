@@ -17,7 +17,7 @@ import {
 } from '../../models/electronic-registration.model';
 import { SearchableSelectComponent } from '../../components/searchable-select/searchable-select.component';
 
-type TabKey = 'partial' | 'pending';
+type TabKey = 'partial' | 'pending' | 'processed';
 
 @Component({
   selector: 'app-electronic-invoices',
@@ -30,6 +30,7 @@ export class ElectronicInvoicesComponent implements OnInit {
   activeTab: TabKey = 'partial';
   partialDocuments: ElectronicDocumentRegistration[] = [];
   pendingDocuments: ElectronicDocumentRegistration[] = [];
+  processedDocuments: ElectronicDocumentRegistration[] = [];
   selectedIds = new Set<string>();
   expandedId: string | null = null;
   homologationForms = new Map<string, DocumentHomologationForm>();
@@ -58,9 +59,9 @@ export class ElectronicInvoicesComponent implements OnInit {
   }
 
   get activeDocuments(): ElectronicDocumentRegistration[] {
-    return this.activeTab === 'partial'
-      ? this.partialDocuments
-      : this.pendingDocuments;
+    if (this.activeTab === 'partial') return this.partialDocuments;
+    if (this.activeTab === 'pending') return this.pendingDocuments;
+    return this.processedDocuments;
   }
 
   loadCatalogs() {
@@ -102,6 +103,13 @@ export class ElectronicInvoicesComponent implements OnInit {
       },
       error: (err) => console.error('Error loading pending documents:', err),
     });
+    this.registrationService.getDocuments('PROCESSED').subscribe({
+      next: (data) => {
+        this.processedDocuments = data;
+        this.syncForms(data);
+      },
+      error: (err) => console.error('Error loading processed documents:', err),
+    });
   }
 
   private syncForms(docs: ElectronicDocumentRegistration[]) {
@@ -126,7 +134,7 @@ export class ElectronicInvoicesComponent implements OnInit {
 
   getForm(docId: string): DocumentHomologationForm {
     if (!this.homologationForms.has(docId)) {
-      const doc = [...this.partialDocuments, ...this.pendingDocuments].find(
+      const doc = [...this.partialDocuments, ...this.pendingDocuments, ...this.processedDocuments].find(
         (d) => d.id === docId,
       );
       this.homologationForms.set(

@@ -45,6 +45,14 @@
     >
       Por procesar ({{ pendingDocuments.length }})
     </button>
+    <button
+      type="button"
+      class="tab"
+      [class.active]="activeTab === 'processed'"
+      (click)="setTab('processed')"
+    >
+      Procesadas ({{ processedDocuments.length }})
+    </button>
   </div>
 
   <div class="info-banner" *ngIf="activeTab === 'partial'">
@@ -153,7 +161,7 @@
             <tr *ngIf="isExpanded(doc.id)" class="expand-row">
               <td colspan="9">
                 <div class="homologation-panel">
-                  <div class="panel-top-actions">
+                  <div class="panel-top-actions" *ngIf="doc.processingStatus !== 'PROCESSED'">
                     <button
                       type="button"
                       class="btn btn-primary btn-homologate-top"
@@ -352,7 +360,7 @@
                           </div>
                         </div>
                       </div>
-                      <div class="accept-line-actions">
+                      <div class="accept-line-actions" *ngIf="doc.processingStatus !== 'PROCESSED'">
                         <button
                           type="button"
                           class="btn btn-primary btn-accept"
@@ -373,7 +381,7 @@
                     </ng-container>
 
                     <ng-template #allHomologated>
-                      <p class="all-homologated-msg">
+                      <p class="all-homologated-msg" *ngIf="doc.processingStatus !== 'PROCESSED'">
                         <span class="material-icons">check_circle</span>
                         Todos los productos del proveedor han sido homologados.
                         Puede presionar Homologar para finalizar el documento.

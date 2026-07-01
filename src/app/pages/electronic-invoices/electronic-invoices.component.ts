@@ -371,7 +371,7 @@ export class ElectronicInvoicesComponent implements OnInit {
 
   uploadFiles(files: File[]) {
     let completed = 0;
-    let hadError = false;
+    const errors: string[] = [];
 
     files.forEach((file) => {
       this.registrationService.uploadDocument(file).subscribe({
@@ -379,15 +379,18 @@ export class ElectronicInvoicesComponent implements OnInit {
           completed++;
           if (completed === files.length) {
             this.uploading = false;
-            if (!hadError) this.loadDocuments();
+            if (errors.length > 0) {
+              this.uploadError = `Se subieron ${files.length - errors.length} facturas. Fallaron ${errors.length}:\n` + errors.join(' | ');
+            }
+            this.loadDocuments();
           }
         },
         error: (err) => {
-          hadError = true;
           completed++;
-          this.uploadError = err.error?.message || `Error al subir ${file.name}`;
+          errors.push(err.error?.message || `Error en ${file.name}`);
           if (completed === files.length) {
             this.uploading = false;
+            this.uploadError = `Se subieron ${files.length - errors.length} facturas. Fallaron ${errors.length}:\n` + errors.join(' | ');
             this.loadDocuments();
           }
         },

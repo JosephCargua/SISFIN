@@ -306,11 +306,22 @@ export class ElectronicInvoicesComponent implements OnInit {
             const ptoEmi = parts[1] || '001';
             const secuencial = parts[2] || '000000001';
             
+            const escapeXml = (str: string) => str.replace(/[<>&'"]/g, (c) => {
+              switch (c) {
+                case '<': return '&lt;';
+                case '>': return '&gt;';
+                case '&': return '&amp;';
+                case "'": return '&apos;';
+                case '"': return '&quot;';
+                default: return c;
+              }
+            });
+
             const xml = `
             <factura>
               <infoTributaria>
                 <ruc>${ruc}</ruc>
-                <razonSocial><![CDATA[${razonSocial}]]></razonSocial>
+                <razonSocial>${escapeXml(razonSocial)}</razonSocial>
                 <codDoc>01</codDoc>
                 <estab>${estab}</estab>
                 <ptoEmi>${ptoEmi}</ptoEmi>
@@ -321,6 +332,7 @@ export class ElectronicInvoicesComponent implements OnInit {
                 <fechaEmision>${fEmi}</fechaEmision>
                 <importeTotal>${total}</importeTotal>
               </infoFactura>
+              <fechaAutorizacion>${fAuto}</fechaAutorizacion>
               <detalles>
                 <detalle>
                   <codigoPrincipal>TXT</codigoPrincipal>

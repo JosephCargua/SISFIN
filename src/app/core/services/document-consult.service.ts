@@ -24,4 +24,8 @@ export class DocumentConsultService {
       params,
     );
   }
+
+  annulDocument(id: string): Observable<any> {
+    return this.api.patch(`electronic-document-registrations/${id}/annul`, {});
+  }
 }

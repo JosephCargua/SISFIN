@@ -1,67 +1,67 @@
-<div class="ats-container">
-  <div class="page-header">
-    <h1>Anexo Transaccional Simplificado (ATS)</h1>
+<div class="ats-container" style="padding: 16px; background-color: #f8fafc; min-height: 100vh;">
+  <div class="page-header" style="margin-bottom: 16px;">
+    <h2 style="font-size: 24px; font-weight: 600; color: #1e293b; margin: 0;">Generar ATS</h2>
   </div>
 
-  <div class="filters card">
-    <h2>Generar ATS</h2>
-    <form (ngSubmit)="generateATS()">
-      <div class="form-row">
-        <div class="form-group">
-          <label>Año *</label>
-          <input
-            type="number"
-            [(ngModel)]="selectedYear"
-            name="year"
-            [min]="2020"
-            [max]="2030"
-            required
-          />
-        </div>
-        <div class="form-group">
-          <label>Mes *</label>
-          <select [(ngModel)]="selectedMonth" name="month" required>
-            <option *ngFor="let month of months" [value]="month.value">
-              {{ month.name }}
-            </option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>&nbsp;</label>
-          <button type="submit" class="btn btn-primary" [disabled]="loading">
-            <span class="material-icons">file_download</span>
-            Generar ATS
-          </button>
-        </div>
+  <div class="alert" style="background-color: #dbeafe; color: #1e40af; padding: 12px 16px; border-radius: 8px; margin-bottom: 24px; font-size: 14px; border-left: 4px solid #3b82f6;">
+    <strong>¡Importante!</strong> Antes de generar el ATS por favor registre el número de establecimientos inscritos en el RUC, en Mi Compañía > Datos de la Empresa.
+  </div>
+
+  <div class="card" style="background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); padding: 24px;">
+    <h3 style="font-size: 18px; font-weight: 500; color: #334155; margin-bottom: 24px; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px;">Búsqueda</h3>
+    
+    <div class="form-row" style="display: flex; gap: 24px; align-items: flex-end; margin-bottom: 24px; flex-wrap: wrap;">
+      <div class="form-group" style="flex: 1; min-width: 200px;">
+        <label style="display: block; font-size: 14px; font-weight: 500; color: #64748b; margin-bottom: 8px;">Tipo</label>
+        <select [(ngModel)]="selectedType" name="type" class="form-control" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background-color: #f8fafc; color: #334155;">
+          <option value="mensual">Mensual</option>
+          <option value="semestral">Semestral</option>
+        </select>
       </div>
-    </form>
-  </div>
 
-  <div class="ats-list card">
-    <h2>ATS Generados</h2>
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>Período</th>
-            <th>Año</th>
-            <th>Mes</th>
-            <th>Estado</th>
-            <th>Fecha de Generación</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let ats of atsList">
-            <td>{{ ats.period }}</td>
-            <td>{{ ats.year }}</td>
-            <td>{{ months[ats.month - 1].name }}</td>
-            <td>
-              <span class="badge badge-success">{{ ats.status }}</span>
-            </td>
-            <td>{{ ats.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="form-group" style="flex: 1; min-width: 200px;">
+        <label style="display: block; font-size: 14px; font-weight: 500; color: #64748b; margin-bottom: 8px;">Mes</label>
+        <select [(ngModel)]="selectedMonth" name="month" class="form-control" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background-color: white; color: #334155;">
+          <option *ngFor="let month of months" [value]="month.value">
+            {{ month.name }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group" style="flex: 1; min-width: 200px;">
+        <label style="display: block; font-size: 14px; font-weight: 500; color: #64748b; margin-bottom: 8px;">Año</label>
+        <select [(ngModel)]="selectedYear" name="year" class="form-control" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background-color: white; color: #334155;">
+          <option *ngFor="let year of years" [value]="year">{{ year }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row" style="display: flex; gap: 24px; align-items: flex-end; margin-bottom: 24px; flex-wrap: wrap;">
+      <div class="form-group" style="flex: 2; min-width: 250px;">
+        <label style="display: block; font-size: 14px; font-weight: 500; color: #64748b; margin-bottom: 8px;">Razón Social</label>
+        <input type="text" [(ngModel)]="razonSocial" name="razonSocial" class="form-control" placeholder="Ej: MOVIMIENTO DE RETIROS PARROQUIALES..." style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background-color: white; color: #334155;">
+      </div>
+
+      <div class="form-group" style="flex: 1; min-width: 200px;">
+        <label style="display: block; font-size: 14px; font-weight: 500; color: #64748b; margin-bottom: 8px;">RUC</label>
+        <input type="text" [(ngModel)]="ruc" name="ruc" class="form-control" placeholder="Ej: 1691729409001" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background-color: white; color: #334155;">
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-bottom: 32px; display: flex; align-items: center; gap: 8px;">
+      <input type="checkbox" id="exclude332" [(ngModel)]="excludeRetention332" style="width: 18px; height: 18px; accent-color: #3b82f6; cursor: pointer;">
+      <label for="exclude332" style="font-size: 14px; color: #475569; cursor: pointer;">Excluir retención informativa 332</label>
+    </div>
+
+    <div class="actions" style="display: flex; gap: 16px;">
+      <button class="btn btn-outline" (click)="exportExcel()" style="display: flex; align-items: center; gap: 8px; padding: 10px 20px; background: white; border: 1px solid #cbd5e1; border-radius: 8px; color: #475569; font-weight: 500; cursor: pointer; transition: all 0.2s;">
+        <span class="material-icons" style="color: #10b981; font-size: 20px;">description</span>
+        Exportar a Excel
+      </button>
+      <button class="btn btn-primary" (click)="generateXML()" style="display: flex; align-items: center; gap: 8px; padding: 10px 20px; background: #3b82f6; border: none; border-radius: 8px; color: white; font-weight: 500; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 4px rgb(59 130 246 / 0.3);">
+        <span class="material-icons" style="font-size: 20px;">description</span>
+        Generar XML
+      </button>
     </div>
   </div>
 </div>

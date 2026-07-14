@@ -1,0 +1,105 @@
+<div class="document-crossing-container" style="padding: 16px; background-color: #f8fafc; min-height: 100vh;">
+  <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+    <h1 style="margin: 0; font-size: 20px; color: #1e293b;">Cruce de documentos</h1>
+    <button type="button" class="btn btn-primary" style="background-color: #0ea5e9; border: none; color: white; border-radius: 4px; padding: 4px 12px;"><span class="material-icons" style="font-size: 18px;">add</span></button>
+  </div>
+
+  <section class="card document-info" style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+    <h2 style="font-size: 16px; color: #334155; margin-top: 0; margin-bottom: 16px;">Información de la Transacción</h2>
+
+    <div class="form-grid" style="display: grid; grid-template-columns: 140px 1fr; gap: 12px; align-items: center; max-width: 600px;">
+      
+      <label style="text-align: right; color: #64748b; font-size: 13px;">Fecha de Emisión:</label>
+      <input type="date" [(ngModel)]="issueDate" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; width: 200px;" />
+
+      <label style="text-align: right; color: #64748b; font-size: 13px;">Persona:</label>
+      <div style="display: flex; align-items: center; border: 1px solid #cbd5e1; border-radius: 4px; overflow: hidden; max-width: 400px;">
+        <input type="text" [(ngModel)]="personName" style="flex: 1; border: none; padding: 6px; outline: none;" />
+        <span class="material-icons" style="color: #64748b; padding: 0 8px; font-size: 18px; cursor: pointer;">search</span>
+      </div>
+
+      <label style="text-align: right; color: #64748b; font-size: 13px;">Documento:</label>
+      <div style="display: flex; align-items: center; border: 1px solid #cbd5e1; border-radius: 4px; overflow: hidden; max-width: 400px;">
+        <input type="text" [(ngModel)]="documentLabel" style="flex: 1; border: none; padding: 6px; outline: none;" />
+        <span class="material-icons" style="color: #64748b; padding: 0 8px; font-size: 18px; cursor: pointer;">search</span>
+      </div>
+
+      <label style="text-align: right; color: #64748b; font-size: 13px;">Saldo:</label>
+      <span style="font-size: 13px; color: #1e293b; padding: 6px 0;">{{ balance.toFixed(1) }}</span>
+
+      <label style="text-align: right; color: #64748b; font-size: 13px;">Tipo de transacción:</label>
+      <div style="display: flex; gap: 8px;">
+        <span style="font-size: 13px; color: #1e293b; padding: 6px 0;">Pago</span>
+        <select [(ngModel)]="transactionMethod" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; width: 250px;">
+          <option value="Cheque propio">Cheque propio</option>
+          <option value="Cheque certificado">Cheque certificado</option>
+          <option value="Cheque de gerencia">Cheque de gerencia</option>
+          <option value="Cheque del exterior">Cheque del exterior</option>
+          <option value="Débito de cuenta">Débito de cuenta</option>
+          <option value="Transferencia propio banco">Transferencia propio banco</option>
+          <option value="Transferencia otro banco nacional">Transferencia otro banco nacional</option>
+          <option value="Transferencia banco exterior">Transferencia banco exterior</option>
+          <option value="Tarjeta de crédito nacional">Tarjeta de crédito nacional</option>
+          <option value="Tarjeta de crédito internacional">Tarjeta de crédito internacional</option>
+          <option value="Giro">Giro</option>
+          <option value="Depósito en cuenta (corriente/ahorros)">Depósito en cuenta (corriente/ahorros)</option>
+          <option value="Endoso de inversión">Endoso de inversión</option>
+          <option value="Compensación de deudas">Compensación de deudas</option>
+        </select>
+      </div>
+
+      <label style="text-align: right; color: #64748b; font-size: 13px; align-self: start;">Descripción:</label>
+      <textarea [(ngModel)]="description" rows="3" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; max-width: 600px; font-size: 13px; grid-column: 2 / 3; width: 150%;"></textarea>
+    </div>
+  </section>
+
+  <section class="card detail-section" style="background: white; border: 1px solid #e2e8f0; border-radius: 8px;">
+    <div class="tabs" role="tablist" style="display: flex; border-bottom: 1px solid #e2e8f0; background: #f8fafc; padding: 8px 16px 0; gap: 16px;">
+      <button type="button" class="tab active" style="padding: 8px 16px; border: none; background: white; border-top: 2px solid #0ea5e9; border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; border-bottom: 1px solid white; margin-bottom: -1px; color: #0ea5e9; font-weight: 500;">Documentos</button>
+      <button type="button" class="tab" style="padding: 8px 16px; border: none; background: transparent; color: #64748b; cursor: pointer;">Anticipos</button>
+      <button type="button" class="tab" style="padding: 8px 16px; border: none; background: transparent; color: #64748b; cursor: pointer;">Cuentas contables</button>
+    </div>
+
+    <div class="tab-panel" style="padding: 16px;">
+      <div class="table-scroll" style="overflow-x: auto;">
+        <table class="detail-table" style="width: 100%; border-collapse: collapse; min-width: 800px; font-size: 13px;">
+          <thead>
+            <tr style="background-color: #f1f5f9; text-align: left; color: #475569;">
+              <th style="padding: 8px; border: 1px solid #e2e8f0;">Documento</th>
+              <th style="padding: 8px; border: 1px solid #e2e8f0;">Fecha Emisión</th>
+              <th style="padding: 8px; border: 1px solid #e2e8f0;">Tipo Documento</th>
+              <th style="padding: 8px; border: 1px solid #e2e8f0; text-align: right;">Valor</th>
+              <th style="padding: 8px; border: 1px solid #e2e8f0; text-align: right;">Saldo</th>
+              <th style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; width: 120px;">Valor a Pagar</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let doc of documents; let i = index" style="border-bottom: 1px solid #e2e8f0;">
+              <td style="padding: 8px; border-right: 1px solid #e2e8f0;">{{ doc.documentLabel }}</td>
+              <td style="padding: 8px; border-right: 1px solid #e2e8f0;">{{ doc.issueDate }}</td>
+              <td style="padding: 8px; border-right: 1px solid #e2e8f0;">{{ doc.type }}</td>
+              <td style="padding: 8px; border-right: 1px solid #e2e8f0; text-align: right;">{{ doc.value.toFixed(1) }}</td>
+              <td style="padding: 8px; border-right: 1px solid #e2e8f0; text-align: right;">{{ doc.balance.toFixed(1) }}</td>
+              <td style="padding: 8px; display: flex; align-items: center; justify-content: flex-end;">
+                <input type="number" [(ngModel)]="doc.amountToPay" style="width: 80px; padding: 4px; text-align: right; border: 1px solid #cbd5e1; border-radius: 4px;" />
+              </td>
+            </tr>
+            <tr *ngIf="documents.length === 0">
+              <td colspan="6" style="padding: 16px; text-align: center; color: #64748b;">Sin documentos</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <button type="button" class="btn btn-primary btn-sm" style="background-color: #0ea5e9; border: none; color: white; padding: 6px 12px; border-radius: 4px; margin-top: 16px; display: inline-flex; align-items: center; gap: 4px; font-size: 13px;">
+        <span class="material-icons" style="font-size: 16px;">add_circle</span> Agregar Detalle
+      </button>
+    </div>
+  </section>
+
+  <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+    <button type="button" class="btn btn-primary" (click)="save()" [disabled]="saving" style="background-color: #0ea5e9; border: none; color: white; padding: 8px 16px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;">
+      <span class="material-icons" style="font-size: 18px;">save</span> {{ saving ? 'Guardando...' : 'Guardar' }}
+    </button>
+  </div>
+</div>

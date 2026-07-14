@@ -68,6 +68,20 @@ export const routes: Routes = [
           ).then((m) => m.RegisterPurchaseExpenseComponent),
       },
       {
+        path: 'register-payment',
+        loadComponent: () =>
+          import(
+            './pages/register-payment/register-payment.component'
+          ).then((m) => m.RegisterPaymentComponent),
+      },
+      {
+        path: 'document-crossing',
+        loadComponent: () =>
+          import(
+            './pages/document-crossing/document-crossing.component'
+          ).then((m) => m.DocumentCrossingComponent),
+      },
+      {
         path: 'reports',
         loadComponent: () =>
           import('./pages/reports/reports.component').then(

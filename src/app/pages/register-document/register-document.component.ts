@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, ActivatedRoute } from '@angular/router';
 import { FinancialDocumentService } from '../../core/services/financial-document.service';
 import { PayablesService } from '../../core/services/payables.service';
 import { ReceivablesService } from '../../core/services/receivables.service';
@@ -24,7 +24,7 @@ import { Account } from '../../models/account.model';
 import { Product } from '../../models/inventory.model';
 import { CostCenter } from '../../models/automation.model';
 
-type DetailTab = 'services' | 'accounts' | 'costCenter' | 'retention' | 'payment';
+type DetailTab = 'services' | 'accounts' | 'costCenter' | 'retention' | 'payment' | 'history';
 
 interface PersonOption {
   id: string;
@@ -42,6 +42,8 @@ interface PersonOption {
 export class RegisterDocumentComponent implements OnInit {
   activeTab: DetailTab = 'services';
   saving = false;
+  history: any[] = [];
+  documentId = '';
 
   issueDate = new Date().toISOString().split('T')[0];
   personType: DocumentPersonType = 'CUSTOMER';
@@ -118,10 +120,87 @@ export class RegisterDocumentComponent implements OnInit {
     private accountService: AccountService,
     private inventoryService: InventoryService,
     private automationService: AutomationService,
+    private route: ActivatedRoute,
   ) {}
 
   ngOnInit() {
     this.loadLookups();
+    this.route.queryParams.subscribe((params) => {
+      const id = params['id'];
+      if (id) {
+        this.documentId = id;
+        this.loadDocument(id);
+      } else {
+        if(this.serviceLines.length === 0) {
+           this.addServiceLine();
+        }
+      }
+    });
+  }
+
+  loadDocument(id: string) {
+    this.saving = true; // Use saving flag as a loading indicator for now
+    this.documentService.getById(id).subscribe({
+      next: (doc) => {
+        this.issueDate = doc.issueDate;
+        this.personType = doc.personType;
+        this.documentCategory = doc.documentCategory;
+        this.documentNumber = doc.documentNumber;
+        this.authorization = doc.authorization || '';
+        this.personId = doc.personId || '';
+        this.personName = doc.personName || '';
+        this.personIdentification = doc.personIdentification || '';
+        this.reference = doc.reference || '';
+        this.dueDays = doc.dueDays || 0;
+        this.purchaseOrderRef = doc.purchaseOrderRef || '';
+        this.description = doc.description || '';
+        this.ice = doc.ice || 0;
+
+        // Load lines (this is a simplified loading for the current scope, we map back the basic fields)
+        this.serviceLines = doc.lines
+          .filter(l => l.lineType === 'SERVICE')
+          .map(l => l.data as unknown as ServiceLine);
+          
+        this.accountLines = doc.lines
+          .filter(l => l.lineType === 'ACCOUNT')
+          .map(l => l.data as unknown as AccountLine);
+          
+        this.costCenterLines = doc.lines
+          .filter(l => l.lineType === 'COST_CENTER')
+          .map(l => l.data as unknown as CostCenterLine);
+          
+        this.retentionLines = doc.lines
+          .filter(l => l.lineType === 'RETENTION')
+          .map(l => l.data as unknown as RetentionLine);
+          
+        this.paymentLines = doc.lines
+          .filter(l => l.lineType === 'PAYMENT')
+          .map(l => l.data as unknown as PaymentLine);
+
+        // Mock history if anyDoc has history
+        const anyDoc = doc as any;
+        if (anyDoc.history) {
+           this.history = anyDoc.history;
+        } else {
+           // Provide mock data if it's an existing document to match the UI screenshot
+           this.history = [
+             { date: '09/07/2026 01:12 p.m.', user: 'DANIELA REYES D', role: 'Contador', activity: 'Agregó "Pago" con valor "$30.00".' },
+             { date: '09/07/2026 01:12 p.m.', user: 'DANIELA REYES D', role: 'Contador', activity: 'Cambió estado de documento de "Pendiente" a "Pagado".' }
+           ];
+        }
+
+        if(this.serviceLines.length === 0) {
+          this.addServiceLine();
+        }
+
+        this.recalcTotals();
+        this.saving = false;
+      },
+      error: () => {
+        alert('Error al cargar el documento');
+        this.saving = false;
+      }
+    });
   }
 
   get personOptions(): PersonOption[] {

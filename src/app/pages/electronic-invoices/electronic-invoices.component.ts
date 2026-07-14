@@ -423,18 +423,6 @@ export class ElectronicInvoicesComponent implements OnInit {
 
   homologate(docId: string) {
     const form = this.getForm(docId);
-    if (!form.payableAccountId) {
-      alert('Seleccione la cuenta por pagar antes de homologar');
-      return;
-    }
-
-    const pending = this.getPendingLineItemsCount(docId);
-    if (pending > 0) {
-      alert(
-        `Quedan ${pending} producto(s) del proveedor por homologar. Use Aceptar en cada ítem.`,
-      );
-      return;
-    }
 
     this.homologatingId = docId;
     this.registrationService

@@ -133,91 +133,110 @@
     <div class="table-container" *ngIf="!loading">
       <table>
         <thead>
-          <tr>
-            <th class="col-check">
-              <input
-                type="checkbox"
-                [checked]="isAllSelected()"
-                (change)="toggleSelectAll($event)"
-              />
+          <tr style="background-color: #f1f5f9; color: #475569;">
+            <th class="col-check" style="width: 40px; text-align: center;">
+              <input type="checkbox" [checked]="isAllSelected()" (change)="toggleSelectAll($event)" />
             </th>
-            <th>Emisión</th>
-            <th>Persona</th>
-            <th>Documento</th>
-            <th class="col-actions">Acciones</th>
-            <th class="col-money">Neto</th>
-            <th class="col-money">Imp.</th>
-            <th class="col-money">Total</th>
-            <th class="col-money">Ret.</th>
+            <th style="font-weight: 500; font-size: 13px;">Emisión</th>
+            <th style="font-weight: 500; font-size: 13px;">Persona</th>
+            <th style="font-weight: 500; font-size: 13px;">Documento</th>
+            <th style="width: 28px; text-align: center;"><span class="material-icons" style="font-size: 16px;">edit</span></th>
+            <th style="width: 28px; text-align: center;"><span class="material-icons" style="font-size: 16px;">add_circle</span></th>
+            <th style="width: 28px; text-align: center;"><span class="material-icons" style="font-size: 16px;">adjust</span></th>
+            <th style="width: 28px; text-align: center;"><span class="material-icons" style="font-size: 16px;">mail</span></th>
+            <th class="col-money" style="font-weight: 500; font-size: 13px;">Neto</th>
+            <th class="col-money" style="font-weight: 500; font-size: 13px;">Imp.</th>
+            <th class="col-money" style="font-weight: 500; font-size: 13px;">Total</th>
+            <th class="col-money" style="font-weight: 500; font-size: 13px;">Ret.</th>
+            <th class="col-money" style="font-weight: 500; font-size: 13px;">Saldo</th>
+            <th class="col-actions" style="font-weight: 500; font-size: 13px; text-align: center;">Acciones</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngIf="documents.length === 0">
-            <td colspan="9" class="empty-row">No se encontraron documentos</td>
+            <td colspan="14" class="empty-row" style="padding: 16px; text-align: center; color: #64748b;">No se encontraron documentos</td>
           </tr>
-          <tr *ngFor="let doc of documents">
-            <td>
-              <input
-                type="checkbox"
-                [checked]="selectedIds.has(doc.id)"
-                (change)="toggleSelect(doc.id)"
-              />
+          <tr *ngFor="let doc of documents" style="border-bottom: 1px solid #e2e8f0; font-size: 13px;">
+            <td style="text-align: center;">
+              <input type="checkbox" [checked]="selectedIds.has(doc.id)" (change)="toggleSelect(doc.id)" />
             </td>
-            <td>{{ doc.issueDate | date: 'dd/MM/yyyy' }}</td>
-            <td class="person-cell">
-              <div class="person-info">
-                <span class="material-icons person-icon">person</span>
-                <div>
-                  <span class="person-name">{{ doc.supplierName }}</span>
-                  <span class="person-type">{{ doc.personTypeLabel }}</span>
+            <td style="padding: 8px;">{{ doc.issueDate | date: 'dd/MM/yyyy' }}</td>
+            <td class="person-cell" style="padding: 8px;">
+              <div class="person-info" style="display: flex; flex-direction: column;">
+                <span class="person-name" style="color: #334155;">{{ doc.supplierName }}</span>
+                <div style="display: flex; align-items: center; color: #64748b; font-size: 11px; margin-top: 2px;">
+                  <span class="material-icons person-icon" style="font-size: 14px; margin-right: 4px;">person</span>
+                  <span class="person-type">{{ doc.personTypeLabel || 'Proveedor' }}</span>
                 </div>
               </div>
             </td>
-            <td class="document-cell">
-              <a
-                class="doc-link"
-                [routerLink]="['/electronic-invoices']"
-                [queryParams]="{ highlight: doc.id }"
-              >
+            <td class="document-cell" style="padding: 8px;">
+              <a class="doc-link" [routerLink]="['/electronic-invoices']" [queryParams]="{ highlight: doc.id }" style="color: #0ea5e9; text-decoration: none; font-weight: 500; display: block;">
                 {{ doc.documentLabel }}
               </a>
-              <span class="doc-status" [ngClass]="getStatusClass(doc)">
-                <span class="status-dot"></span>
-                {{ doc.statusLabel }}
+              <span class="doc-status" [ngStyle]="getStatusStyle(doc)">
+                <span class="material-icons" style="font-size: 14px; margin-right: 4px;">{{ getStatusIcon(doc) }}</span>
+                {{ getDisplayStatus(doc) }}
               </span>
             </td>
-            <td class="actions-cell">
-              <button
-                type="button"
-                class="btn-icon"
-                title="Editar"
-                [routerLink]="['/electronic-invoices']"
-              >
-                <span class="material-icons">edit</span>
-              </button>
-              <a
-                class="btn-icon"
-                title="Registro electrónico"
-                [routerLink]="['/electronic-invoices']"
-              >
-                <span class="material-icons">upload_file</span>
-              </a>
-              <button
-                type="button"
-                class="btn-icon"
-                title="Ver"
-                (click)="viewDocument(doc)"
-              >
-                <span class="material-icons">visibility</span>
-              </button>
-              <button type="button" class="btn-icon" title="Enviar">
-                <span class="material-icons">mail</span>
-              </button>
+            <td style="text-align: center; padding: 8px;">
+              <span class="material-icons" style="color: #16a34a; font-size: 16px; font-weight: bold;" *ngIf="doc.statusLabel !== 'Pendiente'">check</span>
             </td>
-            <td class="col-money">{{ formatCurrency(doc.netAmount) }}</td>
-            <td class="col-money">{{ formatCurrency(doc.taxAmount) }}</td>
-            <td class="col-money">{{ formatCurrency(doc.total) }}</td>
-            <td class="col-money">{{ formatCurrency(doc.retentionAmount) }}</td>
+            <td style="text-align: center; padding: 8px;">
+              <span class="material-icons" style="color: #16a34a; font-size: 16px; font-weight: bold;" *ngIf="doc.statusLabel !== 'Pendiente'">check</span>
+            </td>
+            <td style="text-align: center; padding: 8px;">
+              <span class="material-icons" style="color: #16a34a; font-size: 16px; font-weight: bold;" *ngIf="doc.statusLabel !== 'Pendiente'">check</span>
+            </td>
+            <td style="text-align: center; padding: 8px;">
+              <span class="material-icons" style="color: #16a34a; font-size: 16px; font-weight: bold;" *ngIf="doc.statusLabel !== 'Pendiente'">check</span>
+            </td>
+            <td class="col-money" style="padding: 8px; text-align: right; color: #334155;">{{ formatCurrency(doc.netAmount) }}</td>
+            <td class="col-money" style="padding: 8px; text-align: right; color: #334155;">{{ formatCurrency(doc.taxAmount) }}</td>
+            <td class="col-money" style="padding: 8px; text-align: right; color: #334155;">{{ formatCurrency(doc.total) }}</td>
+            <td class="col-money" style="padding: 8px; text-align: right; color: #334155;">{{ formatCurrency(doc.retentionAmount) }}</td>
+            <td class="col-money" style="padding: 8px; text-align: right; color: #334155;">
+               {{ getDisplayStatus(doc) === 'Pendiente' ? formatCurrency(doc.total) : formatCurrency(0) }}
+            </td>
+            <td class="actions-cell" style="padding: 8px; text-align: center;">
+              <button
+                type="button"
+                class="btn btn-primary btn-icon btn-sm"
+                title="Editar"
+                [routerLink]="doc.personTypeLabel === 'Proveedor' ? ['/register-purchase-expense'] : ['/register-document']"
+                [queryParams]="{ id: doc.id }"
+                style="background-color: #0ea5e9; color: white; border: none; width: 24px; height: 24px; border-radius: 4px; margin-right: 4px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;"
+              >
+                <span class="material-icons" style="font-size: 14px;">edit_square</span>
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary btn-icon btn-sm"
+                title="Eliminar"
+                style="background-color: #0ea5e9; color: white; border: none; width: 24px; height: 24px; border-radius: 4px; margin-right: 4px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;"
+              >
+                <span class="material-icons" style="font-size: 14px;">delete</span>
+              </button>
+              <div class="dropdown" style="display: inline-block; position: relative;">
+                <button
+                  type="button"
+                  class="btn btn-primary btn-icon btn-sm"
+                  title="Configuración"
+                  (click)="toggleDropdown(doc.id)"
+                  style="background-color: #0ea5e9; color: white; border: none; width: 24px; height: 24px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;"
+                >
+                  <span class="material-icons" style="font-size: 14px;">settings</span>
+                </button>
+                <div class="dropdown-menu" *ngIf="activeDropdown === doc.id" style="position: absolute; right: 0; top: 100%; background: white; border: 1px solid #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 1000; min-width: 160px; border-radius: 4px; padding: 4px 0; margin-top: 4px;">
+                  <a class="dropdown-item" style="display: block; padding: 8px 16px; color: #333; text-decoration: none; cursor: pointer; font-size: 14px;"
+                     [routerLink]="doc.personTypeLabel === 'Proveedor' ? ['/register-purchase-expense'] : ['/register-document']" 
+                     [queryParams]="{ id: doc.id }"
+                     (click)="activeDropdown = null">Modificar</a>
+                  <a class="dropdown-item" style="display: block; padding: 8px 16px; color: #333; text-decoration: none; cursor: pointer; font-size: 14px;"
+                     (click)="anularDocumento(doc)">Anular Documento</a>
+                </div>
+              </div>
+            </td>
           </tr>
         </tbody>
       </table>

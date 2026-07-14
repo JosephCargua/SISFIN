@@ -17,6 +17,7 @@ export class ConsultDocumentsComponent implements OnInit {
   loading = false;
   documents: DocumentConsultItem[] = [];
   selectedIds = new Set<string>();
+  activeDropdown: string | null = null;
 
   filters = {
     documentNumber: '',
@@ -165,17 +166,27 @@ export class ConsultDocumentsComponent implements OnInit {
     }).format(amount);
   }
 
-  getStatusClass(doc: DocumentConsultItem): string {
+  getDisplayStatus(doc: DocumentConsultItem): string {
     if (doc.statusLabel === 'Revisado' || doc.statusLabel === 'Procesado') {
-      return 'status-reviewed';
+      return doc.personTypeLabel === 'Proveedor' ? 'Pagado' : 'Cobrado';
     }
-    if (doc.statusLabel === 'No revisado') {
-      return 'status-not-reviewed';
+    return 'Pendiente';
+  }
+
+  getStatusIcon(doc: DocumentConsultItem): string {
+    const status = this.getDisplayStatus(doc);
+    if (status === 'Pagado' || status === 'Cobrado') {
+      return 'check';
     }
-    if (doc.statusLabel === 'Pendiente' || doc.statusLabel === 'Por revisar') {
-      return 'status-pending-review';
+    return 'schedule'; // Pendiente icon
+  }
+
+  getStatusStyle(doc: DocumentConsultItem): any {
+    const status = this.getDisplayStatus(doc);
+    if (status === 'Pagado' || status === 'Cobrado') {
+      return { color: '#16a34a', display: 'flex', 'align-items': 'center', 'font-size': '12px', 'margin-top': '4px' };
     }
-    return 'status-neutral';
+    return { color: '#64748b', display: 'flex', 'align-items': 'center', 'font-size': '12px', 'margin-top': '4px' };
   }
 
   exportExcel() {
@@ -216,5 +227,29 @@ export class ConsultDocumentsComponent implements OnInit {
         `Estado: ${doc.statusLabel}\n` +
         `Total: ${this.formatCurrency(doc.total)}`,
     );
+  }
+
+  toggleDropdown(id: string) {
+    if (this.activeDropdown === id) {
+      this.activeDropdown = null;
+    } else {
+      this.activeDropdown = id;
+    }
+  }
+
+  anularDocumento(doc: DocumentConsultItem) {
+    if (confirm('¿Está seguro de anular el documento?')) {
+      this.consultService.annulDocument(doc.id).subscribe({
+        next: () => {
+          alert('Documento anulado');
+          this.activeDropdown = null;
+          this.search(); // Refresh list
+        },
+        error: (err) => {
+          alert('Error al anular documento');
+          console.error(err);
+        }
+      });
+    }
   }
 }

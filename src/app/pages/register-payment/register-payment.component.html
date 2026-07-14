@@ -1,0 +1,134 @@
+<div class="register-payment-container" style="padding: 16px; background-color: #f8fafc; min-height: 100vh;">
+  <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+    <h1 style="margin: 0; font-size: 20px; color: #1e293b;">Registrar Cobro/Pago</h1>
+    <button type="button" class="btn btn-primary" style="background-color: #0ea5e9; border: none; color: white; border-radius: 4px; padding: 4px 12px;"><span class="material-icons" style="font-size: 18px;">add</span></button>
+  </div>
+
+  <section class="card document-info" style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+      <h2 style="font-size: 16px; color: #334155; margin-top: 0; margin-bottom: 16px;">Información de la Transacción</h2>
+      <label style="display: flex; align-items: center; gap: 4px; font-size: 13px; color: #475569;">
+        Anulado <input type="checkbox" [(ngModel)]="isAnnulled" name="isAnnulled" />
+      </label>
+    </div>
+
+    <div class="form-grid" style="display: grid; grid-template-columns: 140px 1fr; gap: 12px; align-items: center; max-width: 800px;">
+      
+      <label style="text-align: right; color: #64748b; font-size: 13px;">Tipo de Transacción:</label>
+      <select [(ngModel)]="transactionType" (ngModelChange)="onTransactionTypeChange()" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; width: 200px;">
+        <option value="Pago">Pago</option>
+        <option value="Cobro">Cobro</option>
+      </select>
+
+      <label style="text-align: right; color: #64748b; font-size: 13px;">{{ transactionType === 'Pago' ? 'Forma de Pago:' : 'Forma de Cobro:' }}</label>
+      <div style="display: flex; gap: 8px;">
+        <select [(ngModel)]="paymentMethod" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; width: 200px;">
+          <option *ngFor="let method of paymentMethods" [value]="method">{{ method }}</option>
+        </select>
+        <select *ngIf="transactionType === 'Pago' && paymentMethod === 'Cheque'" [(ngModel)]="paymentSubMethod" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; width: 200px;">
+          <option value="Cheque propio">Cheque propio</option>
+        </select>
+      </div>
+
+      <label style="text-align: right; color: #64748b; font-size: 13px;">Fecha de Emisión:</label>
+      <input type="date" [(ngModel)]="issueDate" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; width: 200px;" />
+
+      <label style="text-align: right; color: #64748b; font-size: 13px;">Persona:</label>
+      <div style="display: flex; align-items: center; border: 1px solid #cbd5e1; border-radius: 4px; overflow: hidden; max-width: 400px;">
+        <input type="text" [(ngModel)]="personName" style="flex: 1; border: none; padding: 6px; outline: none;" placeholder="..." />
+        <span class="material-icons" style="color: #64748b; padding: 0 8px; font-size: 18px; cursor: pointer;">search</span>
+      </div>
+
+      <ng-container *ngIf="transactionType === 'Pago'">
+        <label style="text-align: right; color: #64748b; font-size: 13px;">Páguese a la orden de:</label>
+        <input type="text" [(ngModel)]="payToOrderOf" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; max-width: 400px;" />
+      </ng-container>
+
+      <label style="text-align: right; color: #64748b; font-size: 13px;">{{ transactionType === 'Pago' ? 'Cuenta Bancaria:' : 'Cuenta Pago/Cobro:' }}</label>
+      <div style="display: flex; align-items: center; border: 1px solid #cbd5e1; border-radius: 4px; overflow: hidden; max-width: 400px;">
+        <input type="text" [(ngModel)]="bankAccount" style="flex: 1; border: none; padding: 6px; outline: none;" placeholder="..." />
+        <span class="material-icons" style="color: #64748b; padding: 0 8px; font-size: 18px; cursor: pointer;">search</span>
+      </div>
+
+      <label style="text-align: right; color: #64748b; font-size: 13px;">{{ transactionType === 'Pago' ? 'Número de cheque:' : '# de Comprobante:' }}</label>
+      <div style="display: flex; align-items: center; gap: 8px; max-width: 400px;">
+        <input type="text" [(ngModel)]="checkNumber" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; flex: 1;" />
+        <label *ngIf="transactionType === 'Cobro'" style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: #475569; text-transform: uppercase;">
+          <input type="checkbox" [(ngModel)]="isCash" name="isCash" /> EFECTIVO
+        </label>
+      </div>
+
+      <ng-container *ngIf="transactionType === 'Pago'">
+        <label style="text-align: right; color: #64748b; font-size: 13px;">Fecha de cheque:</label>
+        <input type="date" [(ngModel)]="checkDate" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; width: 200px;" />
+      </ng-container>
+
+      <label style="text-align: right; color: #64748b; font-size: 13px; align-self: start;">Descripción:</label>
+      <textarea [(ngModel)]="description" rows="3" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; max-width: 600px; font-size: 13px;"></textarea>
+
+    </div>
+  </section>
+
+  <section class="card detail-section" style="background: white; border: 1px solid #e2e8f0; border-radius: 8px;">
+    <div class="tabs" role="tablist" style="display: flex; border-bottom: 1px solid #e2e8f0; background: #f8fafc; padding: 8px 16px 0;">
+      <button type="button" class="tab active" style="padding: 8px 16px; border: none; background: white; border-top: 2px solid #0ea5e9; border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; border-bottom: 1px solid white; margin-bottom: -1px; color: #0ea5e9; font-weight: 500;">Documentos</button>
+    </div>
+
+    <div class="tab-panel" style="padding: 16px;">
+      <div class="table-scroll" style="overflow-x: auto;">
+        <table class="detail-table" style="width: 100%; border-collapse: collapse; min-width: 800px; font-size: 13px;">
+          <thead>
+            <tr style="background-color: #f1f5f9; text-align: left; color: #475569;">
+              <th style="padding: 8px; border: 1px solid #e2e8f0; width: 40px; text-align: center;"></th>
+              <th style="padding: 8px; border: 1px solid #e2e8f0;">Documento</th>
+              <th style="padding: 8px; border: 1px solid #e2e8f0;">Fecha Emisión</th>
+              <th style="padding: 8px; border: 1px solid #e2e8f0;">Tipo Documento</th>
+              <th style="padding: 8px; border: 1px solid #e2e8f0; text-align: right;">Valor</th>
+              <th style="padding: 8px; border: 1px solid #e2e8f0; text-align: right;">Saldo</th>
+              <th style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; width: 120px;">{{ transactionType === 'Pago' ? 'Valor a pagar' : 'Valor a cobrar' }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let doc of documents; let i = index" style="border-bottom: 1px solid #e2e8f0;">
+              <td style="padding: 8px; text-align: center; border-right: 1px solid #e2e8f0;">
+                <button type="button" class="btn-icon btn-danger" style="color: #ef4444; border: none; background: none; cursor: pointer;"><span class="material-icons" style="font-size: 16px;">delete</span></button>
+              </td>
+              <td style="padding: 8px; border-right: 1px solid #e2e8f0;">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                  {{ doc.documentLabel }}
+                  <span class="material-icons" style="color: #64748b; font-size: 16px; cursor: pointer;">search</span>
+                </div>
+              </td>
+              <td style="padding: 8px; border-right: 1px solid #e2e8f0;">{{ doc.issueDate }}</td>
+              <td style="padding: 8px; border-right: 1px solid #e2e8f0;">{{ doc.type }}</td>
+              <td style="padding: 8px; border-right: 1px solid #e2e8f0; text-align: right;">{{ doc.value.toFixed(1) }}</td>
+              <td style="padding: 8px; border-right: 1px solid #e2e8f0; text-align: right;">{{ doc.balance.toFixed(1) }}</td>
+              <td style="padding: 8px; display: flex; align-items: center; justify-content: flex-end; gap: 4px;">
+                <input type="number" [(ngModel)]="doc.amountToPay" style="width: 80px; padding: 4px; text-align: right; border: 1px solid #cbd5e1; border-radius: 4px;" (ngModelChange)="recalcTotal()" />
+                <span class="material-icons" style="color: #64748b; font-size: 16px; cursor: pointer;">flip_to_front</span>
+              </td>
+            </tr>
+            <tr *ngIf="documents.length === 0">
+              <td colspan="7" style="padding: 16px; text-align: center; color: #64748b;">Sin documentos</td>
+            </tr>
+            <tr>
+              <td colspan="5" style="border: none;"></td>
+              <td style="padding: 8px; text-align: right; font-weight: 500;">Total:</td>
+              <td style="padding: 8px; text-align: right; font-weight: 600;">${{ total.toFixed(2) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <button type="button" class="btn btn-primary btn-sm" style="background-color: #0ea5e9; border: none; color: white; padding: 6px 12px; border-radius: 4px; margin-top: 16px; display: inline-flex; align-items: center; gap: 4px; font-size: 13px;">
+        <span class="material-icons" style="font-size: 16px;">add_circle</span> Agregar Detalle
+      </button>
+    </div>
+  </section>
+
+  <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+    <button type="button" class="btn btn-primary" (click)="save()" [disabled]="saving" style="background-color: #0ea5e9; border: none; color: white; padding: 8px 16px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;">
+      <span class="material-icons" style="font-size: 18px;">save</span> {{ saving ? 'Guardando...' : 'Guardar' }}
+    </button>
+  </div>
+</div>

@@ -8,6 +8,7 @@ import { ReceivablesService } from '../../core/services/receivables.service';
 import { AccountService } from '../../core/services/account.service';
 import { InventoryService } from '../../core/services/inventory.service';
 import { AutomationService } from '../../core/services/automation.service';
+import { DocumentConsultService } from '../../core/services/document-consult.service';
 import {
   ServiceLine,
   AccountLine,
@@ -120,6 +121,7 @@ export class RegisterDocumentComponent implements OnInit {
     private accountService: AccountService,
     private inventoryService: InventoryService,
     private automationService: AutomationService,
+    private documentConsultService: DocumentConsultService,
     private route: ActivatedRoute,
   ) {}
 
@@ -139,68 +141,68 @@ export class RegisterDocumentComponent implements OnInit {
   }
 
   loadDocument(id: string) {
-    this.saving = true; // Use saving flag as a loading indicator for now
-    this.documentService.getById(id).subscribe({
+    this.saving = true;
+    this.documentConsultService.getById(id).subscribe({
       next: (doc) => {
-        this.issueDate = doc.issueDate;
-        this.personType = doc.personType;
-        this.documentCategory = doc.documentCategory;
-        this.documentNumber = doc.documentNumber;
-        this.authorization = doc.authorization || '';
-        this.personId = doc.personId || '';
-        this.personName = doc.personName || '';
-        this.personIdentification = doc.personIdentification || '';
-        this.reference = doc.reference || '';
-        this.dueDays = doc.dueDays || 0;
-        this.purchaseOrderRef = doc.purchaseOrderRef || '';
-        this.description = doc.description || '';
-        this.ice = doc.ice || 0;
-
-        // Load lines (this is a simplified loading for the current scope, we map back the basic fields)
-        this.serviceLines = doc.lines
-          .filter(l => l.lineType === 'SERVICE')
-          .map(l => l.data as unknown as ServiceLine);
-          
-        this.accountLines = doc.lines
-          .filter(l => l.lineType === 'ACCOUNT')
-          .map(l => l.data as unknown as AccountLine);
-          
-        this.costCenterLines = doc.lines
-          .filter(l => l.lineType === 'COST_CENTER')
-          .map(l => l.data as unknown as CostCenterLine);
-          
-        this.retentionLines = doc.lines
-          .filter(l => l.lineType === 'RETENTION')
-          .map(l => l.data as unknown as RetentionLine);
-          
-        this.paymentLines = doc.lines
-          .filter(l => l.lineType === 'PAYMENT')
-          .map(l => l.data as unknown as PaymentLine);
-
-        // Mock history if anyDoc has history
-        const anyDoc = doc as any;
-        if (anyDoc.history) {
-           this.history = anyDoc.history;
-        } else {
-           // Provide mock data if it's an existing document to match the UI screenshot
-           this.history = [
-             { date: '09/07/2026 01:12 p.m.', user: 'DANIELA REYES D', role: 'Contador', activity: 'Agregó "Pago" con valor "$30.00".' },
-             { date: '09/07/2026 01:12 p.m.', user: 'DANIELA REYES D', role: 'Contador', activity: 'Cambió estado de documento de "Pendiente" a "Pagado".' }
-           ];
-        }
-
-        if(this.serviceLines.length === 0) {
-          this.addServiceLine();
-        }
-
-        this.recalcTotals();
+        this.populateFromDoc(doc, true);
         this.saving = false;
       },
       error: () => {
-        alert('Error al cargar el documento');
-        this.saving = false;
+        this.documentService.getById(id).subscribe({
+          next: (doc) => {
+            this.populateFromDoc(doc, false);
+            this.saving = false;
+          },
+          error: () => {
+            alert('Error al cargar el documento');
+            this.saving = false;
+          }
+        });
       }
     });
+  }
+
+  populateFromDoc(doc: any, isElectronic: boolean) {
+    this.issueDate = doc.issueDate;
+    this.personType = doc.personType || (isElectronic ? 'SUPPLIER' : 'CUSTOMER');
+    this.documentCategory = doc.documentCategory || (doc.documentTypeCode === '01' ? 'INVOICE' : 'INVOICE');
+    this.documentNumber = doc.documentNumber;
+    this.authorization = doc.authorization || doc.accessKey || '';
+    this.personId = doc.personId || '';
+    this.personName = doc.personName || doc.supplierName || '';
+    this.personIdentification = doc.personIdentification || doc.supplierIdentification || '';
+    this.reference = doc.reference || '';
+    this.dueDays = doc.dueDays || 0;
+    this.purchaseOrderRef = doc.purchaseOrderRef || '';
+    this.description = doc.description || '';
+    this.ice = doc.ice || 0;
+
+    if (!isElectronic && doc.lines) {
+      this.serviceLines = doc.lines.filter((l: any) => l.lineType === 'SERVICE').map((l: any) => l.data as unknown as ServiceLine);
+      this.accountLines = doc.lines.filter((l: any) => l.lineType === 'ACCOUNT').map((l: any) => l.data as unknown as AccountLine);
+      this.costCenterLines = doc.lines.filter((l: any) => l.lineType === 'COST_CENTER').map((l: any) => l.data as unknown as CostCenterLine);
+      this.retentionLines = doc.lines.filter((l: any) => l.lineType === 'RETENTION').map((l: any) => l.data as unknown as RetentionLine);
+      this.paymentLines = doc.lines.filter((l: any) => l.lineType === 'PAYMENT').map((l: any) => l.data as unknown as PaymentLine);
+      if (doc.history) {
+        this.history = doc.history;
+      } else {
+        this.history = [
+          { date: '09/07/2026 01:12 p.m.', user: 'DANIELA REYES D', role: 'Contador', activity: 'Agregó "Pago" con valor "$30.00".' },
+          { date: '09/07/2026 01:12 p.m.', user: 'DANIELA REYES D', role: 'Contador', activity: 'Cambió estado de documento de "Pendiente" a "Pagado".' }
+        ];
+      }
+    } else {
+      // Mock basic service line for electronic document
+      this.serviceLines = [{
+        quantity: 1, productId: '', productCode: 'TXT', productName: 'Ítem del documento', unit: 'UND',
+        unitPrice: doc.total || 0, ivaRate: 0, retIr: '', retIva: '', discountPercent: 0, discount: 0, extraDiscount: 0, subtotal: doc.total || 0
+      }];
+    }
+
+    if(this.serviceLines.length === 0) {
+      this.addServiceLine();
+    }
+    this.recalcTotals();
   }
 
   get personOptions(): PersonOption[] {

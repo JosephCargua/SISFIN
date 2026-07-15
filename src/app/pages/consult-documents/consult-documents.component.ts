@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { DocumentConsultService } from '../../core/services/document-consult.service';
 import { DocumentConsultItem } from '../../models/document-consult.model';
 import Swal from 'sweetalert2';
@@ -67,7 +67,10 @@ export class ConsultDocumentsComponent implements OnInit {
     { key: 'RETENTION_PENDING', label: 'Retenciones no autorizadas' },
   ];
 
-  constructor(private consultService: DocumentConsultService) {}
+  constructor(
+    private consultService: DocumentConsultService,
+    private router: Router
+  ) {}
 
   ngOnInit() {
     this.search();
@@ -142,6 +145,16 @@ export class ConsultDocumentsComponent implements OnInit {
     } else {
       this.selectedIds.add(id);
     }
+  }
+
+  editDocument(doc: DocumentConsultItem) {
+    // Check if it's an electronic document and it's not homologated (REVIEWED means Homologado)
+    if (doc.reviewStatus && doc.reviewStatus !== 'REVIEWED') {
+      alert('Para acceder, la factura electrónica debe estar homologada primero.');
+      return;
+    }
+    const route = doc.personTypeLabel === 'Proveedor' ? '/register-purchase-expense' : '/register-document';
+    this.router.navigate([route], { queryParams: { id: doc.id } });
   }
 
   toggleSelectAll(event: Event) {

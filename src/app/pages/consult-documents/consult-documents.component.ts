@@ -144,6 +144,16 @@ export class ConsultDocumentsComponent implements OnInit {
     }
   }
 
+  editDocument(doc: DocumentConsultItem) {
+    // Check if it's an electronic document and it's not homologated (REVIEWED means Homologado)
+    if (doc.reviewStatus && doc.reviewStatus !== 'REVIEWED') {
+      alert('Para acceder, la factura electrónica debe estar homologada primero.');
+      return;
+    }
+    const route = doc.personTypeLabel === 'Proveedor' ? '/register-purchase-expense' : '/register-document';
+    this.router.navigate([route], { queryParams: { id: doc.id } });
+  }
+
   toggleSelectAll(event: Event) {
     const checked = (event.target as HTMLInputElement).checked;
     this.selectedIds.clear();

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { DocumentConsultService } from '../../core/services/document-consult.service';
 import { DocumentConsultItem } from '../../models/document-consult.model';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-consult-documents',
@@ -167,9 +168,6 @@ export class ConsultDocumentsComponent implements OnInit {
   }
 
   getDisplayStatus(doc: DocumentConsultItem): string {
-    if (doc.statusLabel === 'Revisado' || doc.statusLabel === 'Procesado') {
-      return doc.personTypeLabel === 'Proveedor' ? 'Pagado' : 'Cobrado';
-    }
     return 'Pendiente';
   }
 
@@ -221,12 +219,19 @@ export class ConsultDocumentsComponent implements OnInit {
   }
 
   viewDocument(doc: DocumentConsultItem) {
-    alert(
-      `Documento: ${doc.documentLabel}\n` +
-        `Proveedor: ${doc.supplierName}\n` +
-        `Estado: ${doc.statusLabel}\n` +
-        `Total: ${this.formatCurrency(doc.total)}`,
-    );
+    Swal.fire({
+      icon: 'info',
+      html: `
+        <div style="font-size: 16px; color: #334155; line-height: 1.5;">
+          Documento: ${doc.documentLabel}<br>
+          Proveedor: ${doc.supplierName}<br>
+          Clave: <br><span style="word-break: break-all; font-size: 14px;">${doc.accessKey || 'No disponible'}</span><br>
+          Total: ${this.formatCurrency(doc.total)}
+        </div>
+      `,
+      confirmButtonText: 'Aceptar',
+      confirmButtonColor: '#0ea5e9'
+    });
   }
 
   toggleDropdown(id: string) {

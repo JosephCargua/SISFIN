@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { FinancialDocumentService } from '../../core/services/financial-document.service';
 
 @Component({
   selector: 'app-register-payment',
@@ -44,26 +45,37 @@ export class RegisterPaymentComponent implements OnInit {
     }
   }
 
-  constructor(private route: ActivatedRoute, private router: Router) {}
+  constructor(
+    private route: ActivatedRoute, 
+    private router: Router,
+    private documentService: FinancialDocumentService
+  ) {}
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
       const id = params['id'];
       if (id) {
-        // Load data based on ID
-        this.personName = 'TRANSPORTES SACHA KASHA S.A.';
-        this.payToOrderOf = 'TRANSPORTES SACHA KASHA S.A.';
-        this.description = `Doc. 001-019-000000293, 019 1600489619001 Ruth Iveth Soria Castro TBC2819 CESLAO MARIN SECTOR LA Y papanguturismo@yahoo.es`;
-        
-        this.documents = [{
-          documentLabel: 'FAC 001-019-000000293',
-          issueDate: '30/06/2026',
-          type: 'Factura',
-          value: 30.0,
-          balance: 0.0,
-          amountToPay: 0.0
-        }];
-        this.recalcTotal();
+        this.documentService.getById(id).subscribe({
+          next: (doc) => {
+            this.personName = doc.personName || '';
+            this.payToOrderOf = doc.personName || '';
+            const documentLabel = `${doc.documentCategory === 'INVOICE' ? 'FAC' : 'DOC'} ${doc.documentNumber}`;
+            this.description = `Pago de doc. ${documentLabel}, ${this.personName}`;
+            
+            this.documents = [{
+              documentLabel: documentLabel,
+              issueDate: doc.issueDate,
+              type: doc.documentCategory === 'INVOICE' ? 'Factura' : 'Documento',
+              value: doc.total || 0,
+              balance: doc.total || 0,
+              amountToPay: 0.0
+            }];
+            this.recalcTotal();
+          },
+          error: () => {
+            alert('Error al cargar la información del documento');
+          }
+        });
       }
     });
   }

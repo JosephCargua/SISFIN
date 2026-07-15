@@ -202,9 +202,18 @@
               <button
                 type="button"
                 class="btn btn-primary btn-icon btn-sm"
+                title="Ver Información"
+                (click)="viewDocument(doc)"
+                style="background-color: #0ea5e9; color: white; border: none; width: 24px; height: 24px; border-radius: 4px; margin-right: 4px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;"
+              >
+                <span class="material-icons" style="font-size: 14px;">info</span>
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary btn-icon btn-sm"
                 title="Editar"
-                [routerLink]="doc.personTypeLabel === 'Proveedor' ? ['/register-purchase-expense'] : ['/register-document']"
-                [queryParams]="{ id: doc.id }"
+                [routerLink]="['/electronic-invoices']"
+                [queryParams]="{ highlight: doc.id }"
                 style="background-color: #0ea5e9; color: white; border: none; width: 24px; height: 24px; border-radius: 4px; margin-right: 4px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;"
               >
                 <span class="material-icons" style="font-size: 14px;">edit_square</span>
@@ -229,8 +238,8 @@
                 </button>
                 <div class="dropdown-menu" *ngIf="activeDropdown === doc.id" style="position: absolute; right: 0; top: 100%; background: white; border: 1px solid #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 1000; min-width: 160px; border-radius: 4px; padding: 4px 0; margin-top: 4px;">
                   <a class="dropdown-item" style="display: block; padding: 8px 16px; color: #333; text-decoration: none; cursor: pointer; font-size: 14px;"
-                     [routerLink]="doc.personTypeLabel === 'Proveedor' ? ['/register-purchase-expense'] : ['/register-document']" 
-                     [queryParams]="{ id: doc.id }"
+                     [routerLink]="['/electronic-invoices']" 
+                     [queryParams]="{ highlight: doc.id }"
                      (click)="activeDropdown = null">Modificar</a>
                   <a class="dropdown-item" style="display: block; padding: 8px 16px; color: #333; text-decoration: none; cursor: pointer; font-size: 14px;"
                      (click)="anularDocumento(doc)">Anular Documento</a>

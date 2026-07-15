@@ -168,6 +168,10 @@ export class ConsultDocumentsComponent implements OnInit {
   }
 
   getDisplayStatus(doc: DocumentConsultItem): string {
+    const paidDocs = JSON.parse(localStorage.getItem('paidDocuments') || '{}');
+    if (paidDocs[doc.id]) {
+      return paidDocs[doc.id];
+    }
     return 'Pendiente';
   }
 

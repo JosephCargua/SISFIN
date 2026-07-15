@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FinancialDocumentService } from '../../core/services/financial-document.service';
+import { DocumentConsultService } from '../../core/services/document-consult.service';
 
 @Component({
   selector: 'app-register-payment',
@@ -48,36 +49,45 @@ export class RegisterPaymentComponent implements OnInit {
   constructor(
     private route: ActivatedRoute, 
     private router: Router,
-    private documentService: FinancialDocumentService
+    private documentService: FinancialDocumentService,
+    private documentConsultService: DocumentConsultService
   ) {}
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
       const id = params['id'];
       if (id) {
-        this.documentService.getById(id).subscribe({
-          next: (doc) => {
-            this.personName = doc.personName || '';
-            this.payToOrderOf = doc.personName || '';
-            const documentLabel = `${doc.documentCategory === 'INVOICE' ? 'FAC' : 'DOC'} ${doc.documentNumber}`;
-            this.description = `Pago de doc. ${documentLabel}, ${this.personName}`;
-            
-            this.documents = [{
-              documentLabel: documentLabel,
-              issueDate: doc.issueDate,
-              type: doc.documentCategory === 'INVOICE' ? 'Factura' : 'Documento',
-              value: doc.total || 0,
-              balance: doc.total || 0,
-              amountToPay: 0.0
-            }];
-            this.recalcTotal();
-          },
+        // First try electronic documents
+        this.documentConsultService.getById(id).subscribe({
+          next: (doc) => this.populateData(doc),
           error: () => {
-            alert('Error al cargar la información del documento');
+            // Fallback to non-electronic financial documents
+            this.documentService.getById(id).subscribe({
+              next: (doc) => this.populateData(doc),
+              error: () => alert('Error al cargar la información del documento')
+            });
           }
         });
       }
     });
+  }
+
+  populateData(doc: any) {
+    this.personName = doc.personName || doc.supplierName || '';
+    this.payToOrderOf = this.personName;
+    const cat = doc.documentCategory === 'INVOICE' || doc.documentTypeCode === '01' ? 'FAC' : 'DOC';
+    const documentLabel = `${cat} ${doc.documentNumber}`;
+    this.description = `Pago de doc. ${documentLabel}, ${this.personName}`;
+    
+    this.documents = [{
+      documentLabel: documentLabel,
+      issueDate: doc.issueDate,
+      type: cat === 'FAC' ? 'Factura' : 'Documento',
+      value: doc.total || 0,
+      balance: doc.total || 0,
+      amountToPay: 0.0
+    }];
+    this.recalcTotal();
   }
 
   recalcTotal() {
@@ -87,6 +97,12 @@ export class RegisterPaymentComponent implements OnInit {
   save() {
     this.saving = true;
     setTimeout(() => {
+      const id = this.route.snapshot.queryParams['id'];
+      if (id) {
+        const paidDocs = JSON.parse(localStorage.getItem('paidDocuments') || '{}');
+        paidDocs[id] = this.transactionType === 'Pago' ? 'Pagado' : 'Cobrado';
+        localStorage.setItem('paidDocuments', JSON.stringify(paidDocs));
+      }
       alert('Pago registrado correctamente');
       this.saving = false;
       this.router.navigate(['/consult-documents']);

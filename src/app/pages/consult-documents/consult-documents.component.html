@@ -180,16 +180,16 @@
               </span>
             </td>
             <td style="text-align: center; padding: 8px;">
-              <span class="material-icons" style="color: #16a34a; font-size: 16px; font-weight: bold;" *ngIf="doc.statusLabel !== 'Pendiente'">check</span>
+              <span class="material-icons" style="color: #16a34a; font-size: 16px; font-weight: bold;" *ngIf="doc.isAccounted">check</span>
             </td>
             <td style="text-align: center; padding: 8px;">
-              <span class="material-icons" style="color: #16a34a; font-size: 16px; font-weight: bold;" *ngIf="doc.statusLabel !== 'Pendiente'">check</span>
+              <span class="material-icons" style="color: #16a34a; font-size: 16px; font-weight: bold;" *ngIf="doc.isPaid">check</span>
             </td>
             <td style="text-align: center; padding: 8px;">
-              <span class="material-icons" style="color: #16a34a; font-size: 16px; font-weight: bold;" *ngIf="doc.statusLabel !== 'Pendiente'">check</span>
+              <span class="material-icons" style="color: #16a34a; font-size: 16px; font-weight: bold;" *ngIf="doc.isReconciled">check</span>
             </td>
             <td style="text-align: center; padding: 8px;">
-              <span class="material-icons" style="color: #16a34a; font-size: 16px; font-weight: bold;" *ngIf="doc.statusLabel !== 'Pendiente'">check</span>
+              <span class="material-icons" style="color: #16a34a; font-size: 16px; font-weight: bold;" *ngIf="doc.isEmailed">check</span>
             </td>
             <td class="col-money" style="padding: 8px; text-align: right; color: #334155;">{{ formatCurrency(doc.netAmount) }}</td>
             <td class="col-money" style="padding: 8px; text-align: right; color: #334155;">{{ formatCurrency(doc.taxAmount) }}</td>

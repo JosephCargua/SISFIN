@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FinancialDocumentService } from '../../core/services/financial-document.service';
+import { DocumentConsultService } from '../../core/services/document-consult.service';
 
 @Component({
   selector: 'app-document-crossing',
@@ -25,34 +26,41 @@ export class DocumentCrossingComponent implements OnInit {
   constructor(
     private route: ActivatedRoute, 
     private router: Router,
-    private documentService: FinancialDocumentService
+    private documentService: FinancialDocumentService,
+    private documentConsultService: DocumentConsultService
   ) {}
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
       const id = params['id'];
       if (id) {
-        this.documentService.getById(id).subscribe({
-          next: (doc) => {
-            this.personName = doc.personName || '';
-            this.documentLabel = `${doc.documentCategory === 'INVOICE' ? 'FAC' : 'DOC'} ${doc.documentNumber}`;
-            this.description = `Pago de doc. ${this.documentLabel}, ${this.personName}`;
-            
-            this.documents = [{
-              documentLabel: this.documentLabel,
-              issueDate: doc.issueDate,
-              type: doc.documentCategory === 'INVOICE' ? 'Factura' : 'Documento',
-              value: doc.total || 0,
-              balance: doc.total || 0,
-              amountToPay: 0.0
-            }];
-          },
+        this.documentConsultService.getById(id).subscribe({
+          next: (doc) => this.populateData(doc),
           error: () => {
-            alert('Error al cargar la información del documento');
+            this.documentService.getById(id).subscribe({
+              next: (doc) => this.populateData(doc),
+              error: () => alert('Error al cargar la información del documento')
+            });
           }
         });
       }
     });
+  }
+
+  populateData(doc: any) {
+    this.personName = doc.personName || doc.supplierName || '';
+    const cat = doc.documentCategory === 'INVOICE' || doc.documentTypeCode === '01' ? 'FAC' : 'DOC';
+    this.documentLabel = `${cat} ${doc.documentNumber}`;
+    this.description = `Pago de doc. ${this.documentLabel}, ${this.personName}`;
+    
+    this.documents = [{
+      documentLabel: this.documentLabel,
+      issueDate: doc.issueDate,
+      type: cat === 'FAC' ? 'Factura' : 'Documento',
+      value: doc.total || 0,
+      balance: doc.total || 0,
+      amountToPay: 0.0
+    }];
   }
 
   save() {

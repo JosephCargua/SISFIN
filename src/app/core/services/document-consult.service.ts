@@ -28,4 +28,8 @@ export class DocumentConsultService {
   annulDocument(id: string): Observable<any> {
     return this.api.patch(`electronic-document-registrations/${id}/annul`, {});
   }
+
+  getById(id: string): Observable<any> {
+    return this.api.get<any>(`electronic-document-registrations/${id}`);
+  }
 }

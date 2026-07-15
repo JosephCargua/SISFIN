@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { FinancialDocumentService } from '../../core/services/financial-document.service';
+import { DocumentConsultService } from '../../core/services/document-consult.service';
 
 @Component({
   selector: 'app-document-crossing',
@@ -21,27 +23,44 @@ export class DocumentCrossingComponent implements OnInit {
 
   documents: any[] = [];
 
-  constructor(private route: ActivatedRoute, private router: Router) {}
+  constructor(
+    private route: ActivatedRoute, 
+    private router: Router,
+    private documentService: FinancialDocumentService,
+    private documentConsultService: DocumentConsultService
+  ) {}
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
       const id = params['id'];
       if (id) {
-        // Load data based on ID
-        this.personName = 'TRANSPORTES SACHA KASHA S.A.';
-        this.documentLabel = 'FAC 001-019-000000293';
-        this.description = `Doc. 001-019-000000293, 019 1600489619001 Ruth Iveth Soria Castro TBC2819 CESLAO MARIN SECTOR LA Y papanguturismo@yahoo.es`;
-        
-        this.documents = [{
-          documentLabel: 'FAC 001-019-000000293',
-          issueDate: '30/06/2026',
-          type: 'Factura',
-          value: 30.0,
-          balance: 0.0,
-          amountToPay: 0.0
-        }];
+        this.documentConsultService.getById(id).subscribe({
+          next: (doc) => this.populateData(doc),
+          error: () => {
+            this.documentService.getById(id).subscribe({
+              next: (doc) => this.populateData(doc),
+              error: () => alert('Error al cargar la información del documento')
+            });
+          }
+        });
       }
     });
+  }
+
+  populateData(doc: any) {
+    this.personName = doc.personName || doc.supplierName || '';
+    const cat = doc.documentCategory === 'INVOICE' || doc.documentTypeCode === '01' ? 'FAC' : 'DOC';
+    this.documentLabel = `${cat} ${doc.documentNumber}`;
+    this.description = `Pago de doc. ${this.documentLabel}, ${this.personName}`;
+    
+    this.documents = [{
+      documentLabel: this.documentLabel,
+      issueDate: doc.issueDate,
+      type: cat === 'FAC' ? 'Factura' : 'Documento',
+      value: doc.total || 0,
+      balance: doc.total || 0,
+      amountToPay: 0.0
+    }];
   }
 
   save() {

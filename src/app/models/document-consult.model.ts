@@ -21,6 +21,10 @@ export interface DocumentConsultItem {
   retentionAmount: number;
   statusLabel: string;
   personTypeLabel: string;
+  isAccounted?: boolean;
+  isPaid?: boolean;
+  isReconciled?: boolean;
+  isEmailed?: boolean;
 }
 
 export interface DocumentSearchFilters {

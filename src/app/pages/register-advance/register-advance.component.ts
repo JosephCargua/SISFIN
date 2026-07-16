@@ -51,7 +51,7 @@ export class RegisterAdvanceComponent implements OnInit {
     this.bankingService.getTransactionById(id).subscribe(tx => {
       this.movement.tipoMovimiento = tx.transactionType || 'Egreso';
       this.movement.metodo = 'Anticipo';
-      this.movement.tipoAnticipo = tx.paymentMethod === 'Anticipo' ? 'Proveedor' : tx.paymentMethod;
+      this.movement.tipoAnticipo = tx.paymentMethod === 'Anticipo' ? 'Proveedor' : (tx.paymentMethod || 'Proveedor');
       this.movement.fechaEmision = tx.date ? new Date(tx.date).toISOString().split('T')[0] : '';
       this.movement.cuentaBancaria = tx.bankAccountId || '';
       this.movement.persona = tx.personName || '';

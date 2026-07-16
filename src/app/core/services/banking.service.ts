@@ -32,15 +32,27 @@ export class BankingService {
     return this.api.post<CashAccount>('cash-accounts', account);
   }
 
+  getAllTransactions(): Observable<BankTransaction[]> {
+    return this.api.get<BankTransaction[]>('bank-transactions');
+  }
+
   getTransactions(bankAccountId?: string): Observable<BankTransaction[]> {
     const endpoint = bankAccountId
-      ? `bank-transactions?bankAccountId=${bankAccountId}`
+      ? `bank-transactions/bank-account/${bankAccountId}`
       : 'bank-transactions';
     return this.api.get<BankTransaction[]>(endpoint);
   }
 
+  getTransactionById(id: string): Observable<BankTransaction> {
+    return this.api.get<BankTransaction>(`bank-transactions/${id}`);
+  }
+
   createTransaction(transaction: CreateBankTransactionDto): Observable<BankTransaction> {
     return this.api.post<BankTransaction>('bank-transactions', transaction);
+  }
+
+  updateTransaction(id: string, transaction: CreateBankTransactionDto): Observable<BankTransaction> {
+    return this.api.put<BankTransaction>(`bank-transactions/${id}`, transaction);
   }
 }
 

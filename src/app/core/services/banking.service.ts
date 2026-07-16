@@ -47,6 +47,13 @@ export class BankingService {
     return this.api.delete<void>(`bank-transactions/${id}`);
   }
 
+  getAccountStatement(bankAccountId: string, startDate?: string, endDate?: string): Observable<any> {
+    const params: any = {};
+    if (startDate) params.startDate = startDate;
+    if (endDate) params.endDate = endDate;
+    return this.api.get<any>(`bank-transactions/bank-account/${bankAccountId}/statement`, params);
+  }
+
   // --- Bank Reconciliations ---
   getReconciliations(): Observable<any[]> {
     return this.api.get<any[]>('bank-reconciliations');

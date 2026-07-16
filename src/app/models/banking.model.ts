@@ -48,6 +48,8 @@ export interface BankTransaction {
   checkDate?: Date;
   details?: BankTransactionDetail[];
 
+  bankReconciliationId?: string;
+
   createdAt: Date;
 }
 

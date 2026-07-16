@@ -1,0 +1,45 @@
+<div class="modal-backdrop" *ngIf="isVisible" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Seleccionar cuenta</h2>
+      <button class="btn-close" (click)="closeModal()"><span class="material-icons">close</span></button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="search-bar">
+        <label>Filtro:</label>
+        <input type="text" [(ngModel)]="filterText" (keyup.enter)="search()" />
+        <button class="btn btn-primary" (click)="search()">
+          <span class="material-icons">search</span> Consultar
+        </button>
+      </div>
+
+      <div class="table-container">
+        <table class="grid-table">
+          <thead>
+            <tr>
+              <th style="width: 150px;">Código</th>
+              <th>Cuenta</th>
+              <th style="width: 120px;">Grupo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let acc of filteredAccounts" (dblclick)="selectAccount(acc)" (click)="selectAccount(acc)" style="cursor: pointer;">
+              <td>{{ acc.code }}</td>
+              <td>{{ acc.name }}</td>
+              <td>{{ acc.type }}</td>
+            </tr>
+            <tr *ngIf="filteredAccounts.length === 0">
+              <td colspan="3" style="text-align: center;">No hay cuentas para mostrar.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination-info">
+        Página 1 de 1.<br />
+        Total de registros: {{ filteredAccounts.length }}
+      </div>
+    </div>
+  </div>
+</div>

@@ -4,16 +4,20 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { BankingService } from '../../core/services/banking.service';
 
+import { AccountSelectorModalComponent } from '../../components/account-selector-modal/account-selector-modal.component';
+import { Account } from '../../models/account.model';
+
 @Component({
   selector: 'app-register-transaction',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, AccountSelectorModalComponent],
   templateUrl: './register-transaction.component.html',
   styleUrl: './register-transaction.component.scss'
 })
 export class RegisterTransactionComponent implements OnInit {
   
   movementId: string | null = null;
+  isAccountModalVisible = false;
   
   movement = {
     tipoMovimiento: 'Ingreso',
@@ -70,6 +74,14 @@ export class RegisterTransactionComponent implements OnInit {
         }));
       }
     });
+  }
+
+  openAccountModal() {
+    this.isAccountModalVisible = true;
+  }
+
+  onAccountSelected(account: Account) {
+    this.movement.cuentaBancaria = account.name;
   }
 
   addDetail() {

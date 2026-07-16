@@ -92,7 +92,8 @@ export class ReportsComponent implements OnInit {
         window.URL.revokeObjectURL(url);
       },
       error: (error) => {
-        alert('Error al generar el reporte');
+        console.error('Error al generar el reporte:', error);
+        alert('Error al generar el reporte. Revise la consola para más detalles.');
       },
     });
   }
@@ -119,7 +120,8 @@ export class ReportsComponent implements OnInit {
         window.URL.revokeObjectURL(url);
       },
       error: (error) => {
-        alert('Error al generar el reporte');
+        console.error('Error al generar el reporte:', error);
+        alert('Error al generar el reporte. Revise la consola para más detalles.');
       },
     });
   }

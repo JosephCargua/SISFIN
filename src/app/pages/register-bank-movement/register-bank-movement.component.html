@@ -30,8 +30,8 @@
       <div class="form-row">
         <label class="required">Cuenta Bancaria:</label>
         <div class="input-with-icon" style="max-width: 400px;">
-          <input type="text" [(ngModel)]="movement.cuentaBancaria" placeholder="..." />
-          <span class="material-icons">search</span>
+          <input type="text" [(ngModel)]="movement.cuentaBancaria" placeholder="..." readonly />
+          <span class="material-icons" style="cursor: pointer;" (click)="openAccountModal('main')">search</span>
         </div>
       </div>
 
@@ -92,8 +92,8 @@
               </td>
               <td>
                 <div class="input-with-icon">
-                  <input type="text" [(ngModel)]="det.cuenta" placeholder="..." />
-                  <span class="material-icons">search</span>
+                  <input type="text" [(ngModel)]="det.cuenta" placeholder="..." readonly />
+                  <span class="material-icons" style="cursor: pointer;" (click)="openAccountModal('detail', i)">search</span>
                 </div>
               </td>
               <td>
@@ -143,3 +143,9 @@
     </button>
   </div>
 </div>
+
+<app-account-selector-modal 
+  [isVisible]="isAccountModalVisible" 
+  (close)="isAccountModalVisible = false"
+  (accountSelected)="onAccountSelected($event)">
+</app-account-selector-modal>

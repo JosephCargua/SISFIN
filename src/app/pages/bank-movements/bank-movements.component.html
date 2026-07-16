@@ -157,7 +157,7 @@
           <td>{{ m.cuenta }}</td>
           <td style="text-align: right; font-weight: 500;">{{ formatCurrency(m.total) }}</td>
           <td style="text-align: center;">
-            <button class="btn-icon btn-edit"><span class="material-icons">edit</span></button>
+            <button class="btn-icon btn-edit" (click)="editMovement(m)"><span class="material-icons">edit</span></button>
             <button class="btn-icon btn-delete"><span class="material-icons">delete</span></button>
           </td>
         </tr>

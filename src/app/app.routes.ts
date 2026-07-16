@@ -150,6 +150,41 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'register-bank-movement/:id',
+        loadComponent: () =>
+          import('./pages/register-bank-movement/register-bank-movement.component').then(
+            (m) => m.RegisterBankMovementComponent,
+          ),
+      },
+      {
+        path: 'register-transaction',
+        loadComponent: () =>
+          import('./pages/register-transaction/register-transaction.component').then(
+            (m) => m.RegisterTransactionComponent,
+          ),
+      },
+      {
+        path: 'register-transaction/:id',
+        loadComponent: () =>
+          import('./pages/register-transaction/register-transaction.component').then(
+            (m) => m.RegisterTransactionComponent,
+          ),
+      },
+      {
+        path: 'register-advance',
+        loadComponent: () =>
+          import('./pages/register-advance/register-advance.component').then(
+            (m) => m.RegisterAdvanceComponent,
+          ),
+      },
+      {
+        path: 'register-advance/:id',
+        loadComponent: () =>
+          import('./pages/register-advance/register-advance.component').then(
+            (m) => m.RegisterAdvanceComponent,
+          ),
+      },
+      {
         path: 'cost-centers',
         loadComponent: () =>
           import('./pages/cost-centers/cost-centers.component').then(

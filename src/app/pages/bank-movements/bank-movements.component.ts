@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
+import { BankingService } from '../../core/services/banking.service';
 
 @Component({
   selector: 'app-bank-movements',
@@ -44,22 +45,32 @@ export class BankMovementsComponent implements OnInit {
     { number: '3200059580', name: 'PAPANGU TURISMO CIA. LTDA', type: 'Corriente' }
   ];
 
-  movements = [
-    { 
-      emision: '07/07/2026', 
-      comprobante: '202607000001', 
-      comprobanteType: 'Cobro',
-      persona: 'ANNE SOPHIE CARDIN', 
-      transaccionType: 'Transacción',
-      transaccionDetail: 'Transferencia/NC # 124847047',
-      cuenta: 'PAPANGU TURISMO CIA. LTDA',
-      total: 420.00
-    }
-  ];
+  movements: any[] = [];
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private bankingService: BankingService) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.loadMovements();
+  }
+
+  loadMovements() {
+    this.bankingService.getAllTransactions().subscribe((data) => {
+      // Map API data to the table format
+      this.movements = data.map(tx => ({
+        id: tx.id,
+        emision: tx.date,
+        comprobante: tx.checkNumber || 'S/N',
+        comprobanteType: tx.transactionType || 'Movimiento',
+        persona: tx.personName || 'No Especificada',
+        transaccionType: tx.paymentMethod || 'Transferencia',
+        transaccionDetail: tx.description || 'Sin detalle',
+        cuenta: tx.bankAccountId, // ideally we would resolve the name
+        total: tx.amount,
+        // Used to route back to the correct screen:
+        sourceForm: tx.paymentMethod === 'Anticipo' ? 'anticipo' : (tx.paymentMethod === 'Transacción' ? 'transaccion' : 'movimiento')
+      }));
+    });
+  }
 
   toggleSearchPanel() {
     this.searchExpanded = !this.searchExpanded;
@@ -87,12 +98,27 @@ export class BankMovementsComponent implements OnInit {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 2
-    }).format(amount);
+    }).format(Number(amount) || 0);
   }
 
   navigateToAdd(type: string) {
     this.showActionMenu = false;
-    // For now they all go to the same general registration screen
-    this.router.navigate(['/register-bank-movement']);
+    if (type === 'transaccion') {
+      this.router.navigate(['/register-transaction']);
+    } else if (type === 'anticipo') {
+      this.router.navigate(['/register-advance']);
+    } else {
+      this.router.navigate(['/register-bank-movement']);
+    }
+  }
+
+  editMovement(m: any) {
+    if (m.sourceForm === 'transaccion') {
+      this.router.navigate(['/register-transaction', m.id]);
+    } else if (m.sourceForm === 'anticipo') {
+      this.router.navigate(['/register-advance', m.id]);
+    } else {
+      this.router.navigate(['/register-bank-movement', m.id]);
+    }
   }
 }

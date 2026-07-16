@@ -5,31 +5,31 @@ import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { BankingService } from '../../core/services/banking.service';
 
 @Component({
-  selector: 'app-register-bank-movement',
+  selector: 'app-register-transaction',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
-  templateUrl: './register-bank-movement.component.html',
-  styleUrl: './register-bank-movement.component.scss'
+  templateUrl: './register-transaction.component.html',
+  styleUrl: './register-transaction.component.scss'
 })
-export class RegisterBankMovementComponent implements OnInit {
+export class RegisterTransactionComponent implements OnInit {
   
   movementId: string | null = null;
   
   movement = {
-    tipoMovimiento: 'Egreso',
-    metodo: 'Movimiento', // Default based on component
+    tipoMovimiento: 'Ingreso',
+    metodo: 'Transacción', 
     anulado: false,
     fechaEmision: new Date().toISOString().split('T')[0],
-    cuentaBancaria: 'b567b458-1234-4567-8901-abcdefabcdef', // mock UUID
+    cuentaBancaria: 'b567b458-1234-4567-8901-abcdefabcdef', 
     persona: '',
     paguese: '',
-    numeroCheque: '',
-    fechaCheque: new Date().toISOString().split('T')[0],
+    numeroComprobante: '',
+    esEfectivo: false,
     descripcion: ''
   };
 
-  accountsDetails: any[] = [
-    { cuenta: '', monto: 0, centroCosto: '', proyecto: '' }
+  documentsDetails: any[] = [
+    { documento: '', fechaEmision: '', tipoDocumento: '', valor: 0, saldo: 0, valorCobrar: 0 }
   ];
 
   constructor(
@@ -49,38 +49,39 @@ export class RegisterBankMovementComponent implements OnInit {
 
   loadMovement(id: string) {
     this.bankingService.getTransactionById(id).subscribe(tx => {
-      this.movement.tipoMovimiento = tx.transactionType || 'Egreso';
-      this.movement.metodo = tx.paymentMethod || 'Movimiento';
+      this.movement.tipoMovimiento = tx.transactionType || 'Ingreso';
+      this.movement.metodo = 'Transacción';
       this.movement.anulado = tx.isAnnulled || false;
       this.movement.fechaEmision = tx.date ? new Date(tx.date).toISOString().split('T')[0] : '';
       this.movement.cuentaBancaria = tx.bankAccountId || '';
       this.movement.persona = tx.personName || '';
-      this.movement.paguese = tx.payToOrderOf || '';
-      this.movement.numeroCheque = tx.checkNumber || '';
-      this.movement.fechaCheque = tx.checkDate ? new Date(tx.checkDate).toISOString().split('T')[0] : '';
+      this.movement.numeroComprobante = tx.checkNumber || ''; // Reusing checkNumber for comprobante
       this.movement.descripcion = tx.description || '';
       
+      // Map back details
       if (tx.details && tx.details.length > 0) {
-        this.accountsDetails = tx.details.map((d: any) => ({
-          cuenta: d.accountName,
-          monto: d.amount,
-          centroCosto: d.costCenter,
-          proyecto: d.project
+        this.documentsDetails = tx.details.map((d: any) => ({
+          documento: d.accountName, 
+          fechaEmision: '', // Not strictly stored in detail
+          tipoDocumento: d.costCenter || 'Factura', 
+          valor: 0,
+          saldo: 0,
+          valorCobrar: d.amount
         }));
       }
     });
   }
 
   addDetail() {
-    this.accountsDetails.push({ cuenta: '', monto: 0, centroCosto: '', proyecto: '' });
+    this.documentsDetails.push({ documento: '', fechaEmision: '', tipoDocumento: '', valor: 0, saldo: 0, valorCobrar: 0 });
   }
 
   removeDetail(index: number) {
-    this.accountsDetails.splice(index, 1);
+    this.documentsDetails.splice(index, 1);
   }
 
   getTotal(): number {
-    return this.accountsDetails.reduce((acc, curr) => acc + (Number(curr.monto) || 0), 0);
+    return this.documentsDetails.reduce((acc, curr) => acc + (Number(curr.valorCobrar) || 0), 0);
   }
 
   formatCurrency(amount: number): string {
@@ -102,25 +103,22 @@ export class RegisterBankMovementComponent implements OnInit {
       paymentMethod: this.movement.metodo,
       isAnnulled: this.movement.anulado,
       personName: this.movement.persona,
-      payToOrderOf: this.movement.paguese,
-      checkNumber: this.movement.numeroCheque,
-      checkDate: this.movement.fechaCheque,
-      details: this.accountsDetails.map(d => ({
-        accountName: d.cuenta || 'N/A',
-        amount: Number(d.monto) || 0,
-        costCenter: d.centroCosto,
-        project: d.proyecto
+      checkNumber: this.movement.numeroComprobante,
+      details: this.documentsDetails.map(d => ({
+        accountName: d.documento || 'Documento',
+        amount: Number(d.valorCobrar) || 0,
+        costCenter: d.tipoDocumento
       }))
     };
 
     if (this.movementId) {
       this.bankingService.updateTransaction(this.movementId, payload).subscribe(() => {
-        alert('Movimiento actualizado exitosamente');
+        alert('Transacción actualizada exitosamente');
         this.router.navigate(['/bank-movements']);
       });
     } else {
       this.bankingService.createTransaction(payload).subscribe(() => {
-        alert('Movimiento registrado exitosamente');
+        alert('Transacción registrada exitosamente');
         this.router.navigate(['/bank-movements']);
       });
     }

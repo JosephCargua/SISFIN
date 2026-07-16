@@ -5,22 +5,22 @@ import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { BankingService } from '../../core/services/banking.service';
 
 @Component({
-  selector: 'app-register-bank-movement',
+  selector: 'app-register-advance',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
-  templateUrl: './register-bank-movement.component.html',
-  styleUrl: './register-bank-movement.component.scss'
+  templateUrl: './register-advance.component.html',
+  styleUrl: './register-advance.component.scss'
 })
-export class RegisterBankMovementComponent implements OnInit {
+export class RegisterAdvanceComponent implements OnInit {
   
   movementId: string | null = null;
   
   movement = {
-    tipoMovimiento: 'Egreso',
-    metodo: 'Movimiento', // Default based on component
-    anulado: false,
+    tipoMovimiento: 'Egreso', // usually advance is an egreso
+    tipoAnticipo: 'Proveedor',
+    metodo: 'Cheque', 
     fechaEmision: new Date().toISOString().split('T')[0],
-    cuentaBancaria: 'b567b458-1234-4567-8901-abcdefabcdef', // mock UUID
+    cuentaBancaria: 'b567b458-1234-4567-8901-abcdefabcdef', 
     persona: '',
     paguese: '',
     numeroCheque: '',
@@ -50,8 +50,8 @@ export class RegisterBankMovementComponent implements OnInit {
   loadMovement(id: string) {
     this.bankingService.getTransactionById(id).subscribe(tx => {
       this.movement.tipoMovimiento = tx.transactionType || 'Egreso';
-      this.movement.metodo = tx.paymentMethod || 'Movimiento';
-      this.movement.anulado = tx.isAnnulled || false;
+      this.movement.metodo = 'Anticipo';
+      this.movement.tipoAnticipo = tx.paymentMethod === 'Anticipo' ? 'Proveedor' : (tx.paymentMethod || 'Proveedor');
       this.movement.fechaEmision = tx.date ? new Date(tx.date).toISOString().split('T')[0] : '';
       this.movement.cuentaBancaria = tx.bankAccountId || '';
       this.movement.persona = tx.personName || '';
@@ -71,18 +71,6 @@ export class RegisterBankMovementComponent implements OnInit {
     });
   }
 
-  addDetail() {
-    this.accountsDetails.push({ cuenta: '', monto: 0, centroCosto: '', proyecto: '' });
-  }
-
-  removeDetail(index: number) {
-    this.accountsDetails.splice(index, 1);
-  }
-
-  getTotal(): number {
-    return this.accountsDetails.reduce((acc, curr) => acc + (Number(curr.monto) || 0), 0);
-  }
-
   formatCurrency(amount: number): string {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -96,11 +84,11 @@ export class RegisterBankMovementComponent implements OnInit {
       bankAccountId: this.movement.cuentaBancaria,
       date: this.movement.fechaEmision,
       description: this.movement.descripcion,
-      amount: this.getTotal(),
+      // Sum logic can be modified, for now use first amount or simple sum if needed, but UI shows individual row sums not a total. We will store sum.
+      amount: this.accountsDetails.reduce((a, b) => a + (Number(b.monto) || 0), 0),
       type: this.movement.tipoMovimiento,
       transactionType: this.movement.tipoMovimiento,
-      paymentMethod: this.movement.metodo,
-      isAnnulled: this.movement.anulado,
+      paymentMethod: 'Anticipo',
       personName: this.movement.persona,
       payToOrderOf: this.movement.paguese,
       checkNumber: this.movement.numeroCheque,
@@ -115,12 +103,12 @@ export class RegisterBankMovementComponent implements OnInit {
 
     if (this.movementId) {
       this.bankingService.updateTransaction(this.movementId, payload).subscribe(() => {
-        alert('Movimiento actualizado exitosamente');
+        alert('Anticipo actualizado exitosamente');
         this.router.navigate(['/bank-movements']);
       });
     } else {
       this.bankingService.createTransaction(payload).subscribe(() => {
-        alert('Movimiento registrado exitosamente');
+        alert('Anticipo registrado exitosamente');
         this.router.navigate(['/bank-movements']);
       });
     }

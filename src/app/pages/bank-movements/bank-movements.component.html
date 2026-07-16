@@ -1,0 +1,211 @@
+<div class="bank-movements-container">
+  <div class="page-header">
+    <h1>Consultar Movimientos Bancarios</h1>
+    
+    <div class="action-menu-container">
+      <button class="btn btn-action" (click)="toggleActionMenu()">
+        <span class="material-icons">post_add</span>
+      </button>
+      <div class="dropdown-menu" *ngIf="showActionMenu">
+        <a (click)="navigateToAdd('movimiento')">Registrar Movimiento Bancario</a>
+        <a (click)="navigateToAdd('transaccion')">Registrar Transacción</a>
+        <a (click)="navigateToAdd('anticipo')">Registrar Anticipo</a>
+      </div>
+    </div>
+  </div>
+
+  <section class="card search-section">
+    <div class="accordion-header" (click)="toggleSearchPanel()">
+      <div class="accordion-title">
+        <span class="material-icons expand-icon">{{ searchExpanded ? 'expand_more' : 'chevron_right' }}</span>
+        <span>Búsqueda</span>
+      </div>
+    </div>
+    
+    <div class="accordion-body" *ngIf="searchExpanded">
+      <div class="search-grid">
+        <div class="form-group row-span">
+          <label>Banco:</label>
+          <div class="input-with-icon">
+            <input type="text" [(ngModel)]="filters.banco" placeholder="..." />
+            <span class="material-icons">search</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Desde:</label>
+          <input type="text" [(ngModel)]="filters.desde" />
+        </div>
+
+        <div class="form-group">
+          <label>Hasta:</label>
+          <input type="text" [(ngModel)]="filters.hasta" />
+        </div>
+        
+        <div class="form-group row-span">
+          <label>Tipo:</label>
+          <select [(ngModel)]="filters.tipo">
+            <option *ngFor="let t of tiposMovimiento" [value]="t">{{t}}</option>
+          </select>
+        </div>
+
+        <div class="form-group row-span" style="grid-column: 1 / 2;">
+          <button class="btn btn-primary btn-search" (click)="searchExpanded = false">
+            <span class="material-icons">search</span> Consultar
+          </button>
+        </div>
+
+        <div class="form-group row-span">
+          <label># Comprobante:</label>
+          <input type="text" [(ngModel)]="filters.comprobante" />
+        </div>
+
+        <div class="form-group row-span">
+          <label># Cheque:</label>
+          <input type="text" [(ngModel)]="filters.cheque" />
+        </div>
+        
+        <div class="form-group row-span">
+          <label>Persona:</label>
+          <div class="input-with-icon">
+            <input type="text" [(ngModel)]="filters.persona" placeholder="..." />
+            <span class="material-icons">search</span>
+          </div>
+        </div>
+        
+        <div class="form-group row-span">
+          <label>Cuenta Bancaria:</label>
+          <div class="input-with-icon">
+            <input type="text" [(ngModel)]="filters.cuentaBancaria" placeholder="..." />
+            <span class="material-icons" (click)="openAccountModal()" style="cursor:pointer">search</span>
+          </div>
+        </div>
+        
+        <div class="form-group row-span">
+          <label>Centro Costo:</label>
+          <div class="input-with-icon">
+            <input type="text" [(ngModel)]="filters.centroCosto" placeholder="..." />
+            <span class="material-icons">search</span>
+          </div>
+        </div>
+
+        <div class="form-group" style="grid-column: 2 / 3; grid-row: 3 / 4;">
+          <label>Origen:</label>
+          <select [(ngModel)]="filters.origen">
+            <option value="Todos">Todos</option>
+          </select>
+        </div>
+        <div class="form-group" style="grid-column: 2 / 3; grid-row: 4 / 5;">
+          <label>Tipo:</label>
+          <select [(ngModel)]="filters.tipo">
+            <option value="Todos">Todos</option>
+          </select>
+        </div>
+        <div class="form-group" style="grid-column: 2 / 3; grid-row: 5 / 6;">
+          <label>Subtipo:</label>
+          <select [(ngModel)]="filters.subtipo">
+            <option value="Todos">Todos</option>
+          </select>
+        </div>
+        <div class="form-group" style="grid-column: 2 / 3; grid-row: 6 / 7;">
+          <label>Estado:</label>
+          <select [(ngModel)]="filters.estado">
+            <option value="Todos">Todos</option>
+          </select>
+        </div>
+        <div class="form-group" style="grid-column: 2 / 3; grid-row: 7 / 8;">
+          <label>Módulo:</label>
+          <select [(ngModel)]="filters.modulo">
+            <option value="Todos">Todos</option>
+          </select>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <div class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th style="width: 40px; text-align: center;"><input type="checkbox" /></th>
+          <th>Emisión</th>
+          <th># Comprobante</th>
+          <th>Persona</th>
+          <th>Transacción</th>
+          <th>Cuenta</th>
+          <th style="text-align: right;">Total</th>
+          <th style="text-align: center;">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let m of movements">
+          <td style="text-align: center;"><input type="checkbox" /></td>
+          <td>{{ m.emision }}</td>
+          <td>
+            <a href="javascript:void(0)" style="color: #0ea5e9; text-decoration: none;">{{ m.comprobante }}</a>
+            <div style="font-size: 11px; color: #64748b; display: flex; align-items: center;"><span class="material-icons" style="font-size: 12px; margin-right: 2px;">arrow_downward</span> {{ m.comprobanteType }}</div>
+          </td>
+          <td>
+            <div>{{ m.persona }}</div>
+            <div style="font-size: 11px; color: #64748b; display: flex; align-items: center;"><span class="material-icons" style="font-size: 12px; margin-right: 2px;">swap_horiz</span> Transacción</div>
+          </td>
+          <td>
+            <div style="display: flex; align-items: center;"><span style="margin-right:4px;">▪️</span> {{ m.transaccionType }}</div>
+            <div style="font-size: 11px; color: #64748b;">{{ m.transaccionDetail }}</div>
+          </td>
+          <td>{{ m.cuenta }}</td>
+          <td style="text-align: right; font-weight: 500;">{{ formatCurrency(m.total) }}</td>
+          <td style="text-align: center;">
+            <button class="btn-icon btn-edit"><span class="material-icons">edit</span></button>
+            <button class="btn-icon btn-delete"><span class="material-icons">delete</span></button>
+          </td>
+        </tr>
+        <tr *ngIf="movements.length === 0">
+          <td colspan="8" class="text-center">No hay registros</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="pagination-info">
+      Página 1 de 1 (1 elementos)
+    </div>
+  </div>
+</div>
+
+<!-- Modal Seleccionar Cuenta -->
+<div *ngIf="showAccountModal" class="modal-backdrop">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Seleccionar Cuenta Bancaria</h3>
+      <span class="material-icons" (click)="closeAccountModal()" style="cursor: pointer; color: #0ea5e9;">close</span>
+    </div>
+    <div class="modal-body">
+      <div class="modal-filter">
+        <label>Filtro:</label>
+        <input type="text" />
+        <button class="btn btn-primary"><span class="material-icons">search</span> Consultar</button>
+      </div>
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Número</th>
+              <th>Nombre</th>
+              <th>Tipo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let acc of mockAccounts" (click)="selectAccount(acc)" class="clickable-row">
+              <td style="color: #0ea5e9; text-decoration: underline;">{{ acc.number }}</td>
+              <td>{{ acc.name }}</td>
+              <td>{{ acc.type }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination-info">
+        Página 1 de 1. Total de registros: 1
+      </div>
+    </div>
+  </div>
+</div>

@@ -180,10 +180,34 @@ export class ConsultDocumentsComponent implements OnInit {
     }).format(amount);
   }
 
+  getRemainingBalance(doc: DocumentConsultItem): number {
+    const paidDocs = JSON.parse(localStorage.getItem('paidDocuments') || '{}');
+    const record = paidDocs[doc.id];
+    let amountPaid = 0;
+    
+    if (typeof record === 'object' && record !== null) {
+      amountPaid = record.amount || 0;
+    } else if (typeof record === 'string') {
+      amountPaid = doc.total || 0; // Legacy fully paid
+    }
+    
+    const balance = (doc.total || 0) - amountPaid;
+    return balance < 0.01 ? 0 : balance;
+  }
+
   getDisplayStatus(doc: DocumentConsultItem): string {
     const paidDocs = JSON.parse(localStorage.getItem('paidDocuments') || '{}');
-    if (paidDocs[doc.id]) {
-      return paidDocs[doc.id];
+    const record = paidDocs[doc.id];
+    
+    if (typeof record === 'object' && record !== null) {
+      const balance = (doc.total || 0) - (record.amount || 0);
+      if (balance < 0.01) {
+        return record.status || 'Pagado';
+      } else if (record.amount > 0) {
+        return 'Parcial';
+      }
+    } else if (typeof record === 'string') {
+      return record;
     }
     return 'Pendiente';
   }

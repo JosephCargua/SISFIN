@@ -62,7 +62,9 @@ export class LayoutComponent implements OnInit {
       icon: 'attach_money',
       expanded: false,
       children: [
-        { label: 'Bancos y Caja', route: '/banking', icon: 'account_balance' }
+        { label: 'Estado de Cuenta', route: '/bank-statement', icon: 'account_balance_wallet' },
+        { label: 'Movimientos', route: '/bank-movements', icon: 'sync_alt' },
+        { label: 'Conciliaciones', route: '/bank-reconciliations', icon: 'fact_check' }
       ]
     },
     {

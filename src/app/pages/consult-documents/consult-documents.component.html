@@ -196,7 +196,7 @@
             <td class="col-money" style="padding: 8px; text-align: right; color: #334155;">{{ formatCurrency(doc.total) }}</td>
             <td class="col-money" style="padding: 8px; text-align: right; color: #334155;">{{ formatCurrency(doc.retentionAmount) }}</td>
             <td class="col-money" style="padding: 8px; text-align: right; color: #334155;">
-               {{ getDisplayStatus(doc) === 'Pendiente' ? formatCurrency(doc.total) : formatCurrency(0) }}
+               {{ formatCurrency(getRemainingBalance(doc)) }}
             </td>
             <td class="actions-cell" style="padding: 8px; text-align: center;">
               <button

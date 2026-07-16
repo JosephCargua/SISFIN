@@ -101,8 +101,8 @@
               </td>
               <td style="padding: 8px; border-right: 1px solid #e2e8f0;">{{ doc.issueDate }}</td>
               <td style="padding: 8px; border-right: 1px solid #e2e8f0;">{{ doc.type }}</td>
-              <td style="padding: 8px; border-right: 1px solid #e2e8f0; text-align: right;">{{ doc.value.toFixed(1) }}</td>
-              <td style="padding: 8px; border-right: 1px solid #e2e8f0; text-align: right;">{{ doc.balance.toFixed(1) }}</td>
+              <td style="padding: 8px; border-right: 1px solid #e2e8f0; text-align: right;">{{ formatCurrency(doc.value) }}</td>
+              <td style="padding: 8px; border-right: 1px solid #e2e8f0; text-align: right;">{{ formatCurrency(doc.balance) }}</td>
               <td style="padding: 8px; display: flex; align-items: center; justify-content: flex-end; gap: 4px;">
                 <input type="number" [(ngModel)]="doc.amountToPay" style="width: 80px; padding: 4px; text-align: right; border: 1px solid #cbd5e1; border-radius: 4px;" (ngModelChange)="recalcTotal()" />
                 <span class="material-icons" style="color: #64748b; font-size: 16px; cursor: pointer;">flip_to_front</span>
@@ -114,7 +114,7 @@
             <tr>
               <td colspan="5" style="border: none;"></td>
               <td style="padding: 8px; text-align: right; font-weight: 500;">Total:</td>
-              <td style="padding: 8px; text-align: right; font-weight: 600;">${{ total.toFixed(2) }}</td>
+              <td style="padding: 8px; text-align: right; font-weight: 600;">{{ formatCurrency(total) }}</td>
             </tr>
           </tbody>
         </table>

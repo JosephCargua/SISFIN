@@ -198,6 +198,27 @@ export const routes: Routes = [
             (m) => m.PeriodLocksComponent,
           ),
       },
+      {
+        path: 'bank-reconciliations',
+        loadComponent: () =>
+          import('./pages/bank-reconciliations/bank-reconciliations.component').then(
+            (m) => m.BankReconciliationsComponent,
+          ),
+      },
+      {
+        path: 'register-reconciliation',
+        loadComponent: () =>
+          import('./pages/register-reconciliation/register-reconciliation.component').then(
+            (m) => m.RegisterReconciliationComponent,
+          ),
+      },
+      {
+        path: 'register-reconciliation/:id',
+        loadComponent: () =>
+          import('./pages/register-reconciliation/register-reconciliation.component').then(
+            (m) => m.RegisterReconciliationComponent,
+          ),
+      },
     ],
   },
 ];

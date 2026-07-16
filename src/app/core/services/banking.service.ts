@@ -43,6 +43,27 @@ export class BankingService {
     return this.api.get<BankTransaction[]>(endpoint);
   }
 
+  deleteTransaction(id: string): Observable<void> {
+    return this.api.delete<void>(`bank-transactions/${id}`);
+  }
+
+  // --- Bank Reconciliations ---
+  getReconciliations(): Observable<any[]> {
+    return this.api.get<any[]>('bank-reconciliations');
+  }
+
+  getReconciliationById(id: string): Observable<any> {
+    return this.api.get<any>(`bank-reconciliations/${id}`);
+  }
+
+  createReconciliation(data: any): Observable<any> {
+    return this.api.post<any>('bank-reconciliations', data);
+  }
+
+  updateReconciliation(id: string, data: any): Observable<any> {
+    return this.api.put<any>(`bank-reconciliations/${id}`, data);
+  }
+
   getTransactionById(id: string): Observable<BankTransaction> {
     return this.api.get<BankTransaction>(`bank-transactions/${id}`);
   }

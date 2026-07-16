@@ -1,0 +1,138 @@
+<div class="register-container">
+  <section class="card form-section" style="display: flex; gap: 32px; padding: 24px;">
+    
+    <!-- Lado Izquierdo: Información Básica -->
+    <div style="flex: 1;">
+      <div class="section-title" style="margin-bottom: 24px; font-size: 1.1rem; color: #334155; font-weight: 600; display: flex; justify-content: space-between; align-items: center;">
+        <span>Información de la Conciliación</span>
+        <button *ngIf="reconciliationId" class="btn" style="background: white; border: 1px solid #e2e8f0; border-radius: 4px; padding: 4px 8px; cursor: pointer; display: flex; align-items: center;" (click)="downloadPDF()">
+          <span class="material-icons" style="color: #0ea5e9;">picture_as_pdf</span>
+        </button>
+      </div>
+      
+      <div class="form-grid" style="display: flex; flex-direction: column; gap: 16px;">
+        
+        <div class="form-row" style="display: flex; align-items: center; justify-content: flex-end; gap: 16px;">
+          <label class="required" style="width: 140px; text-align: right; margin: 0;">Fecha de Corte:</label>
+          <input type="date" [(ngModel)]="reconciliation.reconciliationDate" style="width: 250px;" />
+        </div>
+
+        <div class="form-row" style="display: flex; align-items: center; justify-content: flex-end; gap: 16px;">
+          <label class="required" style="width: 140px; text-align: right; margin: 0;">Cuenta de Banco:</label>
+          <div class="input-with-icon" style="width: 250px;">
+            <input type="text" [(ngModel)]="reconciliation.accountName" placeholder="..." readonly />
+            <span class="material-icons" style="cursor: pointer;" (click)="openAccountModal()">search</span>
+          </div>
+        </div>
+
+        <div class="form-row" style="display: flex; align-items: flex-start; justify-content: flex-end; gap: 16px;">
+          <label class="required" style="width: 140px; text-align: right; margin-top: 8px;">Descripción:</label>
+          <textarea [(ngModel)]="reconciliation.description" rows="4" style="width: 250px;"></textarea>
+        </div>
+
+        <div class="form-row" style="display: flex; align-items: center; justify-content: flex-end; gap: 16px;">
+          <label style="width: 140px; text-align: right; margin: 0;">Estado:</label>
+          <div style="width: 250px; text-align: left;">
+            <span class="status-badge" [class.success]="reconciliation.status === 'Concluida'" [class.pending]="reconciliation.status === 'Pendiente'" style="padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: 600;">
+              {{ reconciliation.status }}
+            </span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Lado Derecho: Saldos -->
+    <div style="flex: 1;">
+      <div style="height: 32px;"></div> <!-- Spacer para alinear con el lado izq -->
+      
+      <div class="form-grid" style="display: flex; flex-direction: column; gap: 16px;">
+        
+        <div class="form-row" style="display: flex; align-items: center; justify-content: flex-end; gap: 16px;">
+          <label style="width: 140px; text-align: right; margin: 0;">Saldo Bancario:</label>
+          <input type="number" [(ngModel)]="reconciliation.statementBalance" (input)="onStatementBalanceChange()" style="width: 150px; text-align: right;" />
+        </div>
+
+        <div class="form-row" style="display: flex; align-items: center; justify-content: flex-end; gap: 16px;">
+          <label style="width: 140px; text-align: right; margin: 0;">Saldo Contable:</label>
+          <div style="width: 150px; text-align: right; font-weight: 500;">
+            {{ formatCurrency(reconciliation.accountingBalance) }}
+          </div>
+        </div>
+
+        <div class="form-row" style="display: flex; align-items: center; justify-content: flex-end; gap: 16px;">
+          <label style="width: 140px; text-align: right; margin: 0;">Diferencia:</label>
+          <div style="width: 150px; text-align: right; font-weight: 600;" [ngStyle]="{'color': reconciliation.difference === 0 ? '#10b981' : '#ef4444'}">
+            {{ formatCurrency(reconciliation.difference) }}
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </section>
+
+  <section class="card detail-section" style="margin-top: 16px;">
+    <div class="tabs">
+      <div class="tab active">Movimientos</div>
+    </div>
+    
+    <div class="tab-content" style="padding: 16px;">
+      <div class="table-scroll">
+        <table class="grid-table" style="width: 100%; border-collapse: collapse;">
+          <thead style="background-color: #f1f5f9; border-bottom: 1px solid #e2e8f0;">
+            <tr>
+              <th style="width: 40px; text-align: center; padding: 12px;"></th>
+              <th style="width: 120px; padding: 12px; font-weight: 600; color: #475569;">Fecha</th>
+              <th style="padding: 12px; font-weight: 600; color: #475569;">Detalle</th>
+              <th style="width: 150px; padding: 12px; font-weight: 600; color: #475569;">Referencia</th>
+              <th style="width: 150px; padding: 12px; font-weight: 600; color: #475569;">Tipo</th>
+              <th style="width: 120px; text-align: right; padding: 12px; font-weight: 600; color: #475569;">Monto</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid #e2e8f0; background-color: #f8fafc; font-weight: 600;">
+              <td style="text-align: center; padding: 12px;"></td>
+              <td style="padding: 12px;"></td>
+              <td style="padding: 12px; color: #334155;">Saldo Inicial:</td>
+              <td style="padding: 12px;"></td>
+              <td style="padding: 12px;"></td>
+              <td style="text-align: right; padding: 12px; color: #334155;">{{ formatCurrency(initialBalance) }}</td>
+            </tr>
+            <tr *ngFor="let m of movements" style="border-bottom: 1px solid #e2e8f0;">
+              <td style="text-align: center; padding: 12px;">
+                <input type="checkbox" [checked]="isSelected(m.id)" (change)="toggleMovement(m.id, $event)" />
+              </td>
+              <td style="padding: 12px;">{{ formatDate(m.date) }}</td>
+              <td style="padding: 12px;">{{ m.description || m.transactionType }}</td>
+              <td style="padding: 12px;">{{ m.reference || m.checkNumber || m.paymentMethod }}</td>
+              <td style="padding: 12px;">{{ m.type }}</td>
+              <td style="text-align: right; padding: 12px;">{{ formatCurrency(m.amount) }}</td>
+            </tr>
+            <tr *ngIf="movements.length === 0">
+              <td colspan="6" style="text-align: center; padding: 24px; color: #64748b;">
+                No hay movimientos para esta cuenta.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Botones de Acción -->
+  <div class="action-buttons-footer" style="display: flex; justify-content: flex-end; gap: 16px; margin-top: 24px; padding-bottom: 32px;">
+    <button class="btn-cancel" (click)="cancel()">
+      <span class="material-icons">close</span> Cancelar
+    </button>
+    <button class="btn-primary" (click)="save()">
+      <span class="material-icons">save</span> Guardar
+    </button>
+  </div>
+</div>
+
+<app-account-selector-modal 
+  [isVisible]="isAccountModalVisible" 
+  (close)="isAccountModalVisible = false"
+  (accountSelected)="onAccountSelected($event)">
+</app-account-selector-modal>

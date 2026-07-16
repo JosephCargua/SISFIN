@@ -1,0 +1,87 @@
+<div class="page-container">
+  <div class="page-header">
+    <h1>Consultar Conciliaciones</h1>
+    <button class="btn btn-primary btn-add" routerLink="/register-reconciliation">
+      <span class="material-icons">add</span>
+    </button>
+  </div>
+
+  <section class="card filter-section">
+    <div class="section-title">
+      <span class="material-icons" style="font-size: 1.2rem; margin-right: 8px;">expand_more</span> 
+      Búsqueda
+    </div>
+    
+    <div class="filter-grid">
+      <div class="form-row">
+        <label>Banco:</label>
+        <div class="input-with-icon">
+          <input type="text" [(ngModel)]="filters.bankId" placeholder="..." />
+          <span class="material-icons">search</span>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>Desde:</label>
+        <input type="date" [(ngModel)]="filters.dateFrom" />
+      </div>
+      <div class="form-row">
+        <label>Hasta:</label>
+        <input type="date" [(ngModel)]="filters.dateTo" />
+      </div>
+      <div class="form-row">
+        <label>Filtro:</label>
+        <input type="text" [(ngModel)]="filters.text" />
+      </div>
+    </div>
+
+    <div class="filter-actions">
+      <button class="btn btn-primary" (click)="loadReconciliations()">
+        <span class="material-icons">search</span> Consultar
+      </button>
+    </div>
+  </section>
+
+  <section class="card table-section">
+    <table class="grid-table">
+      <thead>
+        <tr>
+          <th style="width: 40px; text-align: center;"></th>
+          <th style="text-align: center;">Fecha</th>
+          <th>Banco</th>
+          <th style="text-align: center;">Estado</th>
+          <th style="text-align: right;">Saldo Final</th>
+          <th style="text-align: center; width: 100px;">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let rec of reconciliations">
+          <td style="text-align: center;">
+            <input type="checkbox" />
+          </td>
+          <td style="text-align: center; color: #0ea5e9; font-weight: 500;">
+            {{ formatDate(rec.reconciliationDate) }}
+          </td>
+          <td>{{ rec.accountName || rec.bankAccountId }}</td>
+          <td style="text-align: center;">
+            <span class="status-badge" [class.success]="rec.status === 'Concluida'" [class.pending]="rec.status === 'Pendiente'">
+              {{ rec.status || 'Concluida' }}
+            </span>
+          </td>
+          <td style="text-align: right; font-weight: 500;">{{ formatCurrency(rec.accountingBalance) }}</td>
+          <td style="text-align: center;">
+            <button class="btn-icon btn-edit" (click)="editReconciliation(rec.id)">
+              <span class="material-icons" style="font-size: 16px;">edit</span>
+            </button>
+            <button class="btn-icon btn-delete" (click)="deleteReconciliation(rec.id)">
+              <span class="material-icons" style="font-size: 16px;">delete</span>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="pagination-info">
+      Página 1 de 1 de un Total: {{ reconciliations.length }}
+    </div>
+  </section>
+</div>

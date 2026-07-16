@@ -1,0 +1,140 @@
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 8px;
+  width: 700px;
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid #e2e8f0;
+
+    h2 {
+      margin: 0;
+      font-size: 1.25rem;
+      color: #334155;
+    }
+
+    .btn-close {
+      background: none;
+      border: none;
+      color: #0ea5e9;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+      
+      &:hover {
+        color: #0284c7;
+      }
+    }
+  }
+
+  .modal-body {
+    padding: 24px;
+    flex: 1;
+    overflow-y: auto;
+
+    .search-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+
+      label {
+        font-weight: 500;
+        color: #334155;
+      }
+
+      input {
+        flex: 1;
+        padding: 8px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 4px;
+        font-size: 0.95rem;
+
+        &:focus {
+          outline: none;
+          border-color: #0ea5e9;
+        }
+      }
+
+      .btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        font-weight: 500;
+        cursor: pointer;
+
+        &.btn-primary {
+          background-color: #0ea5e9;
+          color: white;
+
+          &:hover {
+            background-color: #0284c7;
+          }
+        }
+      }
+    }
+
+    .table-container {
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+      max-height: 350px;
+      overflow-y: auto;
+
+      .grid-table {
+        width: 100%;
+        border-collapse: collapse;
+
+        th, td {
+          padding: 12px;
+          text-align: left;
+          border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+          background-color: #f1f5f9;
+          font-weight: 600;
+          color: #475569;
+          position: sticky;
+          top: 0;
+        }
+
+        tr:hover {
+          background-color: #f8fafc;
+        }
+      }
+    }
+
+    .pagination-info {
+      margin-top: 16px;
+      font-size: 0.9rem;
+      color: #64748b;
+    }
+  }
+}

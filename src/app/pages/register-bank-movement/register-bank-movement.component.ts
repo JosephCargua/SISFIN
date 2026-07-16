@@ -4,16 +4,23 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { BankingService } from '../../core/services/banking.service';
 
+import { AccountSelectorModalComponent } from '../../components/account-selector-modal/account-selector-modal.component';
+import { Account } from '../../models/account.model';
+
 @Component({
   selector: 'app-register-bank-movement',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, AccountSelectorModalComponent],
   templateUrl: './register-bank-movement.component.html',
   styleUrl: './register-bank-movement.component.scss'
 })
 export class RegisterBankMovementComponent implements OnInit {
   
   movementId: string | null = null;
+  
+  isAccountModalVisible = false;
+  currentEditingRowIndex: number | null = null;
+  targetField: 'main' | 'detail' = 'main';
   
   movement = {
     tipoMovimiento: 'Egreso',
@@ -69,6 +76,20 @@ export class RegisterBankMovementComponent implements OnInit {
         }));
       }
     });
+  }
+
+  openAccountModal(target: 'main' | 'detail', index: number | null = null) {
+    this.targetField = target;
+    this.currentEditingRowIndex = index;
+    this.isAccountModalVisible = true;
+  }
+
+  onAccountSelected(account: Account) {
+    if (this.targetField === 'main') {
+      this.movement.cuentaBancaria = account.name;
+    } else if (this.targetField === 'detail' && this.currentEditingRowIndex !== null) {
+      this.accountsDetails[this.currentEditingRowIndex].cuenta = account.name;
+    }
   }
 
   addDetail() {

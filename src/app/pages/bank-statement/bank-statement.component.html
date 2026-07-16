@@ -1,0 +1,107 @@
+<div class="bank-movements-container">
+  <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+    <h1>Consultar Estado de Cuenta</h1>
+    <button class="btn" style="background: white; border: 1px solid #e2e8f0; border-radius: 4px; padding: 6px 12px; cursor: pointer; display: flex; align-items: center; color: #0ea5e9;" (click)="downloadPDF()">
+      <span class="material-icons">picture_as_pdf</span>
+    </button>
+  </div>
+
+  <section class="card filter-section" style="padding: 16px; margin-bottom: 16px; background: white; border: 1px solid #e2e8f0; border-radius: 8px;">
+    <div class="section-title" style="margin-bottom: 16px; color: #0ea5e9; font-weight: 500; display: flex; align-items: center; font-size: 14px;">
+      <span class="material-icons" style="margin-right: 4px; font-size: 18px;">expand_more</span>
+      Búsqueda
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;">
+      <!-- Row 1 -->
+      <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+        <label style="width: 60px; text-align: right; color: #64748b; font-size: 13px;">Banco:</label>
+        <div class="input-with-icon" style="flex: 1; display: flex; border: 1px solid #cbd5e1; border-radius: 4px; overflow: hidden; background: white;">
+          <input type="text" [(ngModel)]="filters.bankName" placeholder="..." readonly style="flex: 1; border: none; padding: 6px; font-size: 13px; outline: none;" />
+          <span class="material-icons" (click)="openAccountModal()" style="color: #64748b; font-size: 18px; padding: 4px 8px; cursor: pointer; background: #f8fafc; border-left: 1px solid #cbd5e1;">search</span>
+        </div>
+      </div>
+      <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+        <label style="width: 60px; text-align: right; color: #64748b; font-size: 13px;">Desde:</label>
+        <input type="date" [(ngModel)]="filters.desde" style="flex: 1; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 13px; outline: none;" />
+      </div>
+      <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+        <label style="width: 60px; text-align: right; color: #64748b; font-size: 13px;">Hasta:</label>
+        <input type="date" [(ngModel)]="filters.hasta" style="flex: 1; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 13px; outline: none;" />
+      </div>
+
+      <!-- Row 2 -->
+      <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+        <label style="width: 60px; text-align: right; color: #64748b; font-size: 13px;">Tipo:</label>
+        <select [(ngModel)]="filters.tipo" style="flex: 1; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 13px; outline: none;">
+          <option value="Todos">Todos</option>
+          <option value="Ingreso">Ingresos</option>
+          <option value="Egreso">Egresos</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="margin-top: 16px;">
+      <button class="btn btn-primary" (click)="loadStatement()" style="background-color: #0ea5e9; color: white; border: none; padding: 8px 16px; border-radius: 4px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+        <span class="material-icons" style="font-size: 16px;">search</span> Consultar
+      </button>
+    </div>
+  </section>
+
+  <div style="margin-bottom: 8px; font-size: 14px; color: #334155; font-weight: 600;" *ngIf="searchedData">
+    Movimientos del {{ formatDate(filters.desde) }} al {{ formatDate(filters.hasta) }}:
+  </div>
+
+  <div class="card table-container" style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+    <table class="data-table" style="width: 100%; border-collapse: collapse; font-size: 12px;">
+      <thead style="background-color: #f1f5f9; color: #475569;">
+        <tr>
+          <th style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; text-align: left; font-weight: 600;">Fecha</th>
+          <th style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; text-align: left; font-weight: 600;">Detalle</th>
+          <th style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; text-align: left; font-weight: 600;">Persona</th>
+          <th style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; text-align: left; font-weight: 600;">Referencia</th>
+          <th style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; text-align: left; font-weight: 600;">Tipo</th>
+          <th style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: 600;">Monto</th>
+          <th style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: 600;">Saldo</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Fila de Saldo Inicial -->
+        <tr style="border-bottom: 1px solid #e2e8f0; background-color: #f8fafc;" *ngIf="searchedData">
+          <td style="padding: 10px 12px;"></td>
+          <td style="padding: 10px 12px; font-weight: 600; color: #334155;">Saldo inicial al {{ formatDate(filters.desde) }}:</td>
+          <td style="padding: 10px 12px;"></td>
+          <td style="padding: 10px 12px;"></td>
+          <td style="padding: 10px 12px;"></td>
+          <td style="padding: 10px 12px;"></td>
+          <td style="padding: 10px 12px; text-align: right; color: #334155;">{{ formatCurrency(initialBalance) }}</td>
+        </tr>
+
+        <!-- Iteración de Movimientos -->
+        <tr *ngFor="let m of filteredMovements" style="border-bottom: 1px solid #e2e8f0;">
+          <td style="padding: 10px 12px; color: #475569;">{{ formatDate(m.date) }}</td>
+          <td style="padding: 10px 12px; color: #475569;">{{ m.description || m.transactionType }}</td>
+          <td style="padding: 10px 12px; color: #475569;">{{ m.personName }}</td>
+          <td style="padding: 10px 12px; color: #475569;">{{ m.reference || m.checkNumber || m.paymentMethod }}</td>
+          <td style="padding: 10px 12px; color: #475569;">{{ (m.type === 'Egreso' || m.transactionType === 'Egreso') ? 'CHE' : 'N/D' }}</td>
+          <td style="padding: 10px 12px; text-align: right; color: #475569;">{{ formatCurrency(m.amount) }}</td>
+          <td style="padding: 10px 12px; text-align: right; color: #475569;">{{ formatCurrency(m.runningBalance) }}</td>
+        </tr>
+        
+        <tr *ngIf="filteredMovements.length === 0 && searchedData">
+          <td colspan="7" style="text-align: center; padding: 24px; color: #64748b;">No hay registros para las fechas y banco seleccionados.</td>
+        </tr>
+        
+        <tr *ngIf="!searchedData">
+          <td colspan="7" style="text-align: center; padding: 24px; color: #64748b;">Selecciona un banco y rango de fechas para consultar.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<app-account-selector-modal 
+  [isVisible]="isAccountModalVisible" 
+  (close)="isAccountModalVisible = false"
+  (accountSelected)="onAccountSelected($event)">
+</app-account-selector-modal>

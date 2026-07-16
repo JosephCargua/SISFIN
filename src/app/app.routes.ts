@@ -143,6 +143,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'bank-statement',
+        loadComponent: () =>
+          import('./pages/bank-statement/bank-statement.component').then(
+            (m) => m.BankStatementComponent,
+          ),
+      },
+      {
         path: 'register-bank-movement',
         loadComponent: () =>
           import('./pages/register-bank-movement/register-bank-movement.component').then(

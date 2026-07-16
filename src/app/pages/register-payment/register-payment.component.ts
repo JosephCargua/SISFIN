@@ -79,13 +79,27 @@ export class RegisterPaymentComponent implements OnInit {
     const documentLabel = `${cat} ${doc.documentNumber}`;
     this.description = `Pago de doc. ${documentLabel}, ${this.personName}`;
     
+    const id = this.route.snapshot.queryParams['id'];
+    const paidDocs = JSON.parse(localStorage.getItem('paidDocuments') || '{}');
+    let prevPaid = 0;
+    if (id && paidDocs[id]) {
+      if (typeof paidDocs[id] === 'object' && paidDocs[id].amount) {
+        prevPaid = paidDocs[id].amount;
+      } else if (typeof paidDocs[id] === 'string') {
+        prevPaid = Number(doc.total) || 0;
+      }
+    }
+    
+    const value = Number(doc.total) || 0;
+    const balance = Math.max(0, value - prevPaid);
+    
     this.documents = [{
       documentLabel: documentLabel,
       issueDate: doc.issueDate,
       type: cat === 'FAC' ? 'Factura' : 'Documento',
-      value: doc.total || 0,
-      balance: doc.total || 0,
-      amountToPay: 0.0
+      value: value,
+      balance: balance,
+      amountToPay: balance
     }];
     this.recalcTotal();
   }
@@ -94,13 +108,30 @@ export class RegisterPaymentComponent implements OnInit {
     this.total = this.documents.reduce((acc, doc) => acc + (doc.amountToPay || 0), 0);
   }
 
+  formatCurrency(amount: number): string {
+    if (amount === undefined || amount === null || isNaN(amount)) return '$0.00';
+    return new Intl.NumberFormat('es-EC', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+    }).format(amount);
+  }
+
   save() {
     this.saving = true;
     setTimeout(() => {
       const id = this.route.snapshot.queryParams['id'];
       if (id) {
+        const totalPaid = this.documents.reduce((acc, doc) => acc + (doc.amountToPay || 0), 0);
         const paidDocs = JSON.parse(localStorage.getItem('paidDocuments') || '{}');
-        paidDocs[id] = this.transactionType === 'Pago' ? 'Pagado' : 'Cobrado';
+        let currentRecord = paidDocs[id];
+        let prevAmount = 0;
+        if (typeof currentRecord === 'object' && currentRecord !== null) {
+          prevAmount = currentRecord.amount || 0;
+        }
+        
+        const newStatus = this.transactionType === 'Pago' ? 'Pagado' : 'Cobrado';
+        paidDocs[id] = { amount: prevAmount + totalPaid, status: newStatus };
         localStorage.setItem('paidDocuments', JSON.stringify(paidDocs));
       }
       alert('Pago registrado correctamente');

@@ -136,6 +136,20 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'bank-movements',
+        loadComponent: () =>
+          import('./pages/bank-movements/bank-movements.component').then(
+            (m) => m.BankMovementsComponent,
+          ),
+      },
+      {
+        path: 'register-bank-movement',
+        loadComponent: () =>
+          import('./pages/register-bank-movement/register-bank-movement.component').then(
+            (m) => m.RegisterBankMovementComponent,
+          ),
+      },
+      {
         path: 'cost-centers',
         loadComponent: () =>
           import('./pages/cost-centers/cost-centers.component').then(

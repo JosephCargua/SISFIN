@@ -25,7 +25,7 @@
       </div>
 
       <label style="text-align: right; color: #64748b; font-size: 13px;">Saldo:</label>
-      <span style="font-size: 13px; color: #1e293b; padding: 6px 0;">{{ balance.toFixed(1) }}</span>
+      <span style="font-size: 13px; color: #1e293b; padding: 6px 0;">{{ formatCurrency(balance) }}</span>
 
       <label style="text-align: right; color: #64748b; font-size: 13px;">Tipo de transacción:</label>
       <div style="display: flex; gap: 8px;">
@@ -55,51 +55,172 @@
 
   <section class="card detail-section" style="background: white; border: 1px solid #e2e8f0; border-radius: 8px;">
     <div class="tabs" role="tablist" style="display: flex; border-bottom: 1px solid #e2e8f0; background: #f8fafc; padding: 8px 16px 0; gap: 16px;">
-      <button type="button" class="tab active" style="padding: 8px 16px; border: none; background: white; border-top: 2px solid #0ea5e9; border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; border-bottom: 1px solid white; margin-bottom: -1px; color: #0ea5e9; font-weight: 500;">Documentos</button>
-      <button type="button" class="tab" style="padding: 8px 16px; border: none; background: transparent; color: #64748b; cursor: pointer;">Anticipos</button>
-      <button type="button" class="tab" style="padding: 8px 16px; border: none; background: transparent; color: #64748b; cursor: pointer;">Cuentas contables</button>
+      <button type="button" class="tab" [class.active]="activeTab === 'Documentos'" (click)="activeTab = 'Documentos'" [ngStyle]="{'padding': '8px 16px', 'border': 'none', 'background': activeTab === 'Documentos' ? 'white' : 'transparent', 'border-top': activeTab === 'Documentos' ? '2px solid #0ea5e9' : 'none', 'border-left': activeTab === 'Documentos' ? '1px solid #e2e8f0' : 'none', 'border-right': activeTab === 'Documentos' ? '1px solid #e2e8f0' : 'none', 'border-bottom': activeTab === 'Documentos' ? '1px solid white' : 'none', 'margin-bottom': '-1px', 'color': activeTab === 'Documentos' ? '#0ea5e9' : '#64748b', 'font-weight': activeTab === 'Documentos' ? '500' : 'normal', 'cursor': 'pointer'}">Documentos</button>
+      <button type="button" class="tab" [class.active]="activeTab === 'Anticipos'" (click)="activeTab = 'Anticipos'" [ngStyle]="{'padding': '8px 16px', 'border': 'none', 'background': activeTab === 'Anticipos' ? 'white' : 'transparent', 'border-top': activeTab === 'Anticipos' ? '2px solid #0ea5e9' : 'none', 'border-left': activeTab === 'Anticipos' ? '1px solid #e2e8f0' : 'none', 'border-right': activeTab === 'Anticipos' ? '1px solid #e2e8f0' : 'none', 'border-bottom': activeTab === 'Anticipos' ? '1px solid white' : 'none', 'margin-bottom': '-1px', 'color': activeTab === 'Anticipos' ? '#0ea5e9' : '#64748b', 'font-weight': activeTab === 'Anticipos' ? '500' : 'normal', 'cursor': 'pointer'}">Anticipos</button>
+      <button type="button" class="tab" [class.active]="activeTab === 'Cuentas contables'" (click)="activeTab = 'Cuentas contables'" [ngStyle]="{'padding': '8px 16px', 'border': 'none', 'background': activeTab === 'Cuentas contables' ? 'white' : 'transparent', 'border-top': activeTab === 'Cuentas contables' ? '2px solid #0ea5e9' : 'none', 'border-left': activeTab === 'Cuentas contables' ? '1px solid #e2e8f0' : 'none', 'border-right': activeTab === 'Cuentas contables' ? '1px solid #e2e8f0' : 'none', 'border-bottom': activeTab === 'Cuentas contables' ? '1px solid white' : 'none', 'margin-bottom': '-1px', 'color': activeTab === 'Cuentas contables' ? '#0ea5e9' : '#64748b', 'font-weight': activeTab === 'Cuentas contables' ? '500' : 'normal', 'cursor': 'pointer'}">Cuentas contables</button>
     </div>
 
     <div class="tab-panel" style="padding: 16px;">
-      <div class="table-scroll" style="overflow-x: auto;">
-        <table class="detail-table" style="width: 100%; border-collapse: collapse; min-width: 800px; font-size: 13px;">
-          <thead>
-            <tr style="background-color: #f1f5f9; text-align: left; color: #475569;">
-              <th style="padding: 8px; border: 1px solid #e2e8f0;">Documento</th>
-              <th style="padding: 8px; border: 1px solid #e2e8f0;">Fecha Emisión</th>
-              <th style="padding: 8px; border: 1px solid #e2e8f0;">Tipo Documento</th>
-              <th style="padding: 8px; border: 1px solid #e2e8f0; text-align: right;">Valor</th>
-              <th style="padding: 8px; border: 1px solid #e2e8f0; text-align: right;">Saldo</th>
-              <th style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; width: 120px;">Valor a Pagar</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let doc of documents; let i = index" style="border-bottom: 1px solid #e2e8f0;">
-              <td style="padding: 8px; border-right: 1px solid #e2e8f0;">{{ doc.documentLabel }}</td>
-              <td style="padding: 8px; border-right: 1px solid #e2e8f0;">{{ doc.issueDate }}</td>
-              <td style="padding: 8px; border-right: 1px solid #e2e8f0;">{{ doc.type }}</td>
-              <td style="padding: 8px; border-right: 1px solid #e2e8f0; text-align: right;">{{ doc.value.toFixed(1) }}</td>
-              <td style="padding: 8px; border-right: 1px solid #e2e8f0; text-align: right;">{{ doc.balance.toFixed(1) }}</td>
-              <td style="padding: 8px; display: flex; align-items: center; justify-content: flex-end;">
-                <input type="number" [(ngModel)]="doc.amountToPay" style="width: 80px; padding: 4px; text-align: right; border: 1px solid #cbd5e1; border-radius: 4px;" />
-              </td>
-            </tr>
-            <tr *ngIf="documents.length === 0">
-              <td colspan="6" style="padding: 16px; text-align: center; color: #64748b;">Sin documentos</td>
-            </tr>
-          </tbody>
-        </table>
+      
+      <!-- Documentos Tab -->
+      <div *ngIf="activeTab === 'Documentos'">
+        <div class="table-scroll" style="overflow-x: auto;">
+          <table class="detail-table" style="width: 100%; border-collapse: collapse; min-width: 800px; font-size: 13px;">
+            <thead>
+              <tr style="background-color: #f1f5f9; text-align: left; color: #475569;">
+                <th style="padding: 8px; border: 1px solid #e2e8f0;">Documento</th>
+                <th style="padding: 8px; border: 1px solid #e2e8f0;">Fecha Emisión</th>
+                <th style="padding: 8px; border: 1px solid #e2e8f0;">Tipo Documento</th>
+                <th style="padding: 8px; border: 1px solid #e2e8f0; text-align: right;">Valor</th>
+                <th style="padding: 8px; border: 1px solid #e2e8f0; text-align: right;">Saldo</th>
+                <th style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; width: 120px;">Valor a Pagar</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let doc of documents; let i = index" style="border-bottom: 1px solid #e2e8f0;">
+                <td style="padding: 8px; border-right: 1px solid #e2e8f0;">{{ doc.documentLabel }}</td>
+                <td style="padding: 8px; border-right: 1px solid #e2e8f0;">{{ doc.issueDate }}</td>
+                <td style="padding: 8px; border-right: 1px solid #e2e8f0;">{{ doc.type }}</td>
+                <td style="padding: 8px; border-right: 1px solid #e2e8f0; text-align: right;">{{ formatCurrency(doc.value) }}</td>
+                <td style="padding: 8px; border-right: 1px solid #e2e8f0; text-align: right;">{{ formatCurrency(doc.balance) }}</td>
+                <td style="padding: 8px; display: flex; align-items: center; justify-content: flex-end;">
+                  <input type="number" [(ngModel)]="doc.amountToPay" style="width: 80px; padding: 4px; text-align: right; border: 1px solid #cbd5e1; border-radius: 4px;" />
+                </td>
+              </tr>
+              <tr *ngIf="documents.length === 0">
+                <td colspan="6" style="padding: 16px; text-align: center; color: #64748b;">Sin documentos</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      <button type="button" class="btn btn-primary btn-sm" style="background-color: #0ea5e9; border: none; color: white; padding: 6px 12px; border-radius: 4px; margin-top: 16px; display: inline-flex; align-items: center; gap: 4px; font-size: 13px;">
-        <span class="material-icons" style="font-size: 16px;">add_circle</span> Agregar Detalle
-      </button>
+      <!-- Anticipos Tab -->
+      <div *ngIf="activeTab === 'Anticipos'">
+        <div class="table-scroll" style="overflow-x: auto;">
+          <table class="detail-table" style="width: 100%; border-collapse: collapse; min-width: 800px; font-size: 13px;">
+            <thead>
+              <tr style="background-color: #f1f5f9; text-align: left; color: #475569;">
+                <th style="padding: 8px; border: 1px solid #e2e8f0; width: 40px; text-align: center;"></th>
+                <th style="padding: 8px; border: 1px solid #e2e8f0;">Persona</th>
+                <th style="padding: 8px; border: 1px solid #e2e8f0;">Anticipo</th>
+                <th style="padding: 8px; border: 1px solid #e2e8f0;">Fecha Emisión</th>
+                <th style="padding: 8px; border: 1px solid #e2e8f0; text-align: right;">Valor</th>
+                <th style="padding: 8px; border: 1px solid #e2e8f0; text-align: right;">Saldo</th>
+                <th style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; width: 120px;">Valor a Pagar</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let adv of advances; let i = index" style="border-bottom: 1px solid #e2e8f0;">
+                <td style="padding: 8px; text-align: center; border-right: 1px solid #e2e8f0;">
+                  <button type="button" (click)="advances.splice(i, 1)" class="btn-icon btn-danger" style="color: #ef4444; border: none; background: none; cursor: pointer;"><span class="material-icons" style="font-size: 16px;">delete</span></button>
+                </td>
+                <td style="padding: 8px; border-right: 1px solid #e2e8f0;">
+                  <div style="display: flex; align-items: center; border: 1px solid #cbd5e1; border-radius: 4px; overflow: hidden;">
+                    <input type="text" [(ngModel)]="adv.person" style="flex: 1; border: none; padding: 4px; outline: none; width: 100%;" />
+                    <span class="material-icons" style="color: #64748b; padding: 0 4px; font-size: 16px; cursor: pointer;">search</span>
+                  </div>
+                </td>
+                <td style="padding: 8px; border-right: 1px solid #e2e8f0;">
+                  <div style="display: flex; align-items: center; border: 1px solid #cbd5e1; border-radius: 4px; overflow: hidden;">
+                    <input type="text" [(ngModel)]="adv.advance" style="flex: 1; border: none; padding: 4px; outline: none; width: 100%;" placeholder="..." />
+                    <span class="material-icons" style="color: #64748b; padding: 0 4px; font-size: 16px; cursor: pointer;">search</span>
+                  </div>
+                </td>
+                <td style="padding: 8px; border-right: 1px solid #e2e8f0;">{{ adv.issueDate }}</td>
+                <td style="padding: 8px; border-right: 1px solid #e2e8f0; text-align: right;">{{ formatCurrency(adv.value) }}</td>
+                <td style="padding: 8px; border-right: 1px solid #e2e8f0; text-align: right;">{{ formatCurrency(adv.balance) }}</td>
+                <td style="padding: 8px; display: flex; align-items: center; justify-content: flex-end; gap: 4px;">
+                  <input type="number" [(ngModel)]="adv.amountToPay" style="width: 80px; padding: 4px; text-align: right; border: 1px solid #cbd5e1; border-radius: 4px;" />
+                  <span class="material-icons" style="color: #64748b; font-size: 16px; cursor: pointer;">flip_to_front</span>
+                </td>
+              </tr>
+              <tr *ngIf="advances.length === 0">
+                <td colspan="7" style="padding: 16px; text-align: center; color: #64748b;">Sin anticipos</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <button type="button" (click)="addAdvance()" class="btn btn-primary btn-sm" style="background-color: #0ea5e9; border: none; color: white; padding: 6px 12px; border-radius: 4px; margin-top: 16px; display: inline-flex; align-items: center; gap: 4px; font-size: 13px; cursor: pointer;">
+          <span class="material-icons" style="font-size: 16px;">add_circle</span> Agregar Detalle
+        </button>
+      </div>
+
+      <!-- Cuentas Contables Tab -->
+      <div *ngIf="activeTab === 'Cuentas contables'">
+        <div class="table-scroll" style="overflow-x: auto;">
+          <table class="detail-table" style="width: 100%; border-collapse: collapse; min-width: 800px; font-size: 13px;">
+            <thead>
+              <tr style="background-color: #f1f5f9; text-align: left; color: #475569;">
+                <th style="padding: 8px; border: 1px solid #e2e8f0; width: 40px; text-align: center;"></th>
+                <th style="padding: 8px; border: 1px solid #e2e8f0;">Cuenta Contable</th>
+                <th style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; width: 120px;">Valor a Pagar</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let acc of accounts; let i = index" style="border-bottom: 1px solid #e2e8f0;">
+                <td style="padding: 8px; text-align: center; border-right: 1px solid #e2e8f0;">
+                  <button type="button" (click)="accounts.splice(i, 1)" class="btn-icon btn-danger" style="color: #ef4444; border: none; background: none; cursor: pointer;"><span class="material-icons" style="font-size: 16px;">delete</span></button>
+                </td>
+                <td style="padding: 8px; border-right: 1px solid #e2e8f0;">{{ acc.accountName }}</td>
+                <td style="padding: 8px; display: flex; align-items: center; justify-content: flex-end; gap: 4px;">
+                  <input type="number" [(ngModel)]="acc.amountToPay" style="width: 80px; padding: 4px; text-align: right; border: 1px solid #cbd5e1; border-radius: 4px;" />
+                </td>
+              </tr>
+              <tr *ngIf="accounts.length === 0">
+                <td colspan="3" style="padding: 16px; text-align: center; color: #64748b;">Sin cuentas contables</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <button type="button" (click)="addAccount()" class="btn btn-primary btn-sm" style="background-color: #0ea5e9; border: none; color: white; padding: 6px 12px; border-radius: 4px; margin-top: 16px; display: inline-flex; align-items: center; gap: 4px; font-size: 13px; cursor: pointer;">
+          <span class="material-icons" style="font-size: 16px;">add_circle</span> Agregar Detalle
+        </button>
+      </div>
+
     </div>
   </section>
 
   <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
-    <button type="button" class="btn btn-primary" (click)="save()" [disabled]="saving" style="background-color: #0ea5e9; border: none; color: white; padding: 8px 16px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;">
+    <button type="button" class="btn btn-primary" (click)="save()" [disabled]="saving" style="background-color: #0ea5e9; border: none; color: white; padding: 8px 16px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer;">
       <span class="material-icons" style="font-size: 18px;">save</span> {{ saving ? 'Guardando...' : 'Guardar' }}
     </button>
+  </div>
+</div>
+
+<!-- Modal Seleccionar Cuenta -->
+<div *ngIf="showAccountModal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;">
+  <div style="background: white; border-radius: 8px; width: 600px; max-width: 90vw; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid #e2e8f0;">
+      <h3 style="margin: 0; font-size: 18px; color: #1e293b;">Seleccionar cuenta</h3>
+      <span class="material-icons" (click)="showAccountModal = false" style="cursor: pointer; color: #0ea5e9;">close</span>
+    </div>
+    <div style="padding: 16px;">
+      <div style="display: flex; gap: 8px; margin-bottom: 16px; align-items: center;">
+        <span style="font-size: 13px; font-weight: 500; color: #334155;">Filtro:</span>
+        <input type="text" style="flex: 1; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;" />
+        <button type="button" style="background-color: #0ea5e9; border: none; color: white; padding: 6px 12px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; font-size: 13px;">
+          <span class="material-icons" style="font-size: 16px;">search</span> Consultar
+        </button>
+      </div>
+      <div style="max-height: 400px; overflow-y: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+          <thead>
+            <tr style="background-color: #f1f5f9; text-align: left; color: #475569;">
+              <th style="padding: 8px; border: 1px solid #e2e8f0;">Código</th>
+              <th style="padding: 8px; border: 1px solid #e2e8f0;">Cuenta</th>
+              <th style="padding: 8px; border: 1px solid #e2e8f0;">Grupo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let acc of mockAccounts" (click)="selectAccount(acc)" style="border-bottom: 1px solid #e2e8f0; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor='transparent'">
+              <td style="padding: 8px; border-right: 1px solid #e2e8f0; font-weight: 500; color: #0f172a;">{{ acc.code }}</td>
+              <td style="padding: 8px; border-right: 1px solid #e2e8f0; color: #0ea5e9; text-decoration: underline;">{{ acc.name }}</td>
+              <td style="padding: 8px; border-right: 1px solid #e2e8f0;">{{ acc.group }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 </div>

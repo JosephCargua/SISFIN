@@ -4,24 +4,37 @@ import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { BankingService } from '../../core/services/banking.service';
 import { AccountService } from '../../core/services/account.service';
+import { AccountSelectorModalComponent } from '../../components/account-selector-modal/account-selector-modal.component';
 
 @Component({
   selector: 'app-bank-reconciliations',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, AccountSelectorModalComponent],
   templateUrl: './bank-reconciliations.component.html',
   styleUrl: './bank-reconciliations.component.scss'
 })
 export class BankReconciliationsComponent implements OnInit {
   reconciliations: any[] = [];
   bankAccounts: any[] = [];
+  isAccountModalVisible = false;
   
   filters = {
     bankId: '',
+    bankName: '',
     text: '',
     dateFrom: '',
     dateTo: ''
   };
+
+  openAccountModal() {
+    this.isAccountModalVisible = true;
+  }
+
+  onAccountSelected(account: any) {
+    this.filters.bankId = account.id;
+    this.filters.bankName = account.name;
+    this.isAccountModalVisible = false;
+  }
 
   constructor(
     private bankingService: BankingService,

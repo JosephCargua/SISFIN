@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { BankingService } from '../../core/services/banking.service';
 import {
   BankAccount,
@@ -14,7 +15,7 @@ import {
 @Component({
   selector: 'app-banking',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './banking.component.html',
   styleUrl: './banking.component.scss',
 })

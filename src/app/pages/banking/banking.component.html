@@ -6,7 +6,7 @@
         <span class="material-icons">account_balance</span>
         Caja
       </button>
-      <button class="btn btn-secondary" (click)="showBankAccountForm = !showBankAccountForm">
+      <button class="btn btn-secondary" routerLink="/register-bank-account">
         <span class="material-icons">account_balance</span>
         Banco
       </button>
@@ -17,40 +17,7 @@
     </div>
   </div>
 
-  <div *ngIf="showBankAccountForm" class="create-form card">
-    <h2>Crear Cuenta Bancaria</h2>
-    <form (ngSubmit)="createBankAccount()">
-      <div class="form-row">
-        <div class="form-group">
-          <label>Número de Cuenta *</label>
-          <input
-            type="text"
-            [(ngModel)]="newBankAccount.accountNumber"
-            name="accountNumber"
-            required
-          />
-        </div>
-        <div class="form-group">
-          <label>Banco *</label>
-          <input type="text" [(ngModel)]="newBankAccount.bankName" name="bankName" required />
-        </div>
-        <div class="form-group">
-          <label>Tipo de Cuenta *</label>
-          <select [(ngModel)]="newBankAccount.accountType" name="accountType" required>
-            <option value="CHECKING">Corriente</option>
-            <option value="SAVINGS">Ahorros</option>
-          </select>
-        </div>
 
-      </div>
-      <div class="form-actions">
-        <button type="button" class="btn btn-secondary" (click)="showBankAccountForm = false">
-          Cancelar
-        </button>
-        <button type="submit" class="btn btn-primary">Crear Cuenta</button>
-      </div>
-    </form>
-  </div>
 
   <div *ngIf="showCashAccountForm" class="create-form card">
     <h2>Crear Caja</h2>

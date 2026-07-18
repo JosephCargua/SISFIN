@@ -226,6 +226,20 @@ export const routes: Routes = [
             (m) => m.RegisterReconciliationComponent,
           ),
       },
+      {
+        path: 'register-bank-account',
+        loadComponent: () =>
+          import('./pages/register-bank-account/register-bank-account.component').then(
+            (m) => m.RegisterBankAccountComponent,
+          ),
+      },
+      {
+        path: 'register-bank-account/:id',
+        loadComponent: () =>
+          import('./pages/register-bank-account/register-bank-account.component').then(
+            (m) => m.RegisterBankAccountComponent,
+          ),
+      },
     ],
   },
 ];

@@ -1,0 +1,167 @@
+<div class="register-bank-account-container" style="padding: 16px; background-color: #f8fafc; min-height: 100vh;">
+  <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+    <h2 style="font-size: 20px; font-weight: 500; color: #334155; margin: 0;">Registrar Cuenta Bancaria</h2>
+    <button class="btn-icon" style="background-color: #0ea5e9; color: white; border: none; width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+      <span class="material-icons" style="font-size: 20px;">add</span>
+    </button>
+  </div>
+
+  <div class="card" style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column;">
+    <!-- Tabs Header -->
+    <div class="tabs-header" style="display: flex; border-bottom: 1px solid #e2e8f0; background: #f8fafc;">
+      <div class="tab" 
+           [class.active]="activeTab === 'datosGenerales'" 
+           (click)="setTab('datosGenerales')"
+           style="padding: 12px 16px; font-size: 13px; font-weight: 500; cursor: pointer; border-right: 1px solid #e2e8f0; color: #64748b;">
+        Datos Generales
+      </div>
+      <div class="tab" 
+           [class.active]="activeTab === 'secuenciaCheques'" 
+           (click)="setTab('secuenciaCheques')"
+           style="padding: 12px 16px; font-size: 13px; font-weight: 500; cursor: pointer; border-right: 1px solid #e2e8f0; color: #64748b;">
+        Secuencia de Cheques
+      </div>
+      <div class="tab" 
+           [class.active]="activeTab === 'anulacionCheques'" 
+           (click)="setTab('anulacionCheques')"
+           style="padding: 12px 16px; font-size: 13px; font-weight: 500; cursor: pointer; border-right: 1px solid #e2e8f0; color: #64748b;">
+        Anulación de Cheques
+      </div>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="tab-content" style="padding: 24px;">
+      
+      <!-- Datos Generales -->
+      <div *ngIf="activeTab === 'datosGenerales'">
+        <h3 style="font-size: 16px; font-weight: 500; color: #334155; margin-bottom: 24px;">Datos Generales</h3>
+
+        <div class="form-grid" style="display: grid; grid-template-columns: 140px 1fr; gap: 12px 24px; max-width: 600px; align-items: center;">
+          
+          <label style="text-align: right; font-size: 13px; color: #64748b;">Estado:</label>
+          <select [(ngModel)]="formData.isActive" style="padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 13px; outline: none; width: 100%;">
+            <option [ngValue]="true">Activa</option>
+            <option [ngValue]="false">Inactiva</option>
+          </select>
+
+          <label style="text-align: right; font-size: 13px; color: #64748b;">Tipo:</label>
+          <select [(ngModel)]="formData.accountType" style="padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 13px; outline: none; width: 100%;">
+            <option value="Cuenta de Ahorros">Cuenta de Ahorros</option>
+            <option value="Corriente">Corriente</option>
+          </select>
+
+          <label style="text-align: right; font-size: 13px; color: #64748b;">Nombre: <span style="color: #ef4444;">*</span></label>
+          <input type="text" [(ngModel)]="formData.name" style="padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 13px; outline: none; width: 100%;" />
+
+          <label style="text-align: right; font-size: 13px; color: #64748b;">Número de Cuenta: <span style="color: #ef4444;">*</span></label>
+          <input type="text" [(ngModel)]="formData.accountNumber" style="padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 13px; outline: none; width: 100%;" />
+
+          <label style="text-align: right; font-size: 13px; color: #64748b;">Cuenta Contable: <span style="color: #ef4444;">*</span></label>
+          <div class="input-with-icon" style="display: flex; border: 1px solid #cbd5e1; border-radius: 4px; overflow: hidden;">
+            <input type="text" [(ngModel)]="accountName" placeholder="..." readonly style="flex: 1; border: none; padding: 6px 12px; font-size: 13px; outline: none;" />
+            <span class="material-icons" (click)="openAccountModal()" style="color: #64748b; font-size: 18px; padding: 4px 8px; cursor: pointer; background: #f8fafc; border-left: 1px solid #cbd5e1;">search</span>
+          </div>
+
+          <label style="text-align: right; font-size: 13px; color: #64748b;">Banco: <span style="color: #ef4444;">*</span></label>
+          <select [(ngModel)]="formData.bankName" style="padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 13px; outline: none; width: 100%;">
+            <option value="">-- Seleccionar/Buscar --</option>
+            <option *ngFor="let bank of bankOptions" [value]="bank">{{ bank }}</option>
+          </select>
+
+          <label style="text-align: right; font-size: 13px; color: #64748b;">Ciudad: <span style="color: #ef4444;">*</span></label>
+          <div class="input-with-icon" style="display: flex; border: 1px solid #cbd5e1; border-radius: 4px; overflow: hidden;">
+            <input type="text" [(ngModel)]="formData.city" style="flex: 1; border: none; padding: 6px 12px; font-size: 13px; outline: none;" />
+            <span class="material-icons" style="color: #64748b; font-size: 18px; padding: 4px 8px; cursor: pointer; background: #f8fafc; border-left: 1px solid #cbd5e1;">search</span>
+          </div>
+
+          <label style="text-align: right; font-size: 13px; color: #64748b;">Formato de cheque:</label>
+          <select [(ngModel)]="formData.checkFormat" style="padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 13px; outline: none; width: 100%;">
+            <option *ngFor="let fmt of formatOptions" [value]="fmt">{{ fmt }}</option>
+          </select>
+
+          <label style="text-align: right; font-size: 13px; color: #64748b;">Para Formato Cobro:</label>
+          <div>
+            <input type="checkbox" [(ngModel)]="formData.forCollectionFormat" style="cursor: pointer;" />
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Secuencia de Cheques -->
+      <div *ngIf="activeTab === 'secuenciaCheques'">
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 16px;">
+          <thead style="background-color: #f1f5f9; color: #475569;">
+            <tr>
+              <th style="width: 40px; text-align: center; padding: 10px; border: 1px solid #e2e8f0;"></th>
+              <th style="text-align: center; padding: 10px; border: 1px solid #e2e8f0; font-weight: 500;">Secuencia Inicio</th>
+              <th style="text-align: center; padding: 10px; border: 1px solid #e2e8f0; font-weight: 500;">Secuencia Fin</th>
+              <th style="text-align: center; padding: 10px; border: 1px solid #e2e8f0; font-weight: 500;">Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let seq of formData.checkSequences; let i = index">
+              <td style="text-align: center; padding: 8px; border: 1px solid #e2e8f0;">
+                <button (click)="removeSequence(i)" style="background: none; border: none; cursor: pointer; color: #ef4444;">
+                  <span class="material-icons" style="font-size: 16px;">delete</span>
+                </button>
+              </td>
+              <td style="padding: 8px; border: 1px solid #e2e8f0;">
+                <input type="text" [(ngModel)]="seq.startSequence" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; outline: none;" />
+              </td>
+              <td style="padding: 8px; border: 1px solid #e2e8f0;">
+                <input type="text" [(ngModel)]="seq.endSequence" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; outline: none;" />
+              </td>
+              <td style="padding: 8px; border: 1px solid #e2e8f0;">
+                <select [(ngModel)]="seq.isActive" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; outline: none;">
+                  <option [ngValue]="true">Activa</option>
+                  <option [ngValue]="false">Inactiva</option>
+                </select>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <button class="btn btn-primary" (click)="addSequence()" style="background-color: #0ea5e9; color: white; border: none; padding: 8px 16px; border-radius: 4px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+          <span class="material-icons" style="font-size: 16px;">add_circle</span> Agregar Secuencia
+        </button>
+      </div>
+
+      <!-- Anulación de Cheques -->
+      <div *ngIf="activeTab === 'anulacionCheques'">
+        <p style="font-size: 13px; color: #475569; margin-bottom: 8px;">Seleccione los cheques que desea Anular.</p>
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+          <thead style="background-color: #f1f5f9; color: #475569;">
+            <tr>
+              <th style="width: 40px; text-align: center; padding: 10px; border: 1px solid #e2e8f0;">
+                <input type="checkbox" />
+              </th>
+              <th style="text-align: center; padding: 10px; border: 1px solid #e2e8f0; font-weight: 500;">Cheques Disponibles</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="2" style="text-align: center; padding: 16px; color: #94a3b8; border: 1px solid #e2e8f0;">
+                No hay cheques disponibles
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <!-- Action Bar -->
+    <div class="action-bar" style="padding: 16px 24px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end;">
+      <button class="btn btn-primary" (click)="save()" style="background-color: #0ea5e9; color: white; border: none; padding: 8px 24px; border-radius: 4px; font-size: 13px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+        <span class="material-icons" style="font-size: 16px;">save</span> Guardar
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<app-account-selector-modal 
+  [isVisible]="isAccountModalVisible" 
+  (close)="isAccountModalVisible = false"
+  (accountSelected)="onAccountSelected($event)">
+</app-account-selector-modal>

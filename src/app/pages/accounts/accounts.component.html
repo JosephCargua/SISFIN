@@ -10,11 +10,7 @@
   <div *ngIf="showCreateForm" class="create-form card">
     <h2>Crear Nueva Cuenta</h2>
     
-    <div class="info-box" *ngIf="newAccount.parentId">
-      <p><strong>⚠️ Importante:</strong></p>
-      <p>Si seleccionas una cuenta padre, asegúrate de que sea una <strong>Cuenta de Control</strong>.</p>
-      <p>Las cuentas de movimiento no pueden tener cuentas hijas.</p>
-    </div>
+
 
     <form (ngSubmit)="createAccount()">
       <div class="form-group">

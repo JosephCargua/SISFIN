@@ -1,10 +1,23 @@
+export interface CheckSequence {
+  id?: string;
+  startSequence: string;
+  endSequence: string;
+  isActive: boolean;
+}
+
 export interface BankAccount {
   id: string;
   accountNumber: string;
   bankName: string;
-  accountType: string;
-  balance: number;
+  name?: string;
+  accountType?: string;
+  city?: string;
+  checkFormat?: string;
+  forCollectionFormat?: boolean;
+  accountId: string;
+  balance?: number;
   isActive: boolean;
+  checkSequences?: CheckSequence[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -56,8 +69,14 @@ export interface BankTransaction {
 export interface CreateBankAccountDto {
   accountNumber: string;
   bankName: string;
-  accountType: string;
-  initialBalance?: number;
+  name?: string;
+  accountType?: string;
+  city?: string;
+  checkFormat?: string;
+  forCollectionFormat?: boolean;
+  accountId: string;
+  isActive?: boolean;
+  checkSequences?: CheckSequence[];
 }
 
 export interface CreateCashAccountDto {

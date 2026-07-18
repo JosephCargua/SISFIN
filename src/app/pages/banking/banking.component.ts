@@ -27,11 +27,10 @@ export class BankingComponent implements OnInit {
   showTransactionForm = false;
   selectedAccountId = '';
 
-  newBankAccount: CreateBankAccountDto = {
+  newBankAccount: any = {
     accountNumber: '',
     bankName: '',
-    accountType: 'CHECKING',
-    initialBalance: 0,
+    accountType: 'CHECKING'
   };
 
   newCashAccount: CreateCashAccountDto = {
@@ -136,8 +135,7 @@ export class BankingComponent implements OnInit {
     this.newBankAccount = {
       accountNumber: '',
       bankName: '',
-      accountType: 'CHECKING',
-      initialBalance: 0,
+      accountType: 'CHECKING'
     };
   }
 
@@ -162,7 +160,7 @@ export class BankingComponent implements OnInit {
   }
 
   getTotalBankBalance(): number {
-    return this.bankAccounts.reduce((sum, a) => sum + a.balance, 0);
+    return this.bankAccounts.reduce((sum, a) => sum + (a.balance || 0), 0);
   }
 
   getTotalCashBalance(): number {

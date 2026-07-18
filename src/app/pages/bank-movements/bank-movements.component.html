@@ -93,12 +93,16 @@
           <label>Origen:</label>
           <select [(ngModel)]="filters.origen">
             <option value="Todos">Todos</option>
+            <option value="Movimientos">Movimientos</option>
+            <option value="Transacciones">Transacciones</option>
           </select>
         </div>
         <div class="form-group" style="grid-column: 2 / 3; grid-row: 4 / 5;">
           <label>Tipo:</label>
           <select [(ngModel)]="filters.tipo">
             <option value="Todos">Todos</option>
+            <option value="Ingreso">Ingreso</option>
+            <option value="Egreso">Egreso</option>
           </select>
         </div>
         <div class="form-group" style="grid-column: 2 / 3; grid-row: 5 / 6;">
@@ -111,6 +115,8 @@
           <label>Estado:</label>
           <select [(ngModel)]="filters.estado">
             <option value="Todos">Todos</option>
+            <option value="Anulado">Anulado</option>
+            <option value="No Anulados">No Anulados</option>
           </select>
         </div>
         <div class="form-group" style="grid-column: 2 / 3; grid-row: 7 / 8;">

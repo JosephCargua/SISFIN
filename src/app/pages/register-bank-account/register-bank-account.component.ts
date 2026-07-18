@@ -31,7 +31,52 @@ export class RegisterBankAccountComponent implements OnInit {
   };
 
   accountName: string = '';
-  bankOptions = ['Banco Pichincha', 'Banco Guayaquil', 'Banco del Pacífico', 'Produbanco'];
+  bankOptions = [
+    'Banco Amazonas',
+    'Banco Bolivariano',
+    'Banco Coopnacional',
+    'Banco D-Miro',
+    'Banco de Desarrollo del Ecuador (BDE)',
+    'Banco de Machala',
+    'Banco del Austro',
+    'Banco del Pacífico',
+    'Banco Guayaquil',
+    'Banco Internacional',
+    'Banco Litoral',
+    'Banco Pichincha',
+    'Banco ProCredit',
+    'Banco Solidario',
+    'Banco VisionFund Ecuador',
+    'BanEcuador',
+    'BIESS',
+    'Citibank',
+    'Cooperativa 15 de Abril',
+    'Cooperativa 29 de Octubre',
+    'Cooperativa Alianza del Valle',
+    'Cooperativa Andalucía',
+    'Cooperativa Atuntaqui',
+    'Cooperativa Cacpeco',
+    'Cooperativa CACPE Pastaza',
+    'Cooperativa COOPROGRESO',
+    'Cooperativa El Sagrario',
+    'Cooperativa Jardín Azuayo',
+    'Cooperativa JEP',
+    'Cooperativa Mushuc Runa',
+    'Cooperativa Oscus',
+    'Cooperativa Pablo Muñoz Vega',
+    'Cooperativa Policía Nacional',
+    'Cooperativa Riobamba',
+    'Cooperativa San Francisco',
+    'Cooperativa San Francisco de Asís',
+    'Cooperativa San José',
+    'Cooperativa Santa Rosa',
+    'Cooperativa Tulcán',
+    'Mutualista Azuay',
+    'Mutualista Imbabura',
+    'Mutualista Pichincha',
+    'Produbanco',
+    'Otro...'
+  ];
   formatOptions = ['Bco. Guayaquil', 'Bco. Pichincha', 'Bco. Pacífico'];
 
   constructor(

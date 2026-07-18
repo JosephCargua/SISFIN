@@ -3,12 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { BankingService } from '../../core/services/banking.service';
-import { AccountSelectorModalComponent } from '../../components/account-selector-modal/account-selector-modal.component';
+import { BankAccountSelectorModalComponent } from '../../components/bank-account-selector-modal/bank-account-selector-modal.component';
 
 @Component({
   selector: 'app-bank-statement',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, AccountSelectorModalComponent],
+  imports: [CommonModule, FormsModule, RouterModule, BankAccountSelectorModalComponent],
   templateUrl: './bank-statement.component.html',
   styleUrl: './bank-statement.component.scss'
 })

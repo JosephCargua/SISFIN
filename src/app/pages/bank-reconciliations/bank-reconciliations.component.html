@@ -1,86 +1,89 @@
-<div class="page-container">
-  <div class="page-header">
+<div class="bank-movements-container">
+  <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
     <h1>Consultar Conciliaciones</h1>
-    <button class="btn btn-primary btn-add" routerLink="/register-reconciliation">
+    <button class="btn btn-action" routerLink="/register-reconciliation" style="background-color: white; border: 1px solid #e2e8f0; color: #0ea5e9; padding: 6px 12px; border-radius: 4px; display: flex; align-items: center;">
       <span class="material-icons">add</span>
     </button>
   </div>
 
-  <section class="card filter-section">
-    <div class="section-title">
-      <span class="material-icons" style="font-size: 1.2rem; margin-right: 8px;">expand_more</span> 
+  <section class="card filter-section" style="padding: 16px; margin-bottom: 16px; background: white; border: 1px solid #e2e8f0; border-radius: 8px;">
+    <div class="section-title" style="margin-bottom: 16px; color: #0ea5e9; font-weight: 500; display: flex; align-items: center; font-size: 14px;">
+      <span class="material-icons" style="margin-right: 4px; font-size: 18px;">expand_more</span>
       Búsqueda
     </div>
-    
-    <div class="filter-grid">
-      <div class="form-row">
-        <label>Banco:</label>
-        <div class="input-with-icon">
-          <input type="text" [(ngModel)]="filters.bankId" placeholder="..." />
-          <span class="material-icons">search</span>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;">
+      <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+        <label style="width: 60px; text-align: right; color: #64748b; font-size: 13px;">Banco:</label>
+        <div class="input-with-icon" style="flex: 1; display: flex; border: 1px solid #cbd5e1; border-radius: 4px; overflow: hidden; background: white;">
+          <input type="text" [(ngModel)]="filters.bankId" placeholder="..." style="flex: 1; border: none; padding: 6px; font-size: 13px; outline: none;" />
+          <span class="material-icons" style="color: #64748b; font-size: 18px; padding: 4px 8px; background: #f8fafc; border-left: 1px solid #cbd5e1;">search</span>
         </div>
       </div>
-      <div class="form-row">
-        <label>Desde:</label>
-        <input type="date" [(ngModel)]="filters.dateFrom" />
+      <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+        <label style="width: 60px; text-align: right; color: #64748b; font-size: 13px;">Desde:</label>
+        <input type="date" [(ngModel)]="filters.dateFrom" style="flex: 1; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 13px; outline: none;" />
       </div>
-      <div class="form-row">
-        <label>Hasta:</label>
-        <input type="date" [(ngModel)]="filters.dateTo" />
+      <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+        <label style="width: 60px; text-align: right; color: #64748b; font-size: 13px;">Hasta:</label>
+        <input type="date" [(ngModel)]="filters.dateTo" style="flex: 1; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 13px; outline: none;" />
       </div>
-      <div class="form-row">
-        <label>Filtro:</label>
-        <input type="text" [(ngModel)]="filters.text" />
+      <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+        <label style="width: 60px; text-align: right; color: #64748b; font-size: 13px;">Filtro:</label>
+        <input type="text" [(ngModel)]="filters.text" style="flex: 1; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 13px; outline: none;" />
       </div>
     </div>
 
-    <div class="filter-actions">
-      <button class="btn btn-primary" (click)="loadReconciliations()">
-        <span class="material-icons">search</span> Consultar
+    <div style="margin-top: 16px;">
+      <button class="btn btn-primary" (click)="loadReconciliations()" style="background-color: #0ea5e9; color: white; border: none; padding: 8px 16px; border-radius: 4px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+        <span class="material-icons" style="font-size: 16px;">search</span> Consultar
       </button>
     </div>
   </section>
 
-  <section class="card table-container">
-    <table class="data-table">
-      <thead>
+  <section class="card table-container" style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+    <table class="data-table" style="width: 100%; border-collapse: collapse; font-size: 12px;">
+      <thead style="background-color: #f1f5f9; color: #475569;">
         <tr>
-          <th style="width: 40px; text-align: center;"></th>
-          <th style="text-align: center;">Fecha</th>
-          <th>Banco</th>
-          <th style="text-align: center;">Estado</th>
-          <th style="text-align: right;">Saldo Final</th>
-          <th style="text-align: center; width: 100px;">Acciones</th>
+          <th style="width: 40px; text-align: center; padding: 10px 12px; border-bottom: 1px solid #e2e8f0;"></th>
+          <th style="text-align: center; padding: 10px 12px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Fecha</th>
+          <th style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Banco</th>
+          <th style="text-align: center; padding: 10px 12px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Estado</th>
+          <th style="text-align: right; padding: 10px 12px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Saldo Final</th>
+          <th style="text-align: center; width: 100px; padding: 10px 12px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Acciones</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let rec of reconciliations">
-          <td style="text-align: center;">
+        <tr *ngFor="let rec of reconciliations" style="border-bottom: 1px solid #e2e8f0;">
+          <td style="text-align: center; padding: 10px 12px;">
             <input type="checkbox" />
           </td>
-          <td style="text-align: center; color: #0ea5e9; font-weight: 500;">
+          <td style="text-align: center; color: #0ea5e9; font-weight: 500; padding: 10px 12px;">
             {{ formatDate(rec.reconciliationDate) }}
           </td>
-          <td>{{ rec.accountName || rec.bankAccountId }}</td>
-          <td style="text-align: center;">
-            <span class="status-badge" [class.success]="rec.status === 'Concluida'" [class.pending]="rec.status === 'Pendiente'">
+          <td style="padding: 10px 12px; color: #475569;">{{ rec.accountName || rec.bankAccountId }}</td>
+          <td style="text-align: center; padding: 10px 12px;">
+            <span class="status-badge" [class.success]="rec.status === 'Concluida'" [class.pending]="rec.status === 'Pendiente'" style="padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 500; background-color: #d1fae5; color: #059669;">
               {{ rec.status || 'Concluida' }}
             </span>
           </td>
-          <td style="text-align: right; font-weight: 500;">{{ formatCurrency(rec.accountingBalance) }}</td>
-          <td style="text-align: center;">
-            <button class="btn-icon btn-edit" (click)="editReconciliation(rec.id)">
+          <td style="text-align: right; font-weight: 500; padding: 10px 12px; color: #475569;">{{ formatCurrency(rec.accountingBalance) }}</td>
+          <td style="text-align: center; padding: 10px 12px;">
+            <button class="btn-icon btn-edit" (click)="editReconciliation(rec.id)" style="background: none; border: none; cursor: pointer; color: #0ea5e9; margin-right: 4px;">
               <span class="material-icons" style="font-size: 16px;">edit</span>
             </button>
-            <button class="btn-icon btn-delete" (click)="deleteReconciliation(rec.id)">
+            <button class="btn-icon btn-delete" (click)="deleteReconciliation(rec.id)" style="background: none; border: none; cursor: pointer; color: #ef4444;">
               <span class="material-icons" style="font-size: 16px;">delete</span>
             </button>
           </td>
         </tr>
+        <tr *ngIf="reconciliations.length === 0">
+          <td colspan="6" style="text-align: center; padding: 24px; color: #64748b;">No hay conciliaciones registradas.</td>
+        </tr>
       </tbody>
     </table>
 
-    <div class="pagination-info">
+    <div class="pagination-info" style="padding: 12px 16px; font-size: 12px; color: #64748b; border-top: 1px solid #e2e8f0; background: white;">
       Página 1 de 1 de un Total: {{ reconciliations.length }}
     </div>
   </section>

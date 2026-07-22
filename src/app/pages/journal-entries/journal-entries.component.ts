@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { JournalEntryService } from '../../core/services/journal-entry.service';
 import { AccountService } from '../../core/services/account.service';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   JournalEntry,
   CreateJournalEntryDto,
@@ -10,11 +11,12 @@ import {
   JournalEntryStatus,
 } from '../../models/journal-entry.model';
 import { Account } from '../../models/account.model';
+import { AccountSelectorModalComponent } from '../../components/account-selector-modal/account-selector-modal.component';
 
 @Component({
   selector: 'app-journal-entries',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AccountSelectorModalComponent],
   templateUrl: './journal-entries.component.html',
   styleUrl: './journal-entries.component.scss',
 })
@@ -22,7 +24,15 @@ export class JournalEntriesComponent implements OnInit {
   entries: JournalEntry[] = [];
   accounts: Account[] = [];
   showCreateForm = false;
+  isEditing = false;
+  editingEntryId: string | null = null;
   statusFilter: JournalEntryStatus | '' = '';
+  startDateFilter: string = '';
+  endDateFilter: string = '';
+  searchTerm: string = '';
+
+  isAccountModalVisible = false;
+  activeLineIndex: number = -1;
 
   // Exponer el enum para el template
   JournalEntryStatus = JournalEntryStatus;
@@ -31,8 +41,8 @@ export class JournalEntriesComponent implements OnInit {
     date: new Date().toISOString().split('T')[0],
     description: '',
     lines: [
-      { accountId: '', debit: 0, credit: 0 },
-      { accountId: '', debit: 0, credit: 0 },
+      { accountId: '', accountName: '', debit: 0, credit: 0 },
+      { accountId: '', accountName: '', debit: 0, credit: 0 },
     ],
   };
 
@@ -45,19 +55,27 @@ export class JournalEntriesComponent implements OnInit {
   constructor(
     private journalEntryService: JournalEntryService,
     private accountService: AccountService,
+    private route: ActivatedRoute,
+    private router: Router
   ) {}
 
   ngOnInit() {
     this.loadEntries();
     this.loadAccounts();
+
+    this.route.queryParams.subscribe(params => {
+      if (params['edit']) {
+        this.loadEntryForEditing(params['edit']);
+      }
+    });
   }
 
   loadEntries() {
-    this.journalEntryService.getAll().subscribe({
-      next: (data) => {
+    this.journalEntryService.getAll(this.startDateFilter, this.endDateFilter, (this.statusFilter as JournalEntryStatus) || undefined, this.searchTerm).subscribe({
+      next: (data: JournalEntry[]) => {
         this.entries = data;
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Error loading entries:', error);
         alert('Error al cargar los asientos');
       },
@@ -76,7 +94,20 @@ export class JournalEntriesComponent implements OnInit {
   }
 
   addLine() {
-    this.newEntry.lines.push({ accountId: '', debit: 0, credit: 0 });
+    this.newEntry.lines.push({ accountId: '', accountName: '', debit: 0, credit: 0 });
+  }
+
+  openAccountModal(index: number) {
+    this.activeLineIndex = index;
+    this.isAccountModalVisible = true;
+  }
+
+  onAccountSelected(account: Account) {
+    if (this.activeLineIndex >= 0 && this.activeLineIndex < this.newEntry.lines.length) {
+      this.newEntry.lines[this.activeLineIndex].accountId = account.id;
+      this.newEntry.lines[this.activeLineIndex].accountName = `${account.code} - ${account.name}`;
+    }
+    this.isAccountModalVisible = false;
   }
 
   removeLine(index: number) {
@@ -105,17 +136,66 @@ export class JournalEntriesComponent implements OnInit {
       return;
     }
 
-    this.journalEntryService.create(this.newEntry).subscribe({
-      next: () => {
-        alert('Asiento creado exitosamente');
-        this.showCreateForm = false;
-        this.resetForm();
-        this.loadEntries();
+    if (this.isEditing && this.editingEntryId) {
+      this.journalEntryService.update(this.editingEntryId, this.newEntry).subscribe({
+        next: () => {
+          alert('Asiento actualizado exitosamente');
+          this.showCreateForm = false;
+          this.isEditing = false;
+          this.editingEntryId = null;
+          this.router.navigate([], { queryParams: { edit: null }, queryParamsHandling: 'merge' });
+          this.resetForm();
+          this.loadEntries();
+        },
+        error: (error) => {
+          console.error('Error updating entry:', error);
+          alert(error.error?.message || 'Error al actualizar el asiento');
+        },
+      });
+    } else {
+      this.journalEntryService.create(this.newEntry).subscribe({
+        next: () => {
+          alert('Asiento creado exitosamente');
+          this.showCreateForm = false;
+          this.resetForm();
+          this.loadEntries();
+        },
+        error: (error) => {
+          console.error('Error creating entry:', error);
+          alert(error.error?.message || 'Error al crear el asiento');
+        },
+      });
+    }
+  }
+
+  editEntry(entry: JournalEntry) {
+    this.loadEntryForEditing(entry.id);
+  }
+
+  loadEntryForEditing(id: string) {
+    this.journalEntryService.getById(id).subscribe({
+      next: (entry) => {
+        this.isEditing = true;
+        this.editingEntryId = id;
+        this.showCreateForm = true;
+        this.newEntry = {
+          date: new Date(entry.date).toISOString().split('T')[0],
+          description: entry.description || undefined,
+          reference: entry.reference || undefined,
+          lines: entry.lines.map(line => ({
+            accountId: line.accountId,
+            accountName: line.account ? `${line.account.code} - ${line.account.name}` : '',
+            debit: line.debit,
+            credit: line.credit,
+            description: line.description
+          }))
+        };
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       },
       error: (error) => {
-        console.error('Error creating entry:', error);
-        alert(error.error?.message || 'Error al crear el asiento');
-      },
+        console.error('Error loading entry for edit:', error);
+        alert('Error al cargar el asiento para editar');
+      }
     });
   }
 
@@ -198,8 +278,8 @@ export class JournalEntriesComponent implements OnInit {
       date: new Date().toISOString().split('T')[0],
       description: '',
       lines: [
-        { accountId: '', debit: 0, credit: 0 },
-        { accountId: '', debit: 0, credit: 0 },
+        { accountId: '', accountName: '', debit: 0, credit: 0 },
+        { accountId: '', accountName: '', debit: 0, credit: 0 },
       ],
     };
   }
@@ -208,6 +288,11 @@ export class JournalEntriesComponent implements OnInit {
     this.showCreateForm = !this.showCreateForm;
     if (!this.showCreateForm) {
       this.resetForm();
+      this.isEditing = false;
+      this.editingEntryId = null;
+      if (this.route.snapshot.queryParams['edit']) {
+        this.router.navigate([], { queryParams: { edit: null }, queryParamsHandling: 'merge' });
+      }
     }
   }
 }

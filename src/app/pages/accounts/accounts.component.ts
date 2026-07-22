@@ -15,6 +15,8 @@ export class AccountsComponent implements OnInit {
   accounts: Account[] = [];
   accountsHierarchy: Account[] = [];
   showCreateForm = false;
+  isEditing = false;
+  editingAccountId: string | null = null;
   accountTypes = Object.values(AccountType);
   accountTypeLabels: Record<AccountType, string> = {
     [AccountType.ASSET]: 'Activo',
@@ -68,19 +70,51 @@ export class AccountsComponent implements OnInit {
       return;
     }
 
-    this.accountService.create(this.newAccount).subscribe({
-      next: () => {
-        alert('Cuenta creada exitosamente');
-        this.showCreateForm = false;
-        this.resetForm();
-        this.loadAccounts();
-        this.loadHierarchy();
-      },
-      error: (error) => {
-        console.error('Error creating account:', error);
-        alert(error.error?.message || 'Error al crear la cuenta');
-      },
-    });
+    if (this.isEditing && this.editingAccountId) {
+      this.accountService.update(this.editingAccountId, this.newAccount).subscribe({
+        next: () => {
+          alert('Cuenta actualizada exitosamente');
+          this.showCreateForm = false;
+          this.isEditing = false;
+          this.editingAccountId = null;
+          this.resetForm();
+          this.loadAccounts();
+          this.loadHierarchy();
+        },
+        error: (error) => {
+          console.error('Error updating account:', error);
+          alert(error.error?.message || 'Error al actualizar la cuenta');
+        },
+      });
+    } else {
+      this.accountService.create(this.newAccount).subscribe({
+        next: () => {
+          alert('Cuenta creada exitosamente');
+          this.showCreateForm = false;
+          this.resetForm();
+          this.loadAccounts();
+          this.loadHierarchy();
+        },
+        error: (error) => {
+          console.error('Error creating account:', error);
+          alert(error.error?.message || 'Error al crear la cuenta');
+        },
+      });
+    }
+  }
+
+  editAccount(account: Account) {
+    this.isEditing = true;
+    this.editingAccountId = account.id;
+    this.newAccount = {
+      code: account.code,
+      name: account.name,
+      type: account.type,
+      parentId: account.parentId || null,
+      isControlAccount: account.isControlAccount,
+    };
+    this.showCreateForm = true;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   resetForm() {
@@ -97,6 +131,8 @@ export class AccountsComponent implements OnInit {
     this.showCreateForm = !this.showCreateForm;
     if (!this.showCreateForm) {
       this.resetForm();
+      this.isEditing = false;
+      this.editingAccountId = null;
     }
   }
 

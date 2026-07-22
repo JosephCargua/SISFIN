@@ -97,7 +97,17 @@ export class RegisterReconciliationComponent implements OnInit {
   onAccountSelected(account: Account) {
     this.reconciliation.bankAccountId = account.id;
     this.reconciliation.accountName = account.name;
-    // Optional: reload movements filtered by this account
+    this.isAccountModalVisible = false;
+    
+    // Fetch account statement to get the actual initial balance
+    this.bankingService.getAccountStatement(account.id, undefined, this.reconciliation.reconciliationDate).subscribe(statement => {
+      this.initialBalance = statement.initialBalance || 0;
+      
+      // We can also reload movements if needed, but we already have them loaded
+      if (this.movements.length > 0) {
+         this.calculateTotals();
+      }
+    });
   }
 
   toggleMovement(id: string, event: any) {
@@ -116,13 +126,22 @@ export class RegisterReconciliationComponent implements OnInit {
   calculateTotals() {
     let accBal = 0;
     this.movements.forEach(m => {
+      // Only include movements for the selected account (if one is selected)
+      if (this.reconciliation.bankAccountId && m.bankAccountId !== this.reconciliation.bankAccountId) {
+         return;
+      }
+
       if (this.selectedMovementIds.has(m.id)) {
-        accBal += Number(m.amount) || 0;
+        const amount = Number(m.amount) || 0;
+        if (m.transactionType === 'Egreso' || m.type === 'Egreso') {
+          accBal -= amount;
+        } else {
+          accBal += amount;
+        }
       }
     });
-    this.reconciliation.accountingBalance = accBal;
+    this.reconciliation.accountingBalance = this.initialBalance + accBal;
     this.reconciliation.difference = Number(this.reconciliation.statementBalance) - this.reconciliation.accountingBalance;
-    this.initialBalance = Number(this.reconciliation.statementBalance) - this.reconciliation.accountingBalance;
   }
 
   onStatementBalanceChange() {

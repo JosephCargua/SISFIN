@@ -9,12 +9,10 @@
       <div class="form-row">
         <div class="form-group">
           <label>Cuenta *</label>
-          <select [(ngModel)]="selectedAccountId" name="accountId" required>
-            <option value="">Seleccione una cuenta...</option>
-            <option *ngFor="let account of accounts" [value]="account.id">
-              {{ account.code }} - {{ account.name }}
-            </option>
-          </select>
+          <div class="input-with-icon" style="display: flex; border: 1px solid #cbd5e1; border-radius: 4px; overflow: hidden; background: white;">
+            <input type="text" [(ngModel)]="accountName" name="accountName" placeholder="Buscar cuenta..." readonly style="flex: 1; border: none; padding: 6px 12px; outline: none; width: 100%; min-width: 200px;" required />
+            <span class="material-icons" (click)="openAccountModal()" style="color: #64748b; font-size: 18px; padding: 6px 8px; cursor: pointer; background: #f8fafc; border-left: 1px solid #cbd5e1;">search</span>
+          </div>
         </div>
         <div class="form-group">
           <label>Fecha Inicio *</label>
@@ -61,6 +59,7 @@
             <th>Débito</th>
             <th>Crédito</th>
             <th>Saldo</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -72,6 +71,11 @@
             <td class="text-right">{{ movement.credit | number: '1.2-2' }}</td>
             <td class="text-right balance">
               {{ movement.balance | number: '1.2-2' }}
+            </td>
+            <td style="text-align: center;">
+              <button class="btn-icon btn-primary" title="Ver / Modificar Asiento" (click)="editJournalEntry(movement.journalEntry?.id)">
+                <span class="material-icons" style="font-size: 18px;">edit</span>
+              </button>
             </td>
           </tr>
         </tbody>
@@ -101,4 +105,10 @@
     </div>
   </div>
 </div>
+
+<app-account-selector-modal 
+  [isVisible]="isAccountModalVisible" 
+  (close)="isAccountModalVisible = false"
+  (accountSelected)="onAccountSelected($event)">
+</app-account-selector-modal>
 

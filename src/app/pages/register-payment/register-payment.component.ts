@@ -32,7 +32,7 @@ export class RegisterPaymentComponent implements OnInit {
 
   get paymentMethods() {
     if (this.transactionType === 'Pago') {
-      return ['Cheque', 'Transferencia', 'Caja Chica', 'Tarjeta de Crédito', 'Dinero electrónico'];
+      return ['Cheque', 'Transferencia', 'Caja', 'Tarjeta de Crédito', 'Dinero electrónico'];
     } else {
       return ['Caja', 'Cheque', 'Transferencia'];
     }

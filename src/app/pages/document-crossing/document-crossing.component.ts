@@ -29,7 +29,7 @@ export class DocumentCrossingComponent implements OnInit {
   
   mockAccounts = [
     { code: '1.1.1.1', name: 'Caja', group: 'Activo' },
-    { code: '1.1.1.2', name: 'Caja Chica', group: 'Activo' },
+    { code: '1.1.1.2', name: 'Caja', group: 'Activo' },
     { code: '1.1.1.3.1', name: 'Banco Internacional', group: 'Activo' },
     { code: '1.1.1.4', name: 'Banco dinero electrónico', group: 'Activo' },
     { code: '1.1.2.1', name: 'Activos Financieros con cambios en resultados', group: 'Activo' },

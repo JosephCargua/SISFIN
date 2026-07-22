@@ -3,18 +3,22 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { JournalEntryService } from '../../core/services/journal-entry.service';
 import { AccountService } from '../../core/services/account.service';
+import { Router } from '@angular/router';
 import { Account } from '../../models/account.model';
+import { AccountSelectorModalComponent } from '../../components/account-selector-modal/account-selector-modal.component';
 
 @Component({
   selector: 'app-general-ledger',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AccountSelectorModalComponent],
   templateUrl: './general-ledger.component.html',
   styleUrl: './general-ledger.component.scss',
 })
 export class GeneralLedgerComponent {
   accounts: Account[] = [];
   selectedAccountId = '';
+  accountName = '';
+  isAccountModalVisible = false;
   startDate = new Date(new Date().getFullYear(), 0, 1).toISOString().split('T')[0];
   endDate = new Date().toISOString().split('T')[0];
   ledgerData: any = null;
@@ -23,6 +27,7 @@ export class GeneralLedgerComponent {
   constructor(
     private journalEntryService: JournalEntryService,
     private accountService: AccountService,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -38,6 +43,16 @@ export class GeneralLedgerComponent {
         console.error('Error loading accounts:', error);
       },
     });
+  }
+
+  openAccountModal() {
+    this.isAccountModalVisible = true;
+  }
+
+  onAccountSelected(account: Account) {
+    this.selectedAccountId = account.id;
+    this.accountName = `${account.code} - ${account.name}`;
+    this.isAccountModalVisible = false;
   }
 
   generateLedger() {
@@ -85,6 +100,12 @@ export class GeneralLedgerComponent {
           this.loading = false;
         },
       });
+  }
+
+  editJournalEntry(id: string) {
+    if (id) {
+      this.router.navigate(['/journal-entries'], { queryParams: { edit: id } });
+    }
   }
 }
 

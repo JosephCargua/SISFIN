@@ -29,6 +29,10 @@ export class AccountService {
     return this.api.post<Account>('accounts', account);
   }
 
+  update(id: string, account: Partial<CreateAccountDto>): Observable<Account> {
+    return this.api.put<Account>(`accounts/${id}`, account);
+  }
+
   deactivate(id: string): Observable<Account> {
     return this.api.patch<Account>(`accounts/${id}/deactivate`, {});
   }

@@ -7,6 +7,7 @@ export enum JournalEntryStatus {
 export interface JournalEntryLine {
   id?: string;
   accountId: string;
+  accountName?: string;
   account?: any;
   debit: number;
   credit: number;

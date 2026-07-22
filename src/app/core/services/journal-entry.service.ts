@@ -17,11 +17,13 @@ export class JournalEntryService {
     startDate?: string,
     endDate?: string,
     status?: JournalEntryStatus,
+    searchTerm?: string,
   ): Observable<JournalEntry[]> {
     const params: any = {};
     if (startDate) params.startDate = startDate;
     if (endDate) params.endDate = endDate;
     if (status) params.status = status;
+    if (searchTerm) params.searchTerm = searchTerm;
 
     const queryString = new URLSearchParams(params).toString();
     return this.api.get<JournalEntry[]>(
@@ -35,6 +37,10 @@ export class JournalEntryService {
 
   create(entry: CreateJournalEntryDto): Observable<JournalEntry> {
     return this.api.post<JournalEntry>('journal-entries', entry);
+  }
+
+  update(id: string, entry: CreateJournalEntryDto): Observable<JournalEntry> {
+    return this.api.put<JournalEntry>(`journal-entries/${id}`, entry);
   }
 
   post(id: string): Observable<JournalEntry> {

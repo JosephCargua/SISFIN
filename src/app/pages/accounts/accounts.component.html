@@ -8,11 +8,8 @@
   </div>
 
   <div *ngIf="showCreateForm" class="create-form card">
-    <h2>Crear Nueva Cuenta</h2>
-    
-
-
-    <form (ngSubmit)="createAccount()">
+    <h2>{{ isEditing ? 'Editar Cuenta' : 'Crear Nueva Cuenta' }}</h2>
+    <form (ngSubmit)="createAccount()" #accountForm="ngForm">
       <div class="form-group">
         <label>Código *</label>
         <input
@@ -88,7 +85,9 @@
         <button type="button" class="btn btn-secondary" (click)="toggleCreateForm()">
           Cancelar
         </button>
-        <button type="submit" class="btn btn-primary">Crear Cuenta</button>
+        <button type="submit" class="btn btn-primary" [disabled]="!accountForm.form.valid">
+          {{ isEditing ? 'Guardar Cambios' : 'Crear Cuenta' }}
+        </button>
       </div>
     </form>
   </div>
@@ -132,6 +131,13 @@
             </td>
             <td>
               <div class="action-buttons">
+                <button
+                  class="btn-icon btn-primary"
+                  (click)="editAccount(account)"
+                  title="Editar"
+                >
+                  <span class="material-icons">edit</span>
+                </button>
                 <button
                   *ngIf="account.isActive"
                   class="btn-icon btn-danger"

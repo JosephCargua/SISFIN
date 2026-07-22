@@ -8,7 +8,7 @@
   </div>
 
   <div *ngIf="showCreateForm" class="create-form card">
-    <h2>Crear Nuevo Asiento Contable</h2>
+    <h2>{{ isEditing ? 'Editar Asiento Contable' : 'Crear Nuevo Asiento Contable' }}</h2>
     
     <div class="help-box">
       <details>
@@ -111,12 +111,10 @@
             <tbody>
               <tr *ngFor="let line of newEntry.lines; let i = index">
                 <td>
-                  <select [(ngModel)]="line.accountId" [name]="'account' + i" required>
-                    <option value="">Seleccione...</option>
-                    <option *ngFor="let account of accounts" [value]="account.id">
-                      {{ account.code }} - {{ account.name }}
-                    </option>
-                  </select>
+                  <div class="input-with-icon" style="display: flex; border: 1px solid #cbd5e1; border-radius: 4px; overflow: hidden; background: white;">
+                    <input type="text" [(ngModel)]="line.accountName" [name]="'account' + i" placeholder="Buscar cuenta..." readonly style="flex: 1; border: none; padding: 6px 12px; outline: none; width: 100%; min-width: 150px;" required />
+                    <span class="material-icons" (click)="openAccountModal(i)" style="color: #64748b; font-size: 18px; padding: 6px 8px; cursor: pointer; background: #f8fafc; border-left: 1px solid #cbd5e1;">search</span>
+                  </div>
                 </td>
                 <td>
                   <input
@@ -186,7 +184,7 @@
           class="btn btn-primary"
           [disabled]="!validateDoubleEntry() || getDifference() > 0.01"
         >
-          Crear Asiento
+          {{ isEditing ? 'Guardar Cambios' : 'Crear Asiento' }}
         </button>
       </div>
     </form>
@@ -195,12 +193,18 @@
   <div class="entries-list card">
     <div class="list-header">
       <h2>Asientos Contables</h2>
-      <select [(ngModel)]="statusFilter" (change)="loadEntries()">
-        <option value="">Todos los estados</option>
-        <option [value]="JournalEntryStatus.DRAFT">Borrador</option>
-        <option [value]="JournalEntryStatus.POSTED">Posteado</option>
-        <option [value]="JournalEntryStatus.CANCELLED">Anulado</option>
-      </select>
+      <div class="filters-row" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+        <input type="date" [(ngModel)]="startDateFilter" (change)="loadEntries()" placeholder="Fecha Inicio" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;" />
+        <input type="date" [(ngModel)]="endDateFilter" (change)="loadEntries()" placeholder="Fecha Fin" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;" />
+        <select [(ngModel)]="statusFilter" (change)="loadEntries()" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;">
+          <option value="">Todos los estados</option>
+          <option [value]="JournalEntryStatus.DRAFT">Borrador</option>
+          <option [value]="JournalEntryStatus.POSTED">Posteado</option>
+          <option [value]="JournalEntryStatus.CANCELLED">Anulado</option>
+        </select>
+        <input type="text" [(ngModel)]="searchTerm" (keyup.enter)="loadEntries()" placeholder="Buscar por N° o descripción..." style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; flex: 1; min-width: 200px;" />
+        <button class="btn btn-secondary btn-sm" (click)="loadEntries()"><span class="material-icons">search</span></button>
+      </div>
     </div>
 
     <div class="table-container">
@@ -236,6 +240,13 @@
             <td>
               <div class="action-buttons">
                 <button
+                  class="btn-icon btn-primary"
+                  (click)="editEntry(entry)"
+                  title="Editar"
+                >
+                  <span class="material-icons">edit</span>
+                </button>
+                <button
                   *ngIf="entry.status === JournalEntryStatus.DRAFT"
                   class="btn-icon btn-success"
                   (click)="postEntry(entry.id)"
@@ -259,4 +270,10 @@
     </div>
   </div>
 </div>
+
+<app-account-selector-modal 
+  [isVisible]="isAccountModalVisible" 
+  (close)="isAccountModalVisible = false"
+  (accountSelected)="onAccountSelected($event)">
+</app-account-selector-modal>
 

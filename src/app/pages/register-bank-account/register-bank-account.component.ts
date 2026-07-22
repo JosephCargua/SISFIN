@@ -77,7 +77,35 @@ export class RegisterBankAccountComponent implements OnInit {
     'Produbanco',
     'Otro...'
   ];
-  formatOptions = ['Bco. Guayaquil', 'Bco. Pichincha', 'Bco. Pacífico'];
+  formatOptions = [
+    'Bco. Amazonas',
+    'Bco. Bolivariano',
+    'Bco. de Machala',
+    'Bco. del Austro',
+    'Bco. del Pacífico',
+    'Bco. Guayaquil',
+    'Bco. Internacional',
+    'Bco. Pichincha',
+    'Bco. ProCredit',
+    'Bco. Solidario',
+    'BanEcuador',
+    'Citibank',
+    'Coop. 15 de Abril',
+    'Coop. 29 de Octubre',
+    'Coop. Alianza del Valle',
+    'Coop. Andalucía',
+    'Coop. CACPE Pastaza',
+    'Coop. Cacpeco',
+    'Coop. COOPROGRESO',
+    'Coop. Jardín Azuayo',
+    'Coop. JEP',
+    'Coop. Mushuc Runa',
+    'Coop. Policía Nacional',
+    'Coop. Riobamba',
+    'Coop. San Francisco',
+    'Produbanco',
+    'Otro...'
+  ];
 
   constructor(
     private bankingService: BankingService,

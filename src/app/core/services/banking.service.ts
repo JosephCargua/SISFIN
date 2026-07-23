@@ -71,6 +71,10 @@ export class BankingService {
     return this.api.put<any>(`bank-reconciliations/${id}`, data);
   }
 
+  deleteReconciliation(id: string): Observable<void> {
+    return this.api.delete<void>(`bank-reconciliations/${id}`);
+  }
+
   getTransactionById(id: string): Observable<BankTransaction> {
     return this.api.get<BankTransaction>(`bank-transactions/${id}`);
   }

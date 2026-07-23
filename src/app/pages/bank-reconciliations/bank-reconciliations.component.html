@@ -94,3 +94,19 @@
   (close)="isAccountModalVisible = false"
   (accountSelected)="onAccountSelected($event)">
 </app-account-selector-modal>
+
+<!-- Modal de Confirmación de Eliminación -->
+<div class="modal-overlay" *ngIf="isDeleteModalVisible">
+  <div class="modal-content" style="max-width: 400px; padding: 24px; text-align: center;">
+    <div style="color: #ef4444; margin-bottom: 16px;">
+      <span class="material-icons" style="font-size: 48px;">warning</span>
+    </div>
+    <h3 style="margin-top: 0; color: #0f172a; font-size: 1.25rem;">Eliminar Conciliación</h3>
+    <p style="color: #64748b; margin-bottom: 24px;">¿Está seguro de que desea eliminar esta conciliación? Esta acción no se puede deshacer.</p>
+    
+    <div style="display: flex; justify-content: center; gap: 16px;">
+      <button class="btn-cancel" (click)="cancelDelete()" style="width: auto;">Cancelar</button>
+      <button class="btn-primary" (click)="confirmDelete()" style="width: auto; background-color: #ef4444; color: white; border: none;">Eliminar</button>
+    </div>
+  </div>
+</div>

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
 import { BankingService } from '../../core/services/banking.service';
+import { AccountService } from '../../core/services/account.service';
 import { AccountSelectorModalComponent } from '../../components/account-selector-modal/account-selector-modal.component';
 import { Account } from '../../models/account.model';
 
@@ -30,6 +31,7 @@ export class RegisterReconciliationComponent implements OnInit {
     difference: 0
   };
 
+  allMovements: any[] = [];
   movements: any[] = [];
   selectedMovementIds: Set<string> = new Set();
   initialBalance: number = 0;
@@ -38,6 +40,7 @@ export class RegisterReconciliationComponent implements OnInit {
     private router: Router, 
     private route: ActivatedRoute,
     private bankingService: BankingService,
+    private accountService: AccountService,
     private api: ApiService
   ) {}
 
@@ -57,7 +60,7 @@ export class RegisterReconciliationComponent implements OnInit {
       this.reconciliation = {
         reconciliationDate: recon.reconciliationDate ? new Date(recon.reconciliationDate).toISOString().split('T')[0] : '',
         bankAccountId: recon.bankAccountId,
-        accountName: recon.bankAccountId, // ideally fetch name
+        accountName: '', // will fetch
         description: recon.description || '',
         status: recon.status || 'Pendiente',
         statementBalance: recon.statementBalance,
@@ -65,20 +68,26 @@ export class RegisterReconciliationComponent implements OnInit {
         difference: recon.difference
       };
       
+      if (recon.bankAccountId) {
+        this.accountService.getById(recon.bankAccountId).subscribe(acc => {
+          this.reconciliation.accountName = acc ? acc.name : recon.bankAccountId;
+        });
+      }
+      
       // Load movements for this reconciliation + unassigned if we want them to add more.
       if (recon.bankAccountId) {
         this.bankingService.getTransactions(recon.bankAccountId).subscribe(txs => {
-          this.movements = txs.filter(tx => !tx.bankReconciliationId || tx.bankReconciliationId === id);
+          this.allMovements = txs.filter(tx => !tx.bankReconciliationId || tx.bankReconciliationId === id);
           
           // Mark as selected those that belong to this reconciliation
           this.selectedMovementIds.clear();
-          this.movements.forEach(tx => {
+          this.allMovements.forEach(tx => {
             if (tx.bankReconciliationId === id) {
               this.selectedMovementIds.add(tx.id);
             }
           });
           
-          this.calculateTotals();
+          this.filterMovements();
         });
       }
     });
@@ -87,6 +96,7 @@ export class RegisterReconciliationComponent implements OnInit {
   loadUnreconciledMovements() {
     // When creating a new one, don't load all cross-account movements.
     // Wait until they select an account.
+    this.allMovements = [];
     this.movements = [];
   }
 
@@ -104,20 +114,49 @@ export class RegisterReconciliationComponent implements OnInit {
       this.initialBalance = statement.initialBalance || 0;
       
       this.bankingService.getTransactions(account.id).subscribe(txs => {
-        this.movements = txs.filter(tx => !tx.bankReconciliationId || tx.bankReconciliationId === this.reconciliationId);
+        this.allMovements = txs.filter(tx => !tx.bankReconciliationId || tx.bankReconciliationId === this.reconciliationId);
         
         // Ensure selectedMovementIds is populated correctly if editing
         if (this.reconciliationId) {
-          this.movements.forEach(tx => {
+          this.allMovements.forEach(tx => {
             if (tx.bankReconciliationId === this.reconciliationId) {
               this.selectedMovementIds.add(tx.id);
             }
           });
         }
         
-        this.calculateTotals();
+        this.filterMovements();
       });
     });
+  }
+
+  onDateChange() {
+    this.filterMovements();
+  }
+
+  filterMovements() {
+    if (!this.reconciliation.reconciliationDate) {
+      this.movements = [...this.allMovements];
+      this.calculateTotals();
+      return;
+    }
+    
+    // Parse strictly YYYY-MM-DD to avoid timezone shifts
+    const parts = this.reconciliation.reconciliationDate.split('-');
+    const cutDate = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 23, 59, 59, 999);
+    
+    this.movements = this.allMovements.filter(tx => {
+      let txDate = new Date(tx.date);
+      
+      // If backend sends YYYY-MM-DD directly without time, parse locally
+      if (typeof tx.date === 'string' && tx.date.length === 10 && tx.date.indexOf('-') === 4) {
+        const txParts = tx.date.split('-');
+        txDate = new Date(Number(txParts[0]), Number(txParts[1]) - 1, Number(txParts[2]), 12, 0, 0);
+      }
+      
+      return txDate.getTime() <= cutDate.getTime();
+    });
+    this.calculateTotals();
   }
 
   toggleMovement(id: string, event: any) {

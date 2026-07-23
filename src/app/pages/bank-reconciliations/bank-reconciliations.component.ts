@@ -35,6 +35,8 @@ export class BankReconciliationsComponent implements OnInit {
     this.filters.bankName = account.name;
     this.isAccountModalVisible = false;
   }
+  isDeleteModalVisible = false;
+  reconciliationToDeleteId: string | null = null;
 
   constructor(
     private bankingService: BankingService,

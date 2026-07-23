@@ -66,28 +66,28 @@ export class RegisterReconciliationComponent implements OnInit {
       };
       
       // Load movements for this reconciliation + unassigned if we want them to add more.
-      // For simplicity we load all unassigned AND assigned to this ID.
-      this.bankingService.getTransactions().subscribe(txs => {
-        this.movements = txs.filter(tx => !tx.bankReconciliationId || tx.bankReconciliationId === id);
-        
-        // Mark as selected those that belong to this reconciliation
-        this.selectedMovementIds.clear();
-        this.movements.forEach(tx => {
-          if (tx.bankReconciliationId === id) {
-            this.selectedMovementIds.add(tx.id);
-          }
+      if (recon.bankAccountId) {
+        this.bankingService.getTransactions(recon.bankAccountId).subscribe(txs => {
+          this.movements = txs.filter(tx => !tx.bankReconciliationId || tx.bankReconciliationId === id);
+          
+          // Mark as selected those that belong to this reconciliation
+          this.selectedMovementIds.clear();
+          this.movements.forEach(tx => {
+            if (tx.bankReconciliationId === id) {
+              this.selectedMovementIds.add(tx.id);
+            }
+          });
+          
+          this.calculateTotals();
         });
-        
-        this.calculateTotals();
-      });
+      }
     });
   }
   
   loadUnreconciledMovements() {
-    this.bankingService.getTransactions().subscribe(txs => {
-      this.movements = txs.filter(tx => !tx.bankReconciliationId);
-      this.calculateTotals();
-    });
+    // When creating a new one, don't load all cross-account movements.
+    // Wait until they select an account.
+    this.movements = [];
   }
 
   openAccountModal() {
@@ -103,10 +103,20 @@ export class RegisterReconciliationComponent implements OnInit {
     this.bankingService.getAccountStatement(account.id, undefined, this.reconciliation.reconciliationDate).subscribe(statement => {
       this.initialBalance = statement.initialBalance || 0;
       
-      // We can also reload movements if needed, but we already have them loaded
-      if (this.movements.length > 0) {
-         this.calculateTotals();
-      }
+      this.bankingService.getTransactions(account.id).subscribe(txs => {
+        this.movements = txs.filter(tx => !tx.bankReconciliationId || tx.bankReconciliationId === this.reconciliationId);
+        
+        // Ensure selectedMovementIds is populated correctly if editing
+        if (this.reconciliationId) {
+          this.movements.forEach(tx => {
+            if (tx.bankReconciliationId === this.reconciliationId) {
+              this.selectedMovementIds.add(tx.id);
+            }
+          });
+        }
+        
+        this.calculateTotals();
+      });
     });
   }
 
@@ -126,10 +136,6 @@ export class RegisterReconciliationComponent implements OnInit {
   calculateTotals() {
     let accBal = 0;
     this.movements.forEach(m => {
-      // Only include movements for the selected account (if one is selected)
-      if (this.reconciliation.bankAccountId && m.bankAccountId !== this.reconciliation.bankAccountId) {
-         return;
-      }
 
       if (this.selectedMovementIds.has(m.id)) {
         const amount = Number(m.amount) || 0;

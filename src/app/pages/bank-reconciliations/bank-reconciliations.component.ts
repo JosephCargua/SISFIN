@@ -59,6 +59,29 @@ export class BankReconciliationsComponent implements OnInit {
     });
   }
 
+  get filteredReconciliations() {
+    return this.reconciliations.filter(rec => {
+      const matchBank = !this.filters.bankId || rec.bankAccountId === this.filters.bankId;
+      
+      let matchDate = true;
+      if (this.filters.dateFrom && rec.reconciliationDate) {
+        matchDate = matchDate && new Date(rec.reconciliationDate) >= new Date(this.filters.dateFrom);
+      }
+      if (this.filters.dateTo && rec.reconciliationDate) {
+        matchDate = matchDate && new Date(rec.reconciliationDate) <= new Date(this.filters.dateTo);
+      }
+      
+      let matchText = true;
+      if (this.filters.text) {
+         const txt = this.filters.text.toLowerCase();
+         matchText = (rec.description && rec.description.toLowerCase().includes(txt)) ||
+                     (rec.status && rec.status.toLowerCase().includes(txt));
+      }
+      
+      return matchBank && matchDate && matchText;
+    });
+  }
+
   mapAccountNames() {
     if (this.bankAccounts.length > 0 && this.reconciliations.length > 0) {
       this.reconciliations.forEach(r => {

@@ -184,9 +184,9 @@ export class JournalEntriesComponent implements OnInit {
           reference: entry.reference || undefined,
           lines: entry.lines.map(line => ({
             accountId: line.accountId,
-            accountName: line.account ? `${line.account.code} - ${line.account.name}` : '',
-            debit: line.debit,
-            credit: line.credit,
+            accountName: line.account ? `${line.account.code} - ${line.account.name}` : 'Cuenta sin nombre',
+            debit: Number(line.debit) || 0,
+            credit: Number(line.credit) || 0,
             description: line.description
           }))
         };

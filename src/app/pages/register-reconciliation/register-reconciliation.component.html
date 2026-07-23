@@ -14,7 +14,7 @@
         
         <div class="form-row" style="display: flex; align-items: center; justify-content: flex-end; gap: 16px;">
           <label class="required" style="width: 140px; text-align: right; margin: 0;">Fecha de Corte:</label>
-          <input type="date" [(ngModel)]="reconciliation.reconciliationDate" style="width: 250px;" />
+          <input type="date" [(ngModel)]="reconciliation.reconciliationDate" (ngModelChange)="onDateChange()" style="width: 250px;" />
         </div>
 
         <div class="form-row" style="display: flex; align-items: center; justify-content: flex-end; gap: 16px;">

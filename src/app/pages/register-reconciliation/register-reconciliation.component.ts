@@ -135,11 +135,26 @@ export class RegisterReconciliationComponent implements OnInit {
   }
 
   filterMovements() {
-    const cutDate = new Date(this.reconciliation.reconciliationDate);
-    cutDate.setHours(23, 59, 59, 999);
+    if (!this.reconciliation.reconciliationDate) {
+      this.movements = [...this.allMovements];
+      this.calculateTotals();
+      return;
+    }
+    
+    // Parse strictly YYYY-MM-DD to avoid timezone shifts
+    const parts = this.reconciliation.reconciliationDate.split('-');
+    const cutDate = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 23, 59, 59, 999);
+    
     this.movements = this.allMovements.filter(tx => {
-      const txDate = new Date(tx.date);
-      return txDate <= cutDate;
+      let txDate = new Date(tx.date);
+      
+      // If backend sends YYYY-MM-DD directly without time, parse locally
+      if (typeof tx.date === 'string' && tx.date.length === 10 && tx.date.indexOf('-') === 4) {
+        const txParts = tx.date.split('-');
+        txDate = new Date(Number(txParts[0]), Number(txParts[1]) - 1, Number(txParts[2]), 12, 0, 0);
+      }
+      
+      return txDate.getTime() <= cutDate.getTime();
     });
     this.calculateTotals();
   }

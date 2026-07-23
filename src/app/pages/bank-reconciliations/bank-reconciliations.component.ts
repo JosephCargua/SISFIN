@@ -110,9 +110,30 @@ export class BankReconciliationsComponent implements OnInit {
   }
 
   deleteReconciliation(id: string) {
-    if(confirm('¿Está seguro de eliminar esta conciliación?')) {
-      // Pending backend delete
-      alert('Delete pending');
+    this.reconciliationToDeleteId = id;
+    this.isDeleteModalVisible = true;
+  }
+
+  confirmDelete() {
+    if (this.reconciliationToDeleteId) {
+      this.bankingService.deleteReconciliation(this.reconciliationToDeleteId).subscribe({
+        next: () => {
+          this.isDeleteModalVisible = false;
+          this.reconciliationToDeleteId = null;
+          this.loadReconciliations();
+        },
+        error: (err) => {
+          console.error('Error deleting reconciliation:', err);
+          alert('Hubo un error al eliminar la conciliación.');
+          this.isDeleteModalVisible = false;
+          this.reconciliationToDeleteId = null;
+        }
+      });
     }
+  }
+
+  cancelDelete() {
+    this.isDeleteModalVisible = false;
+    this.reconciliationToDeleteId = null;
   }
 }

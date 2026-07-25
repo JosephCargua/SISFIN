@@ -44,16 +44,13 @@
         <input type="text" [(ngModel)]="payToOrderOf" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; max-width: 400px;" />
       </ng-container>
 
-      <label style="text-align: right; color: #64748b; font-size: 13px;">{{ transactionType === 'Pago' ? 'Cuenta Bancaria:' : 'Cuenta Pago/Cobro:' }}</label>
-      <select [(ngModel)]="bankAccount" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; width: 400px; max-width: 100%;">
-        <option value="">Seleccione una cuenta...</option>
-        <ng-container *ngIf="paymentMethod === 'Caja'">
-          <option *ngFor="let acc of cashAccounts" [value]="acc.id">{{ acc.name }}</option>
-        </ng-container>
-        <ng-container *ngIf="paymentMethod !== 'Caja'">
+      <ng-container *ngIf="paymentMethod !== 'Caja'">
+        <label style="text-align: right; color: #64748b; font-size: 13px;">{{ transactionType === 'Pago' ? 'Cuenta Bancaria:' : 'Cuenta Pago/Cobro:' }}</label>
+        <select [(ngModel)]="bankAccount" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; width: 400px; max-width: 100%;">
+          <option value="">Seleccione una cuenta...</option>
           <option *ngFor="let acc of bankAccounts" [value]="acc.id">{{ acc.bankName }} - {{ acc.accountNumber }}</option>
-        </ng-container>
-      </select>
+        </select>
+      </ng-container>
 
       <label style="text-align: right; color: #64748b; font-size: 13px;">{{ transactionType === 'Pago' ? 'Número de cheque:' : '# de Comprobante:' }}</label>
       <div style="display: flex; align-items: center; gap: 8px; max-width: 400px;">

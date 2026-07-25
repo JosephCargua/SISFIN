@@ -52,6 +52,15 @@ export class RegisterPaymentComponent implements OnInit {
     } else {
       this.paymentMethod = 'Caja';
     }
+    this.onPaymentMethodChange();
+  }
+
+  onPaymentMethodChange() {
+    if (this.paymentMethod === 'Caja' && this.cashAccounts.length > 0) {
+      this.bankAccount = this.cashAccounts[0].id;
+    } else if (this.paymentMethod !== 'Caja') {
+      this.bankAccount = '';
+    }
   }
 
   constructor(
@@ -67,7 +76,12 @@ export class RegisterPaymentComponent implements OnInit {
 
   ngOnInit() {
     this.bankingService.getBankAccounts().subscribe(accs => this.bankAccounts = accs);
-    this.bankingService.getCashAccounts().subscribe(accs => this.cashAccounts = accs);
+    this.bankingService.getCashAccounts().subscribe(accs => {
+      this.cashAccounts = accs;
+      if (this.paymentMethod === 'Caja' && accs.length > 0) {
+        this.bankAccount = accs[0].id;
+      }
+    });
     this.accountService.getAll().subscribe(accs => this.glAccounts = accs);
 
     this.route.queryParams.subscribe(params => {

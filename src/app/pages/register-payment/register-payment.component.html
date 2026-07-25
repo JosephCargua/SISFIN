@@ -22,7 +22,7 @@
 
       <label style="text-align: right; color: #64748b; font-size: 13px;">{{ transactionType === 'Pago' ? 'Forma de Pago:' : 'Forma de Cobro:' }}</label>
       <div style="display: flex; gap: 8px;">
-        <select [(ngModel)]="paymentMethod" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; width: 200px;">
+        <select [(ngModel)]="paymentMethod" (ngModelChange)="onPaymentMethodChange()" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; width: 200px;">
           <option *ngFor="let method of paymentMethods" [value]="method">{{ method }}</option>
         </select>
         <select *ngIf="transactionType === 'Pago' && paymentMethod === 'Cheque'" [(ngModel)]="paymentSubMethod" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; width: 200px;">
@@ -132,7 +132,7 @@
   </section>
 
   <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
-    <button type="button" class="btn btn-primary" (click)="save()" [disabled]="saving || !bankAccount" style="background-color: #0ea5e9; border: none; color: white; padding: 8px 16px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;">
+    <button type="button" class="btn btn-primary" (click)="save()" [disabled]="saving" [ngStyle]="{'opacity': saving ? 0.7 : 1, 'cursor': saving ? 'not-allowed' : 'pointer'}" style="background-color: #0ea5e9; border: none; color: white; padding: 8px 16px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;">
       <span class="material-icons" style="font-size: 18px;">save</span> {{ saving ? 'Guardando...' : 'Guardar' }}
     </button>
   </div>

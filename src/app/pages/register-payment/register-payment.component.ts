@@ -56,9 +56,7 @@ export class RegisterPaymentComponent implements OnInit {
   }
 
   onPaymentMethodChange() {
-    if (this.paymentMethod === 'Caja' && this.cashAccounts.length > 0) {
-      this.bankAccount = this.cashAccounts[0].id;
-    } else if (this.paymentMethod !== 'Caja') {
+    if (this.paymentMethod !== 'Caja') {
       this.bankAccount = '';
     }
   }
@@ -138,8 +136,8 @@ export class RegisterPaymentComponent implements OnInit {
   }
 
   save() {
-    if (!this.bankAccount) {
-      alert('Por favor seleccione una cuenta');
+    if (this.paymentMethod !== 'Caja' && !this.bankAccount) {
+      alert('Por favor seleccione una cuenta bancaria');
       return;
     }
     
@@ -148,8 +146,18 @@ export class RegisterPaymentComponent implements OnInit {
     
     // Register actual financial transaction
     if (this.paymentMethod === 'Caja') {
-      const cashAcc = this.cashAccounts.find(a => a.id === this.bankAccount);
-      if (cashAcc) {
+      let cashAccId = null;
+      // Intenta encontrar una cuenta llamada "Caja" o similar
+      const cashGL = this.glAccounts.find(a => !a.isControlAccount && a.name.toLowerCase().includes('caja'));
+      if (cashGL) {
+        cashAccId = cashGL.id;
+      } else {
+        // Fallback a la primera cuenta de activo (mock)
+        const firstAsset = this.glAccounts.find(a => !a.isControlAccount && a.code.startsWith('1.1.1'));
+        if (firstAsset) cashAccId = firstAsset.id;
+      }
+
+      if (cashAccId) {
         
         // Find counterpart account for double-entry
         let counterpartAcc = null;
@@ -161,7 +169,7 @@ export class RegisterPaymentComponent implements OnInit {
         
         // Fallback to any movement account if specific one not found (for mockup safety)
         if (!counterpartAcc) {
-          counterpartAcc = this.glAccounts.find(a => !a.isControlAccount && a.id !== cashAcc.accountId);
+          counterpartAcc = this.glAccounts.find(a => !a.isControlAccount && a.id !== cashAccId);
         }
 
         if (!counterpartAcc) {
@@ -176,7 +184,7 @@ export class RegisterPaymentComponent implements OnInit {
           description: this.description,
           lines: [
             { 
-              accountId: cashAcc.accountId, 
+              accountId: cashAccId, 
               debit: this.transactionType === 'Cobro' ? totalPaid : 0, 
               credit: this.transactionType === 'Pago' ? totalPaid : 0, 
               description: 'Caja - ' + this.description 

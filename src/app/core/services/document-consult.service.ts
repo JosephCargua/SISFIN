@@ -32,4 +32,8 @@ export class DocumentConsultService {
   getById(id: string): Observable<any> {
     return this.api.get<any>(`electronic-document-registrations/${id}`);
   }
+
+  revertPayments(documentId: string): Observable<any> {
+    return this.api.delete(`document-payments/document/${documentId}`);
+  }
 }

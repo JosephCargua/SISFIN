@@ -23,6 +23,8 @@ export interface DocumentConsultItem {
   personTypeLabel: string;
   isAccounted?: boolean;
   isPaid?: boolean;
+  amountPaid?: number;
+  balance?: number;
   isReconciled?: boolean;
   isEmailed?: boolean;
 }

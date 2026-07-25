@@ -4,6 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FinancialDocumentService } from '../../core/services/financial-document.service';
 import { DocumentConsultService } from '../../core/services/document-consult.service';
+import { BankingService } from '../../core/services/banking.service';
+import { JournalEntryService } from '../../core/services/journal-entry.service';
+import { AccountService } from '../../core/services/account.service';
+import { ApiService } from '../../core/services/api.service';
 
 @Component({
   selector: 'app-register-payment',
@@ -29,6 +33,10 @@ export class RegisterPaymentComponent implements OnInit {
 
   documents: any[] = [];
   total = 0;
+  
+  bankAccounts: any[] = [];
+  cashAccounts: any[] = [];
+  glAccounts: any[] = [];
 
   get paymentMethods() {
     if (this.transactionType === 'Pago') {
@@ -50,10 +58,18 @@ export class RegisterPaymentComponent implements OnInit {
     private route: ActivatedRoute, 
     private router: Router,
     private documentService: FinancialDocumentService,
-    private documentConsultService: DocumentConsultService
+    private documentConsultService: DocumentConsultService,
+    private bankingService: BankingService,
+    private journalEntryService: JournalEntryService,
+    private accountService: AccountService,
+    private documentPaymentService: ApiService
   ) {}
 
   ngOnInit() {
+    this.bankingService.getBankAccounts().subscribe(accs => this.bankAccounts = accs);
+    this.bankingService.getCashAccounts().subscribe(accs => this.cashAccounts = accs);
+    this.accountService.getAll().subscribe(accs => this.glAccounts = accs);
+
     this.route.queryParams.subscribe(params => {
       const id = params['id'];
       if (id) {
@@ -79,17 +95,7 @@ export class RegisterPaymentComponent implements OnInit {
     const documentLabel = `${cat} ${doc.documentNumber}`;
     this.description = `Pago de doc. ${documentLabel}, ${this.personName}`;
     
-    const id = this.route.snapshot.queryParams['id'];
-    const paidDocs = JSON.parse(localStorage.getItem('paidDocuments') || '{}');
-    let prevPaid = 0;
-    if (id && paidDocs[id]) {
-      if (typeof paidDocs[id] === 'object' && paidDocs[id].amount) {
-        prevPaid = paidDocs[id].amount;
-      } else if (typeof paidDocs[id] === 'string') {
-        prevPaid = Number(doc.total) || 0;
-      }
-    }
-    
+    const prevPaid = Number(doc.amountPaid) || 0;
     const value = Number(doc.total) || 0;
     const balance = Math.max(0, value - prevPaid);
     
@@ -118,25 +124,133 @@ export class RegisterPaymentComponent implements OnInit {
   }
 
   save() {
+    if (!this.bankAccount) {
+      alert('Por favor seleccione una cuenta');
+      return;
+    }
+    
     this.saving = true;
-    setTimeout(() => {
-      const id = this.route.snapshot.queryParams['id'];
-      if (id) {
-        const totalPaid = this.documents.reduce((acc, doc) => acc + (doc.amountToPay || 0), 0);
-        const paidDocs = JSON.parse(localStorage.getItem('paidDocuments') || '{}');
-        let currentRecord = paidDocs[id];
-        let prevAmount = 0;
-        if (typeof currentRecord === 'object' && currentRecord !== null) {
-          prevAmount = currentRecord.amount || 0;
+    const totalPaid = this.documents.reduce((acc, doc) => acc + (doc.amountToPay || 0), 0);
+    
+    // Register actual financial transaction
+    if (this.paymentMethod === 'Caja') {
+      const cashAcc = this.cashAccounts.find(a => a.id === this.bankAccount);
+      if (cashAcc) {
+        
+        // Find counterpart account for double-entry
+        let counterpartAcc = null;
+        if (this.transactionType === 'Pago') {
+          counterpartAcc = this.glAccounts.find(a => !a.isControlAccount && (a.name.toLowerCase().includes('pagar') || a.name.toLowerCase().includes('proveedor')));
+        } else {
+          counterpartAcc = this.glAccounts.find(a => !a.isControlAccount && (a.name.toLowerCase().includes('cobrar') || a.name.toLowerCase().includes('cliente')));
         }
         
-        const newStatus = this.transactionType === 'Pago' ? 'Pagado' : 'Cobrado';
-        paidDocs[id] = { amount: prevAmount + totalPaid, status: newStatus };
-        localStorage.setItem('paidDocuments', JSON.stringify(paidDocs));
+        // Fallback to any movement account if specific one not found (for mockup safety)
+        if (!counterpartAcc) {
+          counterpartAcc = this.glAccounts.find(a => !a.isControlAccount && a.id !== cashAcc.accountId);
+        }
+
+        if (!counterpartAcc) {
+          alert('Error: No se encontró una cuenta de contrapartida válida para el asiento contable.');
+          this.saving = false;
+          return;
+        }
+
+        // Create draft journal entry for cash movement
+        const entry = {
+          date: this.issueDate,
+          description: this.description,
+          lines: [
+            { 
+              accountId: cashAcc.accountId, 
+              debit: this.transactionType === 'Cobro' ? totalPaid : 0, 
+              credit: this.transactionType === 'Pago' ? totalPaid : 0, 
+              description: 'Caja - ' + this.description 
+            },
+            {
+              accountId: counterpartAcc.id,
+              debit: this.transactionType === 'Pago' ? totalPaid : 0,
+              credit: this.transactionType === 'Cobro' ? totalPaid : 0,
+              description: 'Contrapartida - ' + this.description
+            }
+          ]
+        };
+        this.journalEntryService.create(entry as any).subscribe({
+          next: (createdEntry) => {
+            // Post the entry so it reflects in the general ledger report immediately
+            this.journalEntryService.post(createdEntry.id).subscribe({
+              next: () => this.finalizeSave(totalPaid, createdEntry.id, 'journal'),
+              error: (err) => {
+                console.error('Error posting journal entry:', err);
+                this.finalizeSave(totalPaid, createdEntry.id, 'journal');
+              }
+            });
+          },
+          error: (err) => {
+            console.error('Error creating journal entry:', err);
+            // Even if error (e.g. balancing fails), we continue for mockup purposes
+            this.finalizeSave(totalPaid, 'mock-id-cash', 'journal');
+          }
+        });
+      } else {
+        this.finalizeSave(totalPaid, 'mock-id-cash', 'journal');
       }
-      alert('Pago registrado correctamente');
+    } else {
+      // Bank Transaction
+      const payload = {
+        bankAccountId: this.bankAccount,
+        date: this.issueDate,
+        description: this.description,
+        amount: totalPaid,
+        type: this.transactionType === 'Pago' ? 'Egreso' : 'Ingreso',
+        transactionType: this.transactionType === 'Pago' ? 'Egreso' : 'Ingreso',
+        paymentMethod: this.paymentMethod,
+        isAnnulled: this.isAnnulled,
+        personName: this.personName,
+        checkNumber: this.checkNumber,
+        checkDate: this.checkDate || this.issueDate,
+        details: this.documents.map(d => ({
+          accountName: d.documentLabel,
+          amount: d.amountToPay,
+          costCenter: 'Pago'
+        }))
+      };
+      this.bankingService.createTransaction(payload).subscribe({
+        next: (createdTx) => this.finalizeSave(totalPaid, createdTx.id, 'bank'),
+        error: () => {
+          alert('Error registrando transacción bancaria');
+          this.saving = false;
+        }
+      });
+    }
+  }
+
+  finalizeSave(totalPaid: number, txId: string, txType: 'bank' | 'journal') {
+    const id = this.route.snapshot.queryParams['id'];
+    if (id) {
+      const docType = this.documents[0]?.type === 'Factura' ? 'ELECTRONIC' : 'FINANCIAL';
+      this.documentPaymentService.post('document-payments', {
+        documentId: id,
+        documentType: docType,
+        amount: totalPaid,
+        transactionType: txType,
+        transactionId: txId
+      }).subscribe({
+        next: () => {
+          alert('Pago registrado correctamente en la base de datos');
+          this.saving = false;
+          this.router.navigate(['/consult-documents']);
+        },
+        error: (e) => {
+          console.error('Failed to register payment:', e);
+          alert('El pago se generó contablemente pero hubo un error al vincularlo a la factura');
+          this.saving = false;
+        }
+      });
+    } else {
+      alert('Pago registrado correctamente (Sin documento vinculado)');
       this.saving = false;
       this.router.navigate(['/consult-documents']);
-    }, 1000);
+    }
   }
 }

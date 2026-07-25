@@ -136,8 +136,13 @@ export class JournalEntriesComponent implements OnInit {
       return;
     }
 
+    const payload = {
+      ...this.newEntry,
+      lines: this.newEntry.lines.map(({ accountName, ...rest }) => rest)
+    };
+
     if (this.isEditing && this.editingEntryId) {
-      this.journalEntryService.update(this.editingEntryId, this.newEntry).subscribe({
+      this.journalEntryService.update(this.editingEntryId, payload).subscribe({
         next: () => {
           alert('Asiento actualizado exitosamente');
           this.showCreateForm = false;
@@ -153,7 +158,7 @@ export class JournalEntriesComponent implements OnInit {
         },
       });
     } else {
-      this.journalEntryService.create(this.newEntry).subscribe({
+      this.journalEntryService.create(payload).subscribe({
         next: () => {
           alert('Asiento creado exitosamente');
           this.showCreateForm = false;

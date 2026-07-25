@@ -36,14 +36,7 @@ export class LayoutComponent implements OnInit {
         { label: 'Balance Comprobación', route: '/trial-balance', icon: 'account_balance' },
       ]
     },
-    {
-      label: 'Inventario / Servicios',
-      icon: 'inventory',
-      expanded: false,
-      children: [
-        { label: 'Inventario', route: '/inventory', icon: 'inventory_2' }
-      ]
-    },
+
     {
       label: 'Transacciones',
       icon: 'swap_horiz',
@@ -53,8 +46,6 @@ export class LayoutComponent implements OnInit {
         { label: 'Registro Electrónico', route: '/electronic-invoices', icon: 'receipt' },
         { label: 'Documentos no electrónicos', route: '/register-document', icon: 'description' },
         { label: 'Consultar Documentos', route: '/consult-documents', icon: 'manage_search' },
-        { label: 'Cuentas por Cobrar', route: '/receivables', icon: 'account_balance_wallet' },
-        { label: 'Cuentas por Pagar', route: '/payables', icon: 'payment' },
       ]
     },
     {

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FinancialDocumentService } from '../../core/services/financial-document.service';
 import { DocumentConsultService } from '../../core/services/document-consult.service';
+import { ApiService } from '../../core/services/api.service';
 
 @Component({
   selector: 'app-document-crossing',
@@ -43,7 +44,8 @@ export class DocumentCrossingComponent implements OnInit {
     private route: ActivatedRoute, 
     private router: Router,
     private documentService: FinancialDocumentService,
-    private documentConsultService: DocumentConsultService
+    private documentConsultService: DocumentConsultService,
+    private documentPaymentService: ApiService
   ) {}
 
   ngOnInit() {
@@ -69,17 +71,7 @@ export class DocumentCrossingComponent implements OnInit {
     this.documentLabel = `${cat} ${doc.documentNumber}`;
     this.description = `Pago de doc. ${this.documentLabel}, ${this.personName}`;
     
-    const id = this.route.snapshot.queryParams['id'];
-    const paidDocs = JSON.parse(localStorage.getItem('paidDocuments') || '{}');
-    let prevPaid = 0;
-    if (id && paidDocs[id]) {
-      if (typeof paidDocs[id] === 'object' && paidDocs[id].amount) {
-        prevPaid = paidDocs[id].amount;
-      } else if (typeof paidDocs[id] === 'string') {
-        prevPaid = Number(doc.total) || 0;
-      }
-    }
-    
+    const prevPaid = Number(doc.amountPaid) || 0;
     const value = Number(doc.total) || 0;
     const balance = Math.max(0, value - prevPaid);
     
@@ -129,23 +121,32 @@ export class DocumentCrossingComponent implements OnInit {
 
   save() {
     this.saving = true;
-    setTimeout(() => {
-      const id = this.route.snapshot.queryParams['id'];
-      if (id) {
-        const totalPaid = this.documents.reduce((acc, doc) => acc + (doc.amountToPay || 0), 0);
-        const paidDocs = JSON.parse(localStorage.getItem('paidDocuments') || '{}');
-        let currentRecord = paidDocs[id];
-        let prevAmount = 0;
-        if (typeof currentRecord === 'object' && currentRecord !== null) {
-          prevAmount = currentRecord.amount || 0;
+    const id = this.route.snapshot.queryParams['id'];
+    if (id) {
+      const totalPaid = this.documents.reduce((acc, doc) => acc + (doc.amountToPay || 0), 0);
+      const docType = this.documents[0]?.type === 'Factura' ? 'ELECTRONIC' : 'FINANCIAL';
+      this.documentPaymentService.post('document-payments', {
+        documentId: id,
+        documentType: docType,
+        amount: totalPaid,
+        transactionType: 'crossing',
+        transactionId: 'mock-crossing-id-' + Date.now() // Mock ID until crossing backend is fully implemented
+      }).subscribe({
+        next: () => {
+          alert('Cruce de documentos registrado correctamente en la base de datos');
+          this.saving = false;
+          this.router.navigate(['/consult-documents']);
+        },
+        error: (e) => {
+          console.error('Failed to register crossing:', e);
+          alert('Error al registrar el cruce');
+          this.saving = false;
         }
-        
-        paidDocs[id] = { amount: prevAmount + totalPaid, status: 'Cruzado' };
-        localStorage.setItem('paidDocuments', JSON.stringify(paidDocs));
-      }
-      alert('Cruce de documentos registrado correctamente');
+      });
+    } else {
+      alert('Cruce registrado (Sin documento vinculado)');
       this.saving = false;
       this.router.navigate(['/consult-documents']);
-    }, 1000);
+    }
   }
 }

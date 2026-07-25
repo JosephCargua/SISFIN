@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { DocumentConsultService } from '../../core/services/document-consult.service';
 import { DocumentConsultItem } from '../../models/document-consult.model';
+import { BankingService } from '../../core/services/banking.service';
+import { JournalEntryService } from '../../core/services/journal-entry.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -69,6 +71,8 @@ export class ConsultDocumentsComponent implements OnInit {
 
   constructor(
     private consultService: DocumentConsultService,
+    private bankingService: BankingService,
+    private journalEntryService: JournalEntryService,
     private router: Router
   ) {}
 
@@ -181,33 +185,14 @@ export class ConsultDocumentsComponent implements OnInit {
   }
 
   getRemainingBalance(doc: DocumentConsultItem): number {
-    const paidDocs = JSON.parse(localStorage.getItem('paidDocuments') || '{}');
-    const record = paidDocs[doc.id];
-    let amountPaid = 0;
-    
-    if (typeof record === 'object' && record !== null) {
-      amountPaid = record.amount || 0;
-    } else if (typeof record === 'string') {
-      amountPaid = doc.total || 0; // Legacy fully paid
-    }
-    
-    const balance = (doc.total || 0) - amountPaid;
-    return balance < 0.01 ? 0 : balance;
+    return doc.balance || 0;
   }
 
   getDisplayStatus(doc: DocumentConsultItem): string {
-    const paidDocs = JSON.parse(localStorage.getItem('paidDocuments') || '{}');
-    const record = paidDocs[doc.id];
-    
-    if (typeof record === 'object' && record !== null) {
-      const balance = (doc.total || 0) - (record.amount || 0);
-      if (balance < 0.01) {
-        return record.status || 'Pagado';
-      } else if (record.amount > 0) {
-        return 'Parcial';
-      }
-    } else if (typeof record === 'string') {
-      return record;
+    if (doc.isPaid) {
+      return 'Pagado';
+    } else if (doc.amountPaid && doc.amountPaid > 0) {
+      return 'Parcial';
     }
     return 'Pendiente';
   }
@@ -296,6 +281,40 @@ export class ConsultDocumentsComponent implements OnInit {
           console.error(err);
         }
       });
+    }
+  }
+
+  hasPayments(doc: DocumentConsultItem): boolean {
+    return !!doc.amountPaid && doc.amountPaid > 0;
+  }
+
+  revertirPago(doc: DocumentConsultItem, silent: boolean = false) {
+    if (!silent && !confirm('¿Está seguro de revertir el pago de este documento? Esta acción eliminará las transacciones bancarias o contables generadas.')) {
+      return;
+    }
+
+    this.consultService.revertPayments(doc.id).subscribe({
+      next: () => {
+        this.activeDropdown = null;
+        if (!silent) {
+          alert('Pago revertido con éxito');
+          this.search(); // Forzar actualización de la lista
+        }
+      },
+      error: (e) => {
+        if (!silent) alert('Error al revertir el pago');
+        console.error(e);
+      }
+    });
+  }
+
+  modificarPago(doc: DocumentConsultItem) {
+    if (confirm('Para modificar el pago, primero se anulará el pago actual (y sus movimientos bancarios/contables) y se le redirigirá a la pantalla de pago para volver a ingresarlo. ¿Desea continuar?')) {
+      // Revertir pago de forma silenciosa
+      this.revertirPago(doc, true);
+      // Navegar a register-payment
+      const route = '/register-payment'; // Assuming standard payment registration screen
+      this.router.navigate([route], { queryParams: { id: doc.id } });
     }
   }
 }

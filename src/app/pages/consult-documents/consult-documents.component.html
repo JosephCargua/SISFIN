@@ -237,7 +237,11 @@
                 </button>
                 <div class="dropdown-menu" *ngIf="activeDropdown === doc.id" style="position: absolute; right: 0; top: 100%; background: white; border: 1px solid #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 1000; min-width: 160px; border-radius: 4px; padding: 4px 0; margin-top: 4px;">
                   <a class="dropdown-item" style="display: block; padding: 8px 16px; color: #333; text-decoration: none; cursor: pointer; font-size: 14px;"
-                     (click)="editDocument(doc); activeDropdown = null">Modificar</a>
+                     (click)="editDocument(doc); activeDropdown = null">Modificar Documento</a>
+                  <a class="dropdown-item" *ngIf="hasPayments(doc)" style="display: block; padding: 8px 16px; color: #333; text-decoration: none; cursor: pointer; font-size: 14px;"
+                     (click)="modificarPago(doc)">Modificar Pago</a>
+                  <a class="dropdown-item" *ngIf="hasPayments(doc)" style="display: block; padding: 8px 16px; color: #e11d48; text-decoration: none; cursor: pointer; font-size: 14px;"
+                     (click)="revertirPago(doc)">Revertir Pago</a>
                   <a class="dropdown-item" style="display: block; padding: 8px 16px; color: #333; text-decoration: none; cursor: pointer; font-size: 14px;"
                      (click)="anularDocumento(doc)">Anular Documento</a>
                 </div>

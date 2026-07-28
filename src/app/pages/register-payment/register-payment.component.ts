@@ -141,8 +141,19 @@ export class RegisterPaymentComponent implements OnInit {
       return;
     }
     
-    this.saving = true;
     const totalPaid = this.documents.reduce((acc, doc) => acc + (doc.amountToPay || 0), 0);
+
+    if (totalPaid <= 0) {
+      alert('El monto a pagar debe ser mayor a 0');
+      return;
+    }
+
+    if (totalPaid > (this.documents[0]?.balance || 0)) {
+      alert('El pago no puede exceder el saldo pendiente de ' + this.formatCurrency(this.documents[0]?.balance || 0));
+      return;
+    }
+
+    this.saving = true;
     
     // Register actual financial transaction
     if (this.paymentMethod === 'Caja') {

@@ -306,14 +306,35 @@ export class JournalEntriesComponent implements OnInit {
 
   exportToExcel() {
     if (!this.entries || this.entries.length === 0) return;
-    const dataToExport = this.entries.map((entry) => ({
-      Número: entry.entryNumber,
-      Fecha: new Date(entry.date).toLocaleDateString(),
-      Descripción: entry.description || '-',
-      Débito: entry.totalDebit,
-      Crédito: entry.totalCredit,
-      Estado: this.statusLabels[entry.status]
-    }));
+    const dataToExport: any[] = [];
+    
+    this.entries.forEach((entry) => {
+      if (entry.lines && entry.lines.length > 0) {
+        entry.lines.forEach((line) => {
+          dataToExport.push({
+            'Número Asiento': entry.entryNumber,
+            Fecha: new Date(entry.date).toLocaleDateString(),
+            'Descripción Asiento': entry.description || '-',
+            Cuenta: line.account ? `${line.account.code} - ${line.account.name}` : '-',
+            'Detalle Línea': line.description || '-',
+            Débito: line.debit || 0,
+            Crédito: line.credit || 0,
+            Estado: this.statusLabels[entry.status]
+          });
+        });
+      } else {
+        dataToExport.push({
+          'Número Asiento': entry.entryNumber,
+          Fecha: new Date(entry.date).toLocaleDateString(),
+          'Descripción Asiento': entry.description || '-',
+          Cuenta: '-',
+          'Detalle Línea': '-',
+          Débito: entry.totalDebit || 0,
+          Crédito: entry.totalCredit || 0,
+          Estado: this.statusLabels[entry.status]
+        });
+      }
+    });
     
     const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(dataToExport);
     const wb: XLSX.WorkBook = XLSX.utils.book_new();
@@ -323,22 +344,36 @@ export class JournalEntriesComponent implements OnInit {
 
   exportToPDF() {
     if (!this.entries || this.entries.length === 0) return;
-    const doc = new jsPDF();
+    const doc = new jsPDF('landscape'); // Landscape to fit more columns
     doc.text('Libro Diario - Asientos Contables', 14, 15);
 
-    const tableData = this.entries.map((entry) => [
-      entry.entryNumber,
-      new Date(entry.date).toLocaleDateString(),
-      entry.description || '-',
-      Number(entry.totalDebit).toFixed(2),
-      Number(entry.totalCredit).toFixed(2),
-      this.statusLabels[entry.status]
-    ]);
+    const tableData: any[] = [];
+    
+    this.entries.forEach((entry) => {
+      if (entry.lines && entry.lines.length > 0) {
+        entry.lines.forEach((line) => {
+          tableData.push([
+            entry.entryNumber,
+            new Date(entry.date).toLocaleDateString(),
+            line.account ? `${line.account.code} - ${line.account.name}` : '-',
+            line.description || '-',
+            Number(line.debit || 0).toFixed(2),
+            Number(line.credit || 0).toFixed(2),
+            this.statusLabels[entry.status]
+          ]);
+        });
+      }
+    });
 
     autoTable(doc, {
       startY: 25,
-      head: [['Número', 'Fecha', 'Descripción', 'Débito', 'Crédito', 'Estado']],
+      head: [['Número', 'Fecha', 'Cuenta', 'Detalle', 'Débito', 'Crédito', 'Estado']],
       body: tableData,
+      styles: { fontSize: 8 },
+      columnStyles: {
+        4: { halign: 'right' },
+        5: { halign: 'right' }
+      }
     });
     doc.save(`Asientos_Contables_${new Date().toISOString().split('T')[0]}.pdf`);
   }

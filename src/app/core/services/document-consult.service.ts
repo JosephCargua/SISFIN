@@ -36,4 +36,8 @@ export class DocumentConsultService {
   revertPayments(documentId: string): Observable<any> {
     return this.api.delete(`document-payments/document/${documentId}`);
   }
+
+  deleteDocument(id: string): Observable<any> {
+    return this.api.delete(`electronic-document-registrations/${id}`);
+  }
 }

@@ -617,7 +617,7 @@
       </div>
       <div class="total-row total-final" *ngIf="hasPayments" style="border-top: 1px dashed #cbd5e1; padding-top: 5px; color: #0ea5e9;">
         <span>Saldo Pendiente</span>
-        <span>{{ (totals.total - amountPaid) > 0 ? (totals.total - amountPaid) : 0 | number: '1.2-2' }}</span>
+        <span>{{ ((totals.total - amountPaid) > 0.01 ? (totals.total - amountPaid) : 0) | number: '1.2-2' }}</span>
       </div>
       <button
         type="button"

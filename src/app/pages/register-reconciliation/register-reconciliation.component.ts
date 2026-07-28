@@ -207,6 +207,12 @@ export class RegisterReconciliationComponent implements OnInit {
   }
 
   save() {
+    if (Math.abs(this.reconciliation.difference) <= 0.01) {
+      this.reconciliation.status = 'Concluida';
+    } else {
+      this.reconciliation.status = 'Pendiente';
+    }
+
     const payload = {
       bankAccountId: this.reconciliation.bankAccountId,
       reconciliationDate: this.reconciliation.reconciliationDate,

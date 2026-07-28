@@ -218,6 +218,16 @@ export class RegisterPurchaseExpenseComponent implements OnInit {
     this.pettyCashAccountId = doc.pettyCashAccountId || '';
     this.ice = doc.ice || 0;
 
+      // Migration logic for old data that was saved as SERVICE but should be ACCOUNT
+      if (doc.lines) {
+        doc.lines.forEach((l: any) => {
+          if (l.lineType === 'SERVICE' && (l.data.mappedAccountId || l.data.accountId)) {
+            l.lineType = 'ACCOUNT';
+            if (!l.data.unitValue) l.data.unitValue = l.data.unitPrice;
+          }
+        });
+      }
+
       if (!isElectronic && doc.lines) {
         this.serviceLines = doc.lines.filter((l: any) => l.lineType === 'SERVICE').map((l: any) => l.data as unknown as ServiceLine);
         this.accountLines = doc.lines.filter((l: any) => l.lineType === 'ACCOUNT').map((l: any) => l.data as unknown as AccountDetailLine);
@@ -230,7 +240,9 @@ export class RegisterPurchaseExpenseComponent implements OnInit {
       if (isElectronic && doc.lines) {
         this.serviceLines = doc.lines.filter((l: any) => l.lineType === 'SERVICE').map((l: any) => l.data as unknown as ServiceLine);
         this.accountLines = doc.lines.filter((l: any) => l.lineType === 'ACCOUNT').map((l: any) => l.data as unknown as AccountDetailLine);
-      }if (doc.retentionMeta) {
+      }
+      
+      if (doc.retentionMeta) {
         this.retentionEmissionDate = doc.retentionMeta.emissionDate || this.issueDate;
         this.retentionFiscalMonth = doc.retentionMeta.fiscalMonth || this.retentionFiscalMonth;
         this.retentionFiscalYear = doc.retentionMeta.fiscalYear || this.retentionFiscalYear;

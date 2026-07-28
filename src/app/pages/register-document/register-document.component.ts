@@ -177,6 +177,24 @@ export class RegisterDocumentComponent implements OnInit {
           this.amountPaid = payments.reduce((sum: number, p: any) => sum + Number(p.amount), 0);
           const types = payments.map((p: any) => p.transactionType === 'bank' ? 'Banco' : 'Caja');
           this.paymentDetailsText = `Pagado con: ${Array.from(new Set(types)).join(', ')}`;
+          
+          this.paymentLines = payments.map(p => ({
+            paymentMethod: p.mappedMethod || 'CASH',
+            term: 0,
+            timeUnit: 'DAYS',
+            amount: Number(p.amount),
+            reference: 'Pago ' + (p.transactionType === 'bank' ? 'Bancario' : 'Efectivo')
+          }));
+
+          const bankPayments = payments.filter(p => p.transactionType === 'bank' && p.accountName);
+          this.accountLines = bankPayments.map(p => ({
+            accountId: '',
+            accountCode: '',
+            accountName: p.accountName,
+            debit: 0,
+            credit: Number(p.amount),
+            description: 'Pago Bancario'
+          }));
         } else {
           this.hasPayments = false;
           this.amountPaid = 0;

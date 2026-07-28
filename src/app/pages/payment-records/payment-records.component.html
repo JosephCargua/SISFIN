@@ -1,0 +1,58 @@
+<div class="page-container" style="padding: 24px; background-color: #f8fafc; min-height: 100vh;">
+  <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+    <div>
+      <h1 style="margin: 0; font-size: 24px; color: #1e293b;">Registros de Pagos</h1>
+      <p style="margin: 4px 0 0; color: #64748b;">Listado de todos los documentos pagados</p>
+    </div>
+  </div>
+
+  <div class="card" style="padding: 20px; background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+    <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 12px;">
+      <label style="font-weight: 500; color: #475569;">Filtrar por forma de pago:</label>
+      <select [(ngModel)]="filterMethod" (change)="applyFilter()" class="form-control" style="width: 250px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 4px;">
+        <option *ngFor="let m of paymentMethods" [value]="m">{{ m }}</option>
+      </select>
+    </div>
+
+    <div *ngIf="loading" style="padding: 20px; text-align: center; color: #64748b;">
+      Cargando registros...
+    </div>
+
+    <table *ngIf="!loading && filteredPayments.length > 0" class="table" style="width: 100%; border-collapse: collapse;">
+      <thead>
+        <tr style="border-bottom: 2px solid #e2e8f0; text-align: left;">
+          <th style="padding: 12px; color: #475569; font-weight: 600;">Fecha</th>
+          <th style="padding: 12px; color: #475569; font-weight: 600;">Documento</th>
+          <th style="padding: 12px; color: #475569; font-weight: 600;">Proveedor / Cliente</th>
+          <th style="padding: 12px; color: #475569; font-weight: 600;">Forma de Pago</th>
+          <th style="padding: 12px; text-align: right; color: #475569; font-weight: 600;">Monto</th>
+          <th style="padding: 12px; text-align: center; color: #475569; font-weight: 600;">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let payment of filteredPayments" style="border-bottom: 1px solid #e2e8f0;">
+          <td style="padding: 12px; color: #1e293b;">{{ payment.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+          <td style="padding: 12px; color: #1e293b; font-weight: 500;">{{ payment.docNumber || 'N/A' }}</td>
+          <td style="padding: 12px; color: #475569;">{{ payment.personName || '-' }}</td>
+          <td style="padding: 12px;">
+            <span style="background-color: #f1f5f9; color: #475569; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">
+              {{ payment.paymentMethod }}
+            </span>
+          </td>
+          <td style="padding: 12px; text-align: right; font-weight: 600; color: #10b981;">
+            {{ payment.amount | currency }}
+          </td>
+          <td style="padding: 12px; text-align: center;">
+            <button class="btn btn-outline" (click)="viewDocument(payment.documentId)" style="padding: 6px 12px; background: white; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer;">
+              <span class="material-icons" style="font-size: 16px; color: #3b82f6; vertical-align: middle;">visibility</span>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="!loading && filteredPayments.length === 0" style="padding: 40px 20px; text-align: center; color: #64748b;">
+      No se encontraron registros de pagos con este filtro.
+    </div>
+  </div>
+</div>

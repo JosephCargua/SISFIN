@@ -38,15 +38,23 @@
   </div>
 
   <div *ngIf="ledgerData && !loading" class="ledger-results card">
-    <div class="ledger-header">
-      <h2>
-        Libro Mayor - {{ ledgerData.account?.code }} -
-        {{ ledgerData.account?.name }}
-      </h2>
-      <p>
-        Período: {{ startDate | date: 'dd/MM/yyyy' }} -
-        {{ endDate | date: 'dd/MM/yyyy' }}
-      </p>
+    <div class="ledger-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 1rem;">
+      <div>
+        <h2 style="margin: 0; color: #1e293b;">
+          Libro Mayor - {{ ledgerData.account?.code }} - {{ ledgerData.account?.name }}
+        </h2>
+        <p style="margin: 4px 0 0 0; color: #64748b; font-size: 14px;">
+          Período: {{ startDate | date: 'dd/MM/yyyy' }} - {{ endDate | date: 'dd/MM/yyyy' }}
+        </p>
+      </div>
+      <div class="export-actions" style="display: flex; gap: 8px;">
+        <button class="btn btn-outline" (click)="exportToExcel()" style="display: flex; align-items: center; gap: 4px; background-color: white; border: 1px solid #10b981; color: #10b981; padding: 6px 12px; border-radius: 4px;">
+          <span class="material-icons" style="font-size: 18px;">table_view</span> Excel
+        </button>
+        <button class="btn btn-outline" (click)="exportToPDF()" style="display: flex; align-items: center; gap: 4px; background-color: white; border: 1px solid #ef4444; color: #ef4444; padding: 6px 12px; border-radius: 4px;">
+          <span class="material-icons" style="font-size: 18px;">picture_as_pdf</span> PDF
+        </button>
+      </div>
     </div>
 
     <div *ngIf="ledgerData.movements && ledgerData.movements.length > 0" class="table-container">

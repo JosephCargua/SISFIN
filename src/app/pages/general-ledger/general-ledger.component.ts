@@ -6,6 +6,9 @@ import { AccountService } from '../../core/services/account.service';
 import { Router } from '@angular/router';
 import { Account } from '../../models/account.model';
 import { AccountSelectorModalComponent } from '../../components/account-selector-modal/account-selector-modal.component';
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 @Component({
   selector: 'app-general-ledger',
@@ -106,6 +109,46 @@ export class GeneralLedgerComponent {
     if (id) {
       this.router.navigate(['/journal-entries'], { queryParams: { edit: id } });
     }
+  }
+
+  exportToExcel() {
+    if (!this.ledgerData || !this.ledgerData.movements) return;
+    const dataToExport = this.ledgerData.movements.map((mov: any) => ({
+      Fecha: new Date(mov.date).toLocaleDateString(),
+      Comprobante: mov.reference,
+      Detalle: mov.description,
+      Debe: mov.debit > 0 ? mov.debit : 0,
+      Haber: mov.credit > 0 ? mov.credit : 0,
+      Saldo: mov.balance
+    }));
+    
+    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(dataToExport);
+    const wb: XLSX.WorkBook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Libro Diario');
+    XLSX.writeFile(wb, `Libro_Diario_${this.accountName}_${this.startDate}.xlsx`);
+  }
+
+  exportToPDF() {
+    if (!this.ledgerData || !this.ledgerData.movements) return;
+    const doc = new jsPDF();
+    doc.text(`Libro Diario: ${this.accountName}`, 14, 15);
+    doc.text(`Periodo: ${this.startDate} a ${this.endDate}`, 14, 22);
+
+    const tableData = this.ledgerData.movements.map((mov: any) => [
+      new Date(mov.date).toLocaleDateString(),
+      mov.reference,
+      mov.description,
+      (mov.debit > 0 ? mov.debit : 0).toFixed(2),
+      (mov.credit > 0 ? mov.credit : 0).toFixed(2),
+      mov.balance.toFixed(2)
+    ]);
+
+    autoTable(doc, {
+      startY: 30,
+      head: [['Fecha', 'Comprobante', 'Detalle', 'Debe', 'Haber', 'Saldo']],
+      body: tableData,
+    });
+    doc.save(`Libro_Diario_${this.accountName}_${this.startDate}.pdf`);
   }
 }
 

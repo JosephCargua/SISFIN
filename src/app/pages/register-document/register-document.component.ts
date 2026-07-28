@@ -9,6 +9,7 @@ import { AccountService } from '../../core/services/account.service';
 import { InventoryService } from '../../core/services/inventory.service';
 import { AutomationService } from '../../core/services/automation.service';
 import { DocumentConsultService } from '../../core/services/document-consult.service';
+import { ApiService } from '../../core/services/api.service';
 import {
   ServiceLine,
   AccountLine,
@@ -60,6 +61,10 @@ export class RegisterDocumentComponent implements OnInit {
   purchaseOrderRef = '';
   description = '';
   ice = 0;
+
+  amountPaid = 0;
+  paymentDetailsText = '';
+  hasPayments = false;
 
   serviceLines: ServiceLine[] = [];
   accountLines: AccountLine[] = [];
@@ -122,6 +127,7 @@ export class RegisterDocumentComponent implements OnInit {
     private inventoryService: InventoryService,
     private automationService: AutomationService,
     private documentConsultService: DocumentConsultService,
+    private apiService: ApiService,
     private route: ActivatedRoute,
   ) {}
 
@@ -145,13 +151,13 @@ export class RegisterDocumentComponent implements OnInit {
     this.documentConsultService.getById(id).subscribe({
       next: (doc) => {
         this.populateFromDoc(doc, true);
-        this.saving = false;
+        this.loadPayments(id);
       },
       error: () => {
         this.documentService.getById(id).subscribe({
           next: (doc) => {
             this.populateFromDoc(doc, false);
-            this.saving = false;
+            this.loadPayments(id);
           },
           error: () => {
             alert('Error al cargar el documento');
@@ -160,6 +166,45 @@ export class RegisterDocumentComponent implements OnInit {
         });
       }
     });
+  }
+
+  loadPayments(id: string) {
+    this.apiService.get<any[]>(`document-payments/document/${id}`).subscribe({
+      next: (payments: any[]) => {
+        this.saving = false;
+        if (payments && payments.length > 0) {
+          this.hasPayments = true;
+          this.amountPaid = payments.reduce((sum: number, p: any) => sum + Number(p.amount), 0);
+          const types = payments.map((p: any) => p.transactionType === 'bank' ? 'Banco' : 'Caja');
+          this.paymentDetailsText = `Pagado con: ${Array.from(new Set(types)).join(', ')}`;
+        } else {
+          this.hasPayments = false;
+          this.amountPaid = 0;
+          this.paymentDetailsText = '';
+        }
+      },
+      error: (err: any) => {
+        console.error('Error loading payments', err);
+        this.saving = false;
+      }
+    });
+  }
+
+  deletePayment() {
+    if (confirm('¿Está seguro de eliminar el pago? El documento volverá a estado pendiente y se revertirá la transacción contable o bancaria.')) {
+      this.saving = true;
+      this.apiService.delete(`document-payments/document/${this.documentId}`).subscribe({
+        next: () => {
+          alert('Pago eliminado correctamente');
+          this.loadDocument(this.documentId);
+        },
+        error: (err: any) => {
+          console.error(err);
+          alert('Error al eliminar el pago');
+          this.saving = false;
+        }
+      });
+    }
   }
 
   populateFromDoc(doc: any, isElectronic: boolean) {
@@ -520,6 +565,9 @@ export class RegisterDocumentComponent implements OnInit {
     this.costCenterLines = [];
     this.retentionLines = [];
     this.paymentLines = [];
+    this.amountPaid = 0;
+    this.hasPayments = false;
+    this.paymentDetailsText = '';
     this.recalcTotals();
   }
 

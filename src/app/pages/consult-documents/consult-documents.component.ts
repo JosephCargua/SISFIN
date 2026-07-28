@@ -284,6 +284,21 @@ export class ConsultDocumentsComponent implements OnInit {
     }
   }
 
+  eliminarDocumento(doc: DocumentConsultItem) {
+    if (confirm('¿Está seguro de eliminar este documento de forma definitiva?')) {
+      this.consultService.deleteDocument(doc.id).subscribe({
+        next: () => {
+          alert('Documento eliminado correctamente');
+          this.search(); // Refresh list so it disappears
+        },
+        error: (err) => {
+          alert('Error al eliminar el documento. Es posible que tenga pagos asociados.');
+          console.error(err);
+        }
+      });
+    }
+  }
+
   hasPayments(doc: DocumentConsultItem): boolean {
     return !!doc.amountPaid && doc.amountPaid > 0;
   }

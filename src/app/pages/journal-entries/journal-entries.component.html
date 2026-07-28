@@ -1,10 +1,18 @@
 <div class="journal-entries-container">
   <div class="page-header">
     <h1>Libro Diario</h1>
-    <button class="btn btn-primary" (click)="toggleCreateForm()">
-      <span class="material-icons">add</span>
-      Nuevo Asiento
-    </button>
+    <div style="display: flex; gap: 8px;">
+      <button class="btn btn-outline" (click)="exportToExcel()" style="display: flex; align-items: center; gap: 4px; background-color: white; border: 1px solid #10b981; color: #10b981; padding: 6px 12px; border-radius: 4px;">
+        <span class="material-icons" style="font-size: 18px;">table_view</span> Excel
+      </button>
+      <button class="btn btn-outline" (click)="exportToPDF()" style="display: flex; align-items: center; gap: 4px; background-color: white; border: 1px solid #ef4444; color: #ef4444; padding: 6px 12px; border-radius: 4px;">
+        <span class="material-icons" style="font-size: 18px;">picture_as_pdf</span> PDF
+      </button>
+      <button class="btn btn-primary" (click)="toggleCreateForm()">
+        <span class="material-icons">add</span>
+        Nuevo Asiento
+      </button>
+    </div>
   </div>
 
   <div *ngIf="showCreateForm" class="create-form card">

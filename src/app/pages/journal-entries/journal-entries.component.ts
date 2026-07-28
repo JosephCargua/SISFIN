@@ -12,6 +12,9 @@ import {
 } from '../../models/journal-entry.model';
 import { Account } from '../../models/account.model';
 import { AccountSelectorModalComponent } from '../../components/account-selector-modal/account-selector-modal.component';
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 @Component({
   selector: 'app-journal-entries',
@@ -299,6 +302,45 @@ export class JournalEntriesComponent implements OnInit {
         this.router.navigate([], { queryParams: { edit: null }, queryParamsHandling: 'merge' });
       }
     }
+  }
+
+  exportToExcel() {
+    if (!this.entries || this.entries.length === 0) return;
+    const dataToExport = this.entries.map((entry) => ({
+      Número: entry.entryNumber,
+      Fecha: new Date(entry.date).toLocaleDateString(),
+      Descripción: entry.description || '-',
+      Débito: entry.totalDebit,
+      Crédito: entry.totalCredit,
+      Estado: this.statusLabels[entry.status]
+    }));
+    
+    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(dataToExport);
+    const wb: XLSX.WorkBook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Libro Diario');
+    XLSX.writeFile(wb, `Asientos_Contables_${new Date().toISOString().split('T')[0]}.xlsx`);
+  }
+
+  exportToPDF() {
+    if (!this.entries || this.entries.length === 0) return;
+    const doc = new jsPDF();
+    doc.text('Libro Diario - Asientos Contables', 14, 15);
+
+    const tableData = this.entries.map((entry) => [
+      entry.entryNumber,
+      new Date(entry.date).toLocaleDateString(),
+      entry.description || '-',
+      Number(entry.totalDebit).toFixed(2),
+      Number(entry.totalCredit).toFixed(2),
+      this.statusLabels[entry.status]
+    ]);
+
+    autoTable(doc, {
+      startY: 25,
+      head: [['Número', 'Fecha', 'Descripción', 'Débito', 'Crédito', 'Estado']],
+      body: tableData,
+    });
+    doc.save(`Asientos_Contables_${new Date().toISOString().split('T')[0]}.pdf`);
   }
 }
 

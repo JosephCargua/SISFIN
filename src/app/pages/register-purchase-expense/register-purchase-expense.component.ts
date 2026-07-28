@@ -324,11 +324,27 @@ export class RegisterPurchaseExpenseComponent implements OnInit {
             const discountPercent =
               gross > 0 ? this.round2((discount / gross) * 100) : 0;
 
+            const mappedAccountId = String(d['mappedAccountId'] || '');
+            const mappedProductId = String(d['mappedProductId'] || '');
+            
+            let productId = '';
+            let productCode = String(d['productCode'] || '');
+            let productName = String(d['productName'] || '');
+            
+            if (mappedProductId) {
+              const matchedProduct = this.products.find(p => p.id === mappedProductId);
+              if (matchedProduct) {
+                productId = mappedProductId;
+                productCode = matchedProduct.code;
+                productName = matchedProduct.name;
+              }
+            }
+
             return {
               quantity,
-              productId: '',
-              productCode: String(d['productCode'] || ''),
-              productName: String(d['productName'] || ''),
+              productId,
+              productCode,
+              productName,
               unit: String(d['unit'] || 'UND'),
               unitPrice,
               ivaRate: Number(d['ivaRate']) || 0,
@@ -338,6 +354,8 @@ export class RegisterPurchaseExpenseComponent implements OnInit {
               discount,
               extraDiscount,
               subtotal: Number(d['subtotal']) || 0,
+              mappedAccountId,
+              mappedProductId
             };
           });
 
@@ -360,11 +378,23 @@ export class RegisterPurchaseExpenseComponent implements OnInit {
             const discountPercent = gross > 0 ? this.round2((discount / gross) * 100) : 0;
             const base = Math.max(gross - discount - extraDiscount, 0);
 
+            const mappedAccountId = String(d['mappedAccountId'] || '');
+            let accountCode = '';
+            let accountName = '';
+            
+            if (mappedAccountId) {
+              const matchedAccount = this.accounts.find(a => a.id === mappedAccountId);
+              if (matchedAccount) {
+                accountCode = matchedAccount.code;
+                accountName = matchedAccount.name;
+              }
+            }
+
             return {
               quantity,
-              accountId: '',
-              accountCode: '',
-              accountName: '',
+              accountId: mappedAccountId,
+              accountCode,
+              accountName,
               unitValue: unitPrice,
               ivaRate: Number(d['ivaRate']) || 0,
               icePercent: 0,

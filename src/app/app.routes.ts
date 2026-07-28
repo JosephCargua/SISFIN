@@ -40,6 +40,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'payment-records',
+        loadComponent: () =>
+          import('./pages/payment-records/payment-records.component').then(
+            (m) => m.PaymentRecordsComponent,
+          ),
+      },
+      {
         path: 'electronic-invoices',
         loadComponent: () =>
           import(

@@ -30,6 +30,7 @@ export class LayoutComponent implements OnInit {
       children: [
         { label: 'Libro Diario', route: '/journal-entries', icon: 'book' },
         { label: 'Libro Mayor', route: '/general-ledger', icon: 'library_books' },
+        { label: 'Registros de Pagos', route: '/payment-records', icon: 'receipt_long' },
         { label: 'Plan de Cuentas', route: '/accounts', icon: 'account_tree' },
         { label: 'Centros de Costo', route: '/cost-centers', icon: 'business' },
         { label: 'Cierre de Período', route: '/period-locks', icon: 'lock' },

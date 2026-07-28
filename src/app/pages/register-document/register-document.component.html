@@ -9,7 +9,7 @@
       <button *ngIf="hasPayments" type="button" class="btn btn-outline" title="Eliminar Pago" (click)="deletePayment()" style="background-color: #fef2f2; border: 1px solid #ef4444; color: #ef4444; border-radius: 4px; padding: 4px 8px;" [disabled]="saving">
         <span class="material-icons" style="font-size: 18px; color: #ef4444;">delete_sweep</span>
       </button>
-      <button type="button" class="btn btn-outline" title="Registrar Pago" [routerLink]="['/register-payment']" [queryParams]="{ id: documentId }" style="background-color: white; border: 1px solid #ccc; color: #0ea5e9; border-radius: 4px; padding: 4px 8px;" [disabled]="!documentId">
+      <button type="button" class="btn btn-outline" title="Registrar Pago" [routerLink]="['/register-payment']" [queryParams]="{ id: documentId }" style="background-color: white; border: 1px solid #ccc; color: #0ea5e9; border-radius: 4px; padding: 4px 8px;" [disabled]="!documentId || (totals.total - amountPaid) <= 0.01">
         <span class="material-icons" style="font-size: 18px; color: #0ea5e9;">paid</span>
       </button>
       <button type="button" class="btn btn-outline" title="Cruzar documento" [routerLink]="['/document-crossing']" [queryParams]="{ id: documentId }" style="background-color: #e0f2fe; border: 1px solid #0ea5e9; color: #0ea5e9; border-radius: 4px; padding: 4px 8px;" [disabled]="!documentId">

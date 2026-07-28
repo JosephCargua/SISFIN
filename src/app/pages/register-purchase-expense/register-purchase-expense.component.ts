@@ -347,6 +347,35 @@ export class RegisterPurchaseExpenseComponent implements OnInit {
           this.serviceLines.forEach((line) => this.recalcServiceLine(line));
         }
 
+        // Populating accountLines as requested by user
+        this.accountLines = parsed.lines
+          .filter((l) => l.lineType === 'SERVICE')
+          .map((l) => {
+            const d = l.data as Record<string, number | string>;
+            const quantity = Number(d['quantity']) || 1;
+            const unitPrice = Number(d['unitPrice']) || 0;
+            const discount = Number(d['discount']) || 0;
+            const extraDiscount = Number(d['extraDiscount']) || 0;
+            const gross = quantity * unitPrice;
+            const discountPercent = gross > 0 ? this.round2((discount / gross) * 100) : 0;
+            const base = Math.max(gross - discount - extraDiscount, 0);
+
+            return {
+              quantity,
+              accountId: '',
+              accountCode: '',
+              accountName: '',
+              unitValue: unitPrice,
+              ivaRate: Number(d['ivaRate']) || 0,
+              icePercent: 0,
+              retIr: '',
+              retIva: '',
+              discountPercent,
+              discount: discount + extraDiscount,
+              subtotal: this.round2(base),
+            };
+          });
+
         this.recalcTotals();
         this.parsingXml = false;
         input.value = '';

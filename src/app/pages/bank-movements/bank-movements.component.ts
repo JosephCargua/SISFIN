@@ -3,19 +3,17 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { BankingService } from '../../core/services/banking.service';
-
-import { BankAccountSelectorModalComponent } from '../../components/bank-account-selector-modal/bank-account-selector-modal.component';
+import { BankAccount } from '../../models/banking.model';
 
 @Component({
   selector: 'app-bank-movements',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, BankAccountSelectorModalComponent],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './bank-movements.component.html',
   styleUrl: './bank-movements.component.scss'
 })
 export class BankMovementsComponent implements OnInit {
   searchExpanded = true;
-  showAccountModal = false;
   showActionMenu = false;
   
   filters = {
@@ -48,29 +46,40 @@ export class BankMovementsComponent implements OnInit {
   ];
 
   movements: any[] = [];
+  bankAccounts: BankAccount[] = [];
 
   constructor(private router: Router, private bankingService: BankingService) {}
 
   ngOnInit() {
-    this.loadMovements();
+    this.loadBankAccounts();
+  }
+
+  loadBankAccounts() {
+    this.bankingService.getBankAccounts().subscribe((accounts) => {
+      this.bankAccounts = accounts;
+      this.loadMovements(); // Load movements after accounts to resolve names
+    });
   }
 
   loadMovements() {
     this.bankingService.getAllTransactions().subscribe((data) => {
       // Map API data to the table format
-      this.movements = data.map(tx => ({
-        id: tx.id,
-        emision: tx.date,
-        comprobante: tx.checkNumber || 'S/N',
-        comprobanteType: tx.transactionType || 'Movimiento',
-        persona: tx.personName || 'No Especificada',
-        transaccionType: tx.paymentMethod || 'Transferencia',
-        transaccionDetail: tx.description || 'Sin detalle',
-        cuenta: tx.bankAccountId, // ideally we would resolve the name
-        total: tx.amount,
-        // Used to route back to the correct screen:
-        sourceForm: tx.paymentMethod === 'Anticipo' ? 'anticipo' : (tx.paymentMethod === 'Transacción' ? 'transaccion' : 'movimiento')
-      }));
+      this.movements = data.map(tx => {
+        const account = this.bankAccounts.find(a => a.id === tx.bankAccountId);
+        return {
+          id: tx.id,
+          emision: tx.date,
+          comprobante: tx.checkNumber || 'S/N',
+          comprobanteType: tx.transactionType || 'Movimiento',
+          persona: tx.personName || 'No Especificada',
+          transaccionType: tx.paymentMethod || 'Transferencia',
+          transaccionDetail: tx.description || 'Sin detalle',
+          cuenta: account ? account.bankName : tx.bankAccountId,
+          total: tx.amount,
+          // Used to route back to the correct screen:
+          sourceForm: tx.paymentMethod === 'Anticipo' ? 'anticipo' : (tx.paymentMethod === 'Transacción' ? 'transaccion' : 'movimiento')
+        };
+      });
     });
   }
 
@@ -80,19 +89,6 @@ export class BankMovementsComponent implements OnInit {
 
   toggleActionMenu() {
     this.showActionMenu = !this.showActionMenu;
-  }
-
-  openAccountModal() {
-    this.showAccountModal = true;
-  }
-
-  closeAccountModal() {
-    this.showAccountModal = false;
-  }
-
-  selectAccount(acc: any) {
-    this.filters.cuentaBancaria = acc.bankName;
-    this.closeAccountModal();
   }
 
   formatCurrency(amount: number): string {

@@ -218,12 +218,30 @@ export class RegisterPurchaseExpenseComponent implements OnInit {
     this.pettyCashAccountId = doc.pettyCashAccountId || '';
     this.ice = doc.ice || 0;
 
-    if (!isElectronic && doc.lines) {
-      this.serviceLines = doc.lines.filter((l: any) => l.lineType === 'SERVICE').map((l: any) => l.data as unknown as ServiceLine);
-      this.accountLines = doc.lines.filter((l: any) => l.lineType === 'ACCOUNT').map((l: any) => l.data as unknown as AccountDetailLine);
-      this.costCenterLines = doc.lines.filter((l: any) => l.lineType === 'COST_CENTER').map((l: any) => l.data as unknown as CostCenterDetailLine);
-      this.retentionLines = doc.lines.filter((l: any) => l.lineType === 'RETENTION').map((l: any) => l.data as unknown as RetentionLine);
-      this.paymentLines = doc.lines.filter((l: any) => l.lineType === 'PAYMENT').map((l: any) => l.data as unknown as PaymentLine);
+      // Migration logic for old data that was saved as SERVICE but should be ACCOUNT
+      if (doc.lines) {
+        doc.lines.forEach((l: any) => {
+          if (l.lineType === 'SERVICE' && (l.data.mappedAccountId || l.data.accountId)) {
+            l.lineType = 'ACCOUNT';
+            if (!l.data.unitValue) l.data.unitValue = l.data.unitPrice;
+          }
+        });
+      }
+
+      if (!isElectronic && doc.lines) {
+        this.serviceLines = doc.lines.filter((l: any) => l.lineType === 'SERVICE').map((l: any) => l.data as unknown as ServiceLine);
+        this.accountLines = doc.lines.filter((l: any) => l.lineType === 'ACCOUNT').map((l: any) => l.data as unknown as AccountDetailLine);
+        this.costCenterLines = doc.lines.filter((l: any) => l.lineType === 'COST_CENTER').map((l: any) => l.data as unknown as CostCenterDetailLine);
+        this.retentionLines = doc.lines.filter((l: any) => l.lineType === 'RETENTION').map((l: any) => l.data as unknown as RetentionLine);
+        this.paymentLines = doc.lines.filter((l: any) => l.lineType === 'PAYMENT').map((l: any) => l.data as unknown as PaymentLine);
+      }
+      
+      // If it is electronic, the lines should be mapped too since they were saved
+      if (isElectronic && doc.lines) {
+        this.serviceLines = doc.lines.filter((l: any) => l.lineType === 'SERVICE').map((l: any) => l.data as unknown as ServiceLine);
+        this.accountLines = doc.lines.filter((l: any) => l.lineType === 'ACCOUNT').map((l: any) => l.data as unknown as AccountDetailLine);
+      }
+      
       if (doc.retentionMeta) {
         this.retentionEmissionDate = doc.retentionMeta.emissionDate || this.issueDate;
         this.retentionFiscalMonth = doc.retentionMeta.fiscalMonth || this.retentionFiscalMonth;
@@ -240,15 +258,8 @@ export class RegisterPurchaseExpenseComponent implements OnInit {
           { date: '09/07/2026 01:12 p.m.', user: 'DANIELA REYES D', role: 'Contador', activity: 'Cambió estado de documento de "Pendiente" a "Pagado".' }
         ];
       }
-    } else {
-      // Mock basic service line for electronic document
-      this.serviceLines = [{
-        quantity: 1, productId: '', productCode: 'TXT', productName: 'Ítem del documento', unit: 'UND',
-        unitPrice: doc.total || 0, ivaRate: 0, retIr: '', retIva: '', discountPercent: 0, discount: 0, extraDiscount: 0, subtotal: doc.total || 0
-      }];
-    }
 
-    if(this.serviceLines.length === 0) {
+    if(this.serviceLines.length === 0 && this.accountLines.length === 0) {
       this.addServiceLine();
     }
     this.recalcTotals();
@@ -359,52 +370,12 @@ export class RegisterPurchaseExpenseComponent implements OnInit {
             };
           });
 
-        if (this.serviceLines.length === 0) {
+        if (this.serviceLines.length === 0 && this.accountLines.length === 0) {
           this.addServiceLine();
         } else {
           this.serviceLines.forEach((line) => this.recalcServiceLine(line));
+          this.accountLines.forEach((line) => this.recalcAccountLine(line));
         }
-
-        // Populating accountLines as requested by user
-        this.accountLines = parsed.lines
-          .filter((l) => l.lineType === 'SERVICE')
-          .map((l) => {
-            const d = l.data as Record<string, number | string>;
-            const quantity = Number(d['quantity']) || 1;
-            const unitPrice = Number(d['unitPrice']) || 0;
-            const discount = Number(d['discount']) || 0;
-            const extraDiscount = Number(d['extraDiscount']) || 0;
-            const gross = quantity * unitPrice;
-            const discountPercent = gross > 0 ? this.round2((discount / gross) * 100) : 0;
-            const base = Math.max(gross - discount - extraDiscount, 0);
-
-            const mappedAccountId = String(d['mappedAccountId'] || '');
-            let accountCode = '';
-            let accountName = '';
-            
-            if (mappedAccountId) {
-              const matchedAccount = this.accounts.find(a => a.id === mappedAccountId);
-              if (matchedAccount) {
-                accountCode = matchedAccount.code;
-                accountName = matchedAccount.name;
-              }
-            }
-
-            return {
-              quantity,
-              accountId: mappedAccountId,
-              accountCode,
-              accountName,
-              unitValue: unitPrice,
-              ivaRate: Number(d['ivaRate']) || 0,
-              icePercent: 0,
-              retIr: '',
-              retIva: '',
-              discountPercent,
-              discount: discount + extraDiscount,
-              subtotal: this.round2(base),
-            };
-          });
 
         this.recalcTotals();
         this.parsingXml = false;
@@ -487,27 +458,31 @@ export class RegisterPurchaseExpenseComponent implements OnInit {
     this.recalcAccountLine(line);
   }
 
-  removeAccountLine(index: number) {
-    this.accountLines.splice(index, 1);
-  }
-
-  onAccountSelected(line: AccountDetailLine) {
-    const account = this.accounts.find((a) => a.id === line.accountId);
-    if (account) {
-      line.accountCode = account.code;
-      line.accountName = account.name;
+    removeAccountLine(index: number) {
+      this.accountLines.splice(index, 1);
+      this.recalcTotals();
     }
-  }
 
-  recalcAccountLine(line: AccountDetailLine) {
-    const gross = line.quantity * line.unitValue;
-    line.discount = this.round2((gross * line.discountPercent) / 100);
-    line.subtotal = this.round2(Math.max(gross - line.discount, 0));
-  }
+    onAccountSelected(line: AccountDetailLine) {
+      const account = this.accounts.find((a) => a.id === line.accountId);
+      if (account) {
+        line.accountCode = account.code;
+        line.accountName = account.name;
+      }
+    }
 
-  onAccountLineChange(line: AccountDetailLine) {
-    this.recalcAccountLine(line);
-  }
+    recalcAccountLine(line: AccountDetailLine) {
+      // Recalcular el base basado en si cambiaron el IVA y el unitValue es estático?
+      // No, we just calculate subtotal from unitValue. The user changes unitValue to adjust.
+      const gross = line.quantity * line.unitValue;
+      line.discount = this.round2((gross * line.discountPercent) / 100);
+      line.subtotal = this.round2(Math.max(gross - line.discount, 0));
+    }
+
+    onAccountLineChange(line: AccountDetailLine) {
+      this.recalcAccountLine(line);
+      this.recalcTotals();
+    }
 
   addCostCenterLine() {
     this.costCenterLines.push({
@@ -586,8 +561,8 @@ export class RegisterPurchaseExpenseComponent implements OnInit {
     let iva15 = 0;
     let iva5 = 0;
 
-    for (const line of this.serviceLines) {
-      const lineDiscount = line.discount + line.extraDiscount;
+    const processLine = (line: { discount: number, extraDiscount?: number, subtotal: number, ivaRate: number }) => {
+      const lineDiscount = line.discount + (line.extraDiscount || 0);
       discount += lineDiscount;
       const base = line.subtotal;
 
@@ -600,6 +575,14 @@ export class RegisterPurchaseExpenseComponent implements OnInit {
       } else {
         subtotal0 += base;
       }
+    };
+
+    for (const line of this.serviceLines) {
+      processLine(line);
+    }
+
+    for (const line of this.accountLines) {
+      processLine(line);
     }
 
     const total =

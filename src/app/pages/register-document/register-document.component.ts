@@ -10,6 +10,7 @@ import { InventoryService } from '../../core/services/inventory.service';
 import { AutomationService } from '../../core/services/automation.service';
 import { DocumentConsultService } from '../../core/services/document-consult.service';
 import { ApiService } from '../../core/services/api.service';
+import Swal from 'sweetalert2';
 import {
   ServiceLine,
   AccountLine,
@@ -209,20 +210,31 @@ export class RegisterDocumentComponent implements OnInit {
   }
 
   deletePayment() {
-    if (confirm('¿Está seguro de eliminar el pago? El documento volverá a estado pendiente y se revertirá la transacción contable o bancaria.')) {
-      this.saving = true;
-      this.apiService.delete(`document-payments/document/${this.documentId}`).subscribe({
-        next: () => {
-          alert('Pago eliminado correctamente');
-          this.loadDocument(this.documentId);
-        },
-        error: (err: any) => {
-          console.error(err);
-          alert('Error al eliminar el pago');
-          this.saving = false;
-        }
-      });
-    }
+    Swal.fire({
+      title: '¿Eliminar pago?',
+      text: '¿Está seguro de eliminar el pago? El documento volverá a estado pendiente y se revertirá la transacción contable o bancaria.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.saving = true;
+        this.apiService.delete(`document-payments/document/${this.documentId}`).subscribe({
+          next: () => {
+            Swal.fire('Eliminado', 'Pago eliminado correctamente.', 'success');
+            this.loadDocument(this.documentId);
+          },
+          error: (err: any) => {
+            console.error(err);
+            Swal.fire('Error', 'Error al eliminar el pago', 'error');
+            this.saving = false;
+          }
+        });
+      }
+    });
   }
 
   populateFromDoc(doc: any, isElectronic: boolean) {

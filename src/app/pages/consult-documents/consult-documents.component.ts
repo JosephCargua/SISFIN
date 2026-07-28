@@ -269,34 +269,56 @@ export class ConsultDocumentsComponent implements OnInit {
   }
 
   anularDocumento(doc: DocumentConsultItem) {
-    if (confirm('¿Está seguro de anular el documento?')) {
-      this.consultService.annulDocument(doc.id).subscribe({
-        next: () => {
-          alert('Documento anulado');
-          this.activeDropdown = null;
-          this.search(); // Refresh list
-        },
-        error: (err) => {
-          alert('Error al anular documento');
-          console.error(err);
-        }
-      });
-    }
+    Swal.fire({
+      title: '¿Anular documento?',
+      text: '¿Está seguro de anular este documento?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#f59e0b',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'Sí, anular',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.consultService.annulDocument(doc.id).subscribe({
+          next: () => {
+            Swal.fire('Anulado', 'Documento anulado correctamente.', 'success');
+            this.activeDropdown = null;
+            this.search(); // Refresh list
+          },
+          error: (err) => {
+            Swal.fire('Error', 'Error al anular documento', 'error');
+            console.error(err);
+          }
+        });
+      }
+    });
   }
 
   eliminarDocumento(doc: DocumentConsultItem) {
-    if (confirm('¿Está seguro de eliminar este documento de forma definitiva?')) {
-      this.consultService.deleteDocument(doc.id).subscribe({
-        next: () => {
-          alert('Documento eliminado correctamente');
-          this.search(); // Refresh list so it disappears
-        },
-        error: (err) => {
-          alert('Error al eliminar el documento. Es posible que tenga pagos asociados.');
-          console.error(err);
-        }
-      });
-    }
+    Swal.fire({
+      title: '¿Eliminar documento?',
+      text: '¿Está seguro de eliminar este documento de forma definitiva?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.consultService.deleteDocument(doc.id).subscribe({
+          next: () => {
+            Swal.fire('Eliminado', 'Documento eliminado correctamente.', 'success');
+            this.search(); // Refresh list so it disappears
+          },
+          error: (err) => {
+            Swal.fire('Error', 'Error al eliminar el documento. Es posible que tenga pagos asociados.', 'error');
+            console.error(err);
+          }
+        });
+      }
+    });
   }
 
   hasPayments(doc: DocumentConsultItem): boolean {
@@ -304,32 +326,61 @@ export class ConsultDocumentsComponent implements OnInit {
   }
 
   revertirPago(doc: DocumentConsultItem, silent: boolean = false) {
-    if (!silent && !confirm('¿Está seguro de revertir el pago de este documento? Esta acción eliminará las transacciones bancarias o contables generadas.')) {
+    if (silent) {
+      this.executeRevertirPago(doc, silent);
       return;
     }
 
+    Swal.fire({
+      title: '¿Revertir pago?',
+      text: '¿Está seguro de revertir el pago de este documento? Esta acción eliminará las transacciones bancarias o contables generadas.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'Sí, revertir',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.executeRevertirPago(doc, false);
+      }
+    });
+  }
+
+  private executeRevertirPago(doc: DocumentConsultItem, silent: boolean) {
     this.consultService.revertPayments(doc.id).subscribe({
       next: () => {
         this.activeDropdown = null;
         if (!silent) {
-          alert('Pago revertido con éxito');
+          Swal.fire('Revertido', 'Pago revertido con éxito.', 'success');
           this.search(); // Forzar actualización de la lista
         }
       },
       error: (e) => {
-        if (!silent) alert('Error al revertir el pago');
+        if (!silent) Swal.fire('Error', 'Error al revertir el pago', 'error');
         console.error(e);
       }
     });
   }
 
   modificarPago(doc: DocumentConsultItem) {
-    if (confirm('Para modificar el pago, primero se anulará el pago actual (y sus movimientos bancarios/contables) y se le redirigirá a la pantalla de pago para volver a ingresarlo. ¿Desea continuar?')) {
-      // Revertir pago de forma silenciosa
-      this.revertirPago(doc, true);
-      // Navegar a register-payment
-      const route = '/register-payment'; // Assuming standard payment registration screen
-      this.router.navigate([route], { queryParams: { id: doc.id } });
-    }
+    Swal.fire({
+      title: '¿Modificar pago?',
+      text: 'Para modificar el pago, primero se anulará el pago actual (y sus movimientos bancarios/contables) y se le redirigirá a la pantalla de pago para volver a ingresarlo. ¿Desea continuar?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#0ea5e9',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'Sí, continuar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Revertir pago de forma silenciosa
+        this.revertirPago(doc, true);
+        // Navegar a register-payment
+        const route = '/register-payment';
+        this.router.navigate([route], { queryParams: { id: doc.id } });
+      }
+    });
   }
 }

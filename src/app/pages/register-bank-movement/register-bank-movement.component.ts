@@ -32,6 +32,7 @@ export class RegisterBankMovementComponent implements OnInit {
     fechaEmision: new Date().toISOString().split('T')[0],
     cuentaBancaria: 'b567b458-1234-4567-8901-abcdefabcdef', // mock UUID
     persona: '',
+    personaId: '',
     paguese: '',
     numeroCheque: '',
     fechaCheque: new Date().toISOString().split('T')[0],
@@ -65,6 +66,7 @@ export class RegisterBankMovementComponent implements OnInit {
       this.movement.fechaEmision = tx.date ? new Date(tx.date).toISOString().split('T')[0] : '';
       this.movement.cuentaBancaria = tx.bankAccountId || '';
       this.movement.persona = tx.personName || '';
+      this.movement.personaId = tx.personaId || '';
       this.movement.paguese = tx.payToOrderOf || '';
       this.movement.numeroCheque = tx.checkNumber || '';
       this.movement.fechaCheque = tx.checkDate ? new Date(tx.checkDate).toISOString().split('T')[0] : '';
@@ -101,6 +103,7 @@ export class RegisterBankMovementComponent implements OnInit {
 
   onPersonaSelected(persona: Persona) {
     this.movement.persona = persona.nombre;
+    this.movement.personaId = persona.id!;
   }
 
   addDetail() {
@@ -133,6 +136,7 @@ export class RegisterBankMovementComponent implements OnInit {
       transactionType: this.movement.tipoMovimiento,
       paymentMethod: this.movement.metodo,
       isAnnulled: this.movement.anulado,
+      personaId: this.movement.personaId || null,
       personName: this.movement.persona,
       payToOrderOf: this.movement.paguese,
       checkNumber: this.movement.numeroCheque,

@@ -29,6 +29,7 @@ export class RegisterTransactionComponent implements OnInit {
     fechaEmision: new Date().toISOString().split('T')[0],
     cuentaBancaria: 'b567b458-1234-4567-8901-abcdefabcdef', 
     persona: '',
+    personaId: '',
     paguese: '',
     numeroComprobante: '',
     esEfectivo: false,
@@ -62,6 +63,7 @@ export class RegisterTransactionComponent implements OnInit {
       this.movement.fechaEmision = tx.date ? new Date(tx.date).toISOString().split('T')[0] : '';
       this.movement.cuentaBancaria = tx.bankAccountId || '';
       this.movement.persona = tx.personName || '';
+      this.movement.personaId = tx.personaId || '';
       this.movement.numeroComprobante = tx.checkNumber || ''; // Reusing checkNumber for comprobante
       this.movement.descripcion = tx.description || '';
       
@@ -93,6 +95,7 @@ export class RegisterTransactionComponent implements OnInit {
 
   onPersonaSelected(persona: Persona) {
     this.movement.persona = persona.nombre;
+    this.movement.personaId = persona.id!;
   }
 
   addDetail() {
@@ -125,6 +128,7 @@ export class RegisterTransactionComponent implements OnInit {
       transactionType: this.movement.tipoMovimiento,
       paymentMethod: this.movement.metodo,
       isAnnulled: this.movement.anulado,
+      personaId: this.movement.personaId || null,
       personName: this.movement.persona,
       checkNumber: this.movement.numeroComprobante,
       details: this.documentsDetails.map(d => ({

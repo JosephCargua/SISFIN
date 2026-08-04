@@ -76,9 +76,15 @@
 
   .form-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 40px;
-    padding: 16px 40px;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 16px;
+    
+    @media (min-width: 768px) {
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      padding: 16px 40px;
+    }
   }
 
   .form-column {
@@ -89,14 +95,24 @@
 
   .form-group {
     display: grid;
-    grid-template-columns: 120px 1fr;
-    align-items: center;
-    gap: 16px;
+    grid-template-columns: 1fr;
+    align-items: flex-start;
+    gap: 6px;
+
+    @media (min-width: 768px) {
+      grid-template-columns: 120px 1fr;
+      align-items: center;
+      gap: 16px;
+    }
 
     label {
-      text-align: right;
+      text-align: left;
       font-size: 13px;
       color: #64748b;
+      
+      @media (min-width: 768px) {
+        text-align: right;
+      }
     }
 
     input[type="text"],

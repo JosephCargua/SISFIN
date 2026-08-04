@@ -42,13 +42,13 @@ export class LayoutComponent implements OnInit {
     {
       label: 'Transacciones',
       icon: 'swap_horiz',
-      expanded: true,
+      expanded: false,
       children: [
         { label: 'Compras o Gastos', route: '/register-purchase-expense', icon: 'shopping_cart' },
         { 
           label: 'Cobros/Pagos', 
           icon: 'payments',
-          expanded: true,
+          expanded: false,
           children: [
             { label: 'Cobros/Pagos', route: '/payment-records' },
             { label: 'Cobros/Pagos Masivos', route: '/payment-records', queryParams: { view: 'masivo' } },

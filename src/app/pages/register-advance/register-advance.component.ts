@@ -6,11 +6,13 @@ import { BankingService } from '../../core/services/banking.service';
 
 import { AccountSelectorModalComponent } from '../../components/account-selector-modal/account-selector-modal.component';
 import { Account } from '../../models/account.model';
+import { PersonaSelectorModalComponent } from '../../components/persona-selector-modal/persona-selector-modal.component';
+import { Persona } from '../../models/persona.model';
 
 @Component({
   selector: 'app-register-advance',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, AccountSelectorModalComponent],
+  imports: [CommonModule, FormsModule, RouterModule, AccountSelectorModalComponent, PersonaSelectorModalComponent],
   templateUrl: './register-advance.component.html',
   styleUrl: './register-advance.component.scss'
 })
@@ -19,6 +21,7 @@ export class RegisterAdvanceComponent implements OnInit {
   movementId: string | null = null;
   
   isAccountModalVisible = false;
+  isPersonaModalVisible = false;
   currentEditingRowIndex: number | null = null;
   targetField: 'main' | 'detail' = 'main';
   
@@ -90,6 +93,14 @@ export class RegisterAdvanceComponent implements OnInit {
     } else if (this.targetField === 'detail' && this.currentEditingRowIndex !== null) {
       this.accountsDetails[this.currentEditingRowIndex].cuenta = account.name;
     }
+  }
+
+  openPersonaModal() {
+    this.isPersonaModalVisible = true;
+  }
+
+  onPersonaSelected(persona: Persona) {
+    this.movement.persona = persona.nombre;
   }
 
   formatCurrency(amount: number): string {

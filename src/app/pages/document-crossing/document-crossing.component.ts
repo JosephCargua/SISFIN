@@ -6,10 +6,13 @@ import { FinancialDocumentService } from '../../core/services/financial-document
 import { DocumentConsultService } from '../../core/services/document-consult.service';
 import { ApiService } from '../../core/services/api.service';
 
+import { PersonaSelectorModalComponent } from '../../components/persona-selector-modal/persona-selector-modal.component';
+import { Persona } from '../../models/persona.model';
+
 @Component({
   selector: 'app-document-crossing',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PersonaSelectorModalComponent],
   templateUrl: './document-crossing.component.html',
   styleUrl: './document-crossing.component.scss'
 })
@@ -27,6 +30,8 @@ export class DocumentCrossingComponent implements OnInit {
   accounts: any[] = [];
   activeTab = 'Documentos';
   showAccountModal = false;
+  showPersonaModal = false;
+  targetPersonaIndex: number = -1; // -1 for main person, >=0 for advances
   
   mockAccounts = [
     { code: '1.1.1.1', name: 'Caja', group: 'Activo' },
@@ -117,6 +122,19 @@ export class DocumentCrossingComponent implements OnInit {
       amountToPay: 0
     });
     this.showAccountModal = false;
+  }
+
+  openPersonaModal(index: number = -1) {
+    this.targetPersonaIndex = index;
+    this.showPersonaModal = true;
+  }
+
+  onPersonaSelected(persona: Persona) {
+    if (this.targetPersonaIndex === -1) {
+      this.personName = persona.nombre;
+    } else {
+      this.advances[this.targetPersonaIndex].person = persona.nombre;
+    }
   }
 
   save() {

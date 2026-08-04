@@ -6,11 +6,13 @@ import { BankingService } from '../../core/services/banking.service';
 
 import { AccountSelectorModalComponent } from '../../components/account-selector-modal/account-selector-modal.component';
 import { Account } from '../../models/account.model';
+import { PersonaSelectorModalComponent } from '../../components/persona-selector-modal/persona-selector-modal.component';
+import { Persona } from '../../models/persona.model';
 
 @Component({
   selector: 'app-register-transaction',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, AccountSelectorModalComponent],
+  imports: [CommonModule, FormsModule, RouterModule, AccountSelectorModalComponent, PersonaSelectorModalComponent],
   templateUrl: './register-transaction.component.html',
   styleUrl: './register-transaction.component.scss'
 })
@@ -18,6 +20,7 @@ export class RegisterTransactionComponent implements OnInit {
   
   movementId: string | null = null;
   isAccountModalVisible = false;
+  isPersonaModalVisible = false;
   
   movement = {
     tipoMovimiento: 'Ingreso',
@@ -82,6 +85,14 @@ export class RegisterTransactionComponent implements OnInit {
 
   onAccountSelected(account: Account) {
     this.movement.cuentaBancaria = account.name;
+  }
+
+  openPersonaModal() {
+    this.isPersonaModalVisible = true;
+  }
+
+  onPersonaSelected(persona: Persona) {
+    this.movement.persona = persona.nombre;
   }
 
   addDetail() {

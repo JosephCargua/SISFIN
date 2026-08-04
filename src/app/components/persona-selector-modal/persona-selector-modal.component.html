@@ -1,0 +1,42 @@
+<div class="modal-backdrop" *ngIf="isVisible" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Seleccionar Persona</h2>
+      <button class="btn-close" (click)="closeModal()"><span class="material-icons">close</span></button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="search-bar">
+        <label>Filtro:</label>
+        <div style="flex: 1;">
+          <input type="text" [(ngModel)]="filterText" (ngModelChange)="search()" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; outline: none;" />
+        </div>
+        <button class="btn btn-primary" (click)="search()">
+          <span class="material-icons">search</span> Consultar
+        </button>
+      </div>
+
+      <div class="table-container">
+        <table class="grid-table">
+          <thead>
+            <tr>
+              <th style="width: 150px;">Ruc</th>
+              <th>Nombre Comercial</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of filteredPersonas" (dblclick)="selectPersona(p)" (click)="selectPersona(p)" style="cursor: pointer;">
+              <td>
+                <a href="javascript:void(0)" class="link-blue">{{ p.ruc || p.cedula || 'N/A' }}</a>
+              </td>
+              <td>{{ p.nombre }}</td>
+            </tr>
+            <tr *ngIf="filteredPersonas.length === 0">
+              <td colspan="2" style="text-align: center;">No hay personas para mostrar.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

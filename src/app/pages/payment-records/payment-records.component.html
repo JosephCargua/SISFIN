@@ -32,8 +32,8 @@
         </div>
         <div class="form-group search-group">
           <label>Persona:</label>
-          <div class="search-input">
-            <input type="text" placeholder="..." [(ngModel)]="filters.persona">
+          <div class="search-input" (click)="openPersonaModal()" style="cursor: pointer;">
+            <input type="text" placeholder="..." [(ngModel)]="filters.persona" readonly style="cursor: pointer; background: white;">
             <span class="material-icons">search</span>
           </div>
         </div>
@@ -140,4 +140,10 @@
       </tbody>
     </table>
   </div>
+  
+  <app-persona-selector-modal
+    [isVisible]="showPersonaModal"
+    (close)="showPersonaModal = false"
+    (personaSelected)="onPersonaSelected($event)">
+  </app-persona-selector-modal>
 </div>

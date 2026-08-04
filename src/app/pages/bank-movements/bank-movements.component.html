@@ -67,8 +67,8 @@
         
         <div class="form-group row-span">
           <label>Persona:</label>
-          <div class="input-with-icon">
-            <input type="text" [(ngModel)]="filters.persona" placeholder="..." />
+          <div class="input-with-icon" (click)="openPersonaModal()" style="cursor: pointer;">
+            <input type="text" [(ngModel)]="filters.persona" placeholder="..." readonly style="cursor: pointer; background: white;" />
             <span class="material-icons">search</span>
           </div>
         </div>
@@ -176,5 +176,11 @@
       Página 1 de 1 (1 elementos)
     </div>
   </div>
+
+  <app-persona-selector-modal
+    [isVisible]="showPersonaModal"
+    (close)="showPersonaModal = false"
+    (personaSelected)="onPersonaSelected($event)">
+  </app-persona-selector-modal>
 </div>
 

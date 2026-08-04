@@ -31,15 +31,9 @@
       
       <div class="form-group search-group">
         <label>Persona:</label>
-        <div class="search-input">
-          <input type="text" [(ngModel)]="personSearch" (input)="searchPersons()" placeholder="..." (blur)="hidePersonResults()">
+        <div class="search-input" (click)="openPersonaModal()" style="cursor: pointer;">
+          <input type="text" [(ngModel)]="personSearch" placeholder="..." readonly style="cursor: pointer; background: white;">
           <span class="material-icons">search</span>
-          
-          <div class="autocomplete-results" *ngIf="showPersonResults && persons.length > 0">
-            <div class="result-item" *ngFor="let p of persons" (mousedown)="selectPerson(p)">
-              {{ p.nombre }} - {{ p.ruc || p.cedula }}
-            </div>
-          </div>
         </div>
       </div>
 
@@ -139,4 +133,10 @@
       <span class="material-icons">save</span> {{ saving ? 'Guardando...' : 'Guardar' }}
     </button>
   </div>
+
+  <app-persona-selector-modal
+    [isVisible]="showPersonaModal"
+    (close)="showPersonaModal = false"
+    (personaSelected)="onPersonaSelected($event)">
+  </app-persona-selector-modal>
 </div>

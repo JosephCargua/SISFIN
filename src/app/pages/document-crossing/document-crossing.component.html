@@ -13,8 +13,8 @@
       <input type="date" [(ngModel)]="issueDate" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; width: 200px;" />
 
       <label style="text-align: right; color: #64748b; font-size: 13px;">Persona:</label>
-      <div style="display: flex; align-items: center; border: 1px solid #cbd5e1; border-radius: 4px; overflow: hidden; max-width: 400px;">
-        <input type="text" [(ngModel)]="personName" style="flex: 1; border: none; padding: 6px; outline: none;" />
+      <div style="display: flex; align-items: center; border: 1px solid #cbd5e1; border-radius: 4px; overflow: hidden; max-width: 400px; background: white;" (click)="openPersonaModal(-1)" style="cursor: pointer;">
+        <input type="text" [(ngModel)]="personName" readonly style="flex: 1; border: none; padding: 6px; outline: none; cursor: pointer; background: white;" />
         <span class="material-icons" style="color: #64748b; padding: 0 8px; font-size: 18px; cursor: pointer;">search</span>
       </div>
 
@@ -116,8 +116,8 @@
                   <button type="button" (click)="advances.splice(i, 1)" class="btn-icon btn-danger" style="color: #ef4444; border: none; background: none; cursor: pointer;"><span class="material-icons" style="font-size: 16px;">delete</span></button>
                 </td>
                 <td style="padding: 8px; border-right: 1px solid #e2e8f0;">
-                  <div style="display: flex; align-items: center; border: 1px solid #cbd5e1; border-radius: 4px; overflow: hidden;">
-                    <input type="text" [(ngModel)]="adv.person" style="flex: 1; border: none; padding: 4px; outline: none; width: 100%;" />
+                  <div style="display: flex; align-items: center; border: 1px solid #cbd5e1; border-radius: 4px; overflow: hidden; background: white;" (click)="openPersonaModal(i)" style="cursor: pointer;">
+                    <input type="text" [(ngModel)]="adv.person" readonly style="flex: 1; border: none; padding: 4px; outline: none; width: 100%; cursor: pointer; background: white;" />
                     <span class="material-icons" style="color: #64748b; padding: 0 4px; font-size: 16px; cursor: pointer;">search</span>
                   </div>
                 </td>
@@ -186,6 +186,12 @@
       <span class="material-icons" style="font-size: 18px;">save</span> {{ saving ? 'Guardando...' : 'Guardar' }}
     </button>
   </div>
+
+  <app-persona-selector-modal
+    [isVisible]="showPersonaModal"
+    (close)="showPersonaModal = false"
+    (personaSelected)="onPersonaSelected($event)">
+  </app-persona-selector-modal>
 </div>
 
 <!-- Modal Seleccionar Cuenta -->

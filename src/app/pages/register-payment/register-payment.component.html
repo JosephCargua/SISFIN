@@ -37,6 +37,20 @@
             <select *ngIf="transactionType === 'Pago' && paymentMethod === 'Cheque'" style="flex: 1;">
               <option value="Cheque propio">Cheque propio</option>
             </select>
+            <!-- Dropdown secundario para Pago con Transferencia -->
+            <select *ngIf="transactionType === 'Pago' && paymentMethod === 'Transferencia'" style="flex: 1;">
+              <option value="Débito de cuenta">Débito de cuenta</option>
+              <option value="Transferencia propio banco">Transferencia propio banco</option>
+              <option value="Transferencia otro banco nacional">Transferencia otro banco nacional</option>
+              <option value="Transferencia banco exterior">Transferencia banco exterior</option>
+              <option value="Pago Ventanilla - Cheque de gerencia">Pago Ventanilla - Cheque de gerencia</option>
+              <option value="Pago Ventanilla - Efectivo">Pago Ventanilla - Efectivo</option>
+            </select>
+            <!-- Dropdown secundario para Pago con Tarjeta de Crédito -->
+            <select *ngIf="transactionType === 'Pago' && paymentMethod === 'Tarjeta de Crédito'" style="flex: 1;">
+              <option value="Tarjeta de crédito nacional">Tarjeta de crédito nacional</option>
+              <option value="Tarjeta de crédito internacional">Tarjeta de crédito internacional</option>
+            </select>
           </div>
         </div>
 
@@ -58,7 +72,7 @@
           <input type="text" placeholder="">
         </div>
 
-        <div class="form-group" *ngIf="paymentMethod === 'Caja' || paymentMethod === 'Cheque' && transactionType === 'Cobro'">
+        <div class="form-group" *ngIf="paymentMethod === 'Caja' || paymentMethod === 'Transferencia' || paymentMethod === 'Tarjeta de Crédito' || paymentMethod === 'Dinero electrónico' || (paymentMethod === 'Cheque' && transactionType === 'Cobro')">
           <label>Cuenta Pago/Cobro:</label>
           <div class="search-input" style="cursor: pointer; flex: 1;">
             <input type="text" placeholder="..." readonly style="cursor: pointer; background: white;">
@@ -77,7 +91,7 @@
           </div>
         </div>
 
-        <div class="form-group" *ngIf="paymentMethod === 'Caja' || paymentMethod === 'Transferencia'">
+        <div class="form-group" *ngIf="paymentMethod === 'Caja' || paymentMethod === 'Transferencia' || paymentMethod === 'Tarjeta de Crédito' || paymentMethod === 'Dinero electrónico'">
           <label># de Comprobante:</label>
           <div style="display: flex; gap: 12px; align-items: center; flex: 1;">
             <input type="text" style="flex: 1;">

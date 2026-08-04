@@ -17,7 +17,7 @@ import { Persona } from '../../models/persona.model';
 })
 export class RegisterPaymentComponent implements OnInit {
   transactionType = 'Cobro';
-  paymentMethod = 'Transferencia';
+  paymentMethod = 'Caja';
   issueDate = new Date().toISOString().split('T')[0];
   
   personSearch = '';
@@ -47,7 +47,7 @@ export class RegisterPaymentComponent implements OnInit {
   totalToPay = 0;
 
   get paymentMethods() {
-    return ['Transferencia', 'Cheque', 'Efectivo', 'Tarjeta de Crédito', 'Cruce de Documentos'];
+    return ['Caja', 'Transferencia', 'Cheque', 'Tarjeta de Crédito', 'Dinero electrónico'];
   }
 
   constructor(
@@ -62,7 +62,7 @@ export class RegisterPaymentComponent implements OnInit {
   }
 
   onTransactionTypeChange() {
-    this.paymentMethod = 'Transferencia';
+    this.paymentMethod = 'Caja';
     this.documents = [];
     this.advances = [];
     this.accounts = [];
@@ -145,7 +145,7 @@ export class RegisterPaymentComponent implements OnInit {
 
   resetForm() {
     this.transactionType = 'Cobro';
-    this.paymentMethod = 'Transferencia';
+    this.paymentMethod = 'Caja';
     this.issueDate = new Date().toISOString().split('T')[0];
     this.personSearch = '';
     this.selectedPersonId = '';

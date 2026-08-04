@@ -9,70 +9,89 @@
     </div>
   </div>
 
-  <div class="card section">
-    <h2>Información de la Transacción</h2>
+  <div class="card section form-spacious">
+    <div class="section-header">
+      <h2>Información de la Transacción</h2>
+    </div>
     <div class="form-grid">
-      <div class="form-group">
-        <label>Tipo de Transacción:</label>
-        <select [(ngModel)]="transactionType" (ngModelChange)="onTransactionTypeChange()">
-          <option value="Cobro">Cobro</option>
-          <option value="Pago">Pago</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>{{ transactionType === 'Pago' ? 'Forma de Pago:' : 'Forma de Cobro:' }}</label>
-        <select [(ngModel)]="paymentMethod">
-          <option *ngFor="let method of paymentMethods" [value]="method">{{ method }}</option>
-        </select>
-      </div>
-      
-      <div class="form-group" style="grid-column: span 2; display: flex; justify-content: flex-end;">
-        <label class="checkbox-label" style="align-self: flex-end;">
-          Anulado <input type="checkbox" [(ngModel)]="isAnnulled">
-        </label>
-      </div>
-
-      <div class="form-group">
-        <label>Fecha de Emisión:</label>
-        <input type="date" [(ngModel)]="issueDate">
-      </div>
-      
-      <div class="form-group" style="grid-column: span 3;">
-        <label>Páguese a la orden de:</label>
-        <input type="text" [(ngModel)]="payToOrderOf">
-      </div>
-
-      <div class="form-group search-group" style="grid-column: span 2;">
-        <label>Cuenta Bancaria:</label>
-        <div class="search-input">
-          <select [(ngModel)]="bankAccount" style="border: none; flex: 1;">
-            <option value="">Seleccione una cuenta...</option>
-            <option *ngFor="let acc of bankAccounts" [value]="acc.id">{{ acc.bankName }} - {{ acc.accountNumber }}</option>
+      <!-- Fila 1 -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tipo de Transacción:</label>
+          <select [(ngModel)]="transactionType" (ngModelChange)="onTransactionTypeChange()">
+            <option value="Cobro Masivo">Cobro Masivo</option>
+            <option value="Pago Masivo">Pago Masivo</option>
           </select>
-          <span class="material-icons">search</span>
+        </div>
+        <div class="form-group">
+          <label>Forma de Pago:</label>
+          <select [(ngModel)]="paymentMethod">
+            <option *ngFor="let method of paymentMethods" [value]="method">{{ method }}</option>
+          </select>
         </div>
       </div>
 
-      <div class="form-group" style="grid-column: span 2;">
-        <label>Número de cheque:</label>
-        <input type="text" [(ngModel)]="checkNumber">
+      <!-- Fila 2 -->
+      <div class="form-row">
+        <div class="form-group">
+          <label></label>
+          <div class="checkbox-wrapper">
+            <label class="inline-checkbox">Anulado <input type="checkbox" [(ngModel)]="isAnnulled"></label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Fecha de Emisión:</label>
+          <input type="date" [(ngModel)]="issueDate">
+        </div>
       </div>
 
-      <div class="form-group">
-        <label>Fecha de cheque:</label>
-        <input type="date" [(ngModel)]="checkDate">
+      <!-- Fila 3 -->
+      <div class="form-row full-row">
+        <div class="form-group">
+          <label>Páguese a la orden de:</label>
+          <input type="text" [(ngModel)]="payToOrderOf" placeholder="Opcional: Nombre global para el cheque">
+        </div>
       </div>
 
-      <div class="form-group full-width" style="grid-column: 1 / -1;">
-        <label>Descripción:</label>
-        <textarea [(ngModel)]="description" rows="3"></textarea>
+      <!-- Fila 4 -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Cuenta Bancaria:</label>
+          <div class="search-input">
+            <select [(ngModel)]="bankAccount" style="border: none; flex: 1; outline: none; background: transparent;">
+              <option value="">Seleccione Banco...</option>
+              <option *ngFor="let acc of bankAccounts" [value]="acc.id">{{ acc.bankName }} - {{ acc.accountNumber }}</option>
+            </select>
+            <span class="material-icons">search</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fila 5 -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Número de cheque:</label>
+          <input type="text" [(ngModel)]="checkNumber">
+        </div>
+        <div class="form-group" *ngIf="paymentMethod === 'Cheque'">
+          <label>Fecha de cheque:</label>
+          <input type="date" [(ngModel)]="checkDate">
+        </div>
+      </div>
+
+      <!-- Fila 6 -->
+      <div class="form-row full-row" style="align-items: flex-start;">
+        <div class="form-group" style="align-items: flex-start;">
+          <label style="padding-top: 8px;">Descripción:</label>
+          <textarea [(ngModel)]="description" rows="2"></textarea>
+        </div>
       </div>
     </div>
   </div>
 
   <div class="card tabs-card">
     <div class="tabs">
-      <div class="tab active">Documentos</div>
+      <div class="tab active">Documentos ({{documents.length}})</div>
     </div>
     
     <div class="tab-content">
@@ -124,6 +143,9 @@
                 <span class="material-icons" title="Copiar saldo a valor a pagar" (click)="doc.amountToPay = doc.balance; recalcTotal()">flip_to_front</span>
               </td>
             </tr>
+            <tr *ngIf="documents.length === 0">
+              <td colspan="8" style="text-align: center; color: #777; padding: 20px;">No hay documentos agregados.</td>
+            </tr>
           </tbody>
           <tfoot>
             <tr>
@@ -135,16 +157,14 @@
       </div>
       
       <div class="add-detail-container">
-        <button class="btn-primary" (click)="addDocument()">
-          <span class="material-icons">add_circle</span> Agregar Detalle
-        </button>
+        <button class="btn-secondary" (click)="addDocument()">+ Agregar Detalle</button>
       </div>
     </div>
   </div>
 
   <div class="footer-actions">
     <button class="btn-primary btn-save" (click)="save()" [disabled]="saving">
-      <span class="material-icons">save</span> {{ saving ? 'Guardando...' : 'Guardar' }}
+      <span class="material-icons">save</span> {{ saving ? 'Guardando...' : 'Guardar Transacción' }}
     </button>
   </div>
 

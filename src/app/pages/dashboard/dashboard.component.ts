@@ -50,9 +50,14 @@ export class DashboardComponent implements OnInit {
       route: '/inventory',
     },
     {
-      label: 'Registrar una persona',
+      label: 'Personas',
       icon: 'groups',
-      route: '/payables',
+      route: '/personas',
+    },
+    {
+      label: 'Cobros/Pagos',
+      icon: 'payments',
+      route: '/payment-records',
     },
     {
       label: 'Balance de Comprobación',

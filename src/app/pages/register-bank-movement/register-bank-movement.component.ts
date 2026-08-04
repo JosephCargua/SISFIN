@@ -30,7 +30,7 @@ export class RegisterBankMovementComponent implements OnInit {
     metodo: 'Movimiento', // Default based on component
     anulado: false,
     fechaEmision: new Date().toISOString().split('T')[0],
-    cuentaBancaria: 'b567b458-1234-4567-8901-abcdefabcdef', // mock UUID
+    cuentaBancaria: '', 
     persona: '',
     personaId: '',
     paguese: '',

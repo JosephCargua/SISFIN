@@ -192,41 +192,10 @@
     (close)="showPersonaModal = false"
     (personaSelected)="onPersonaSelected($event)">
   </app-persona-selector-modal>
-</div>
 
-<!-- Modal Seleccionar Cuenta -->
-<div *ngIf="showAccountModal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;">
-  <div style="background: white; border-radius: 8px; width: 600px; max-width: 90vw; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
-    <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid #e2e8f0;">
-      <h3 style="margin: 0; font-size: 18px; color: #1e293b;">Seleccionar cuenta</h3>
-      <span class="material-icons" (click)="showAccountModal = false" style="cursor: pointer; color: #0ea5e9;">close</span>
-    </div>
-    <div style="padding: 16px;">
-      <div style="display: flex; gap: 8px; margin-bottom: 16px; align-items: center;">
-        <span style="font-size: 13px; font-weight: 500; color: #334155;">Filtro:</span>
-        <input type="text" style="flex: 1; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;" />
-        <button type="button" style="background-color: #0ea5e9; border: none; color: white; padding: 6px 12px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; font-size: 13px;">
-          <span class="material-icons" style="font-size: 16px;">search</span> Consultar
-        </button>
-      </div>
-      <div style="max-height: 400px; overflow-y: auto;">
-        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
-          <thead>
-            <tr style="background-color: #f1f5f9; text-align: left; color: #475569;">
-              <th style="padding: 8px; border: 1px solid #e2e8f0;">Código</th>
-              <th style="padding: 8px; border: 1px solid #e2e8f0;">Cuenta</th>
-              <th style="padding: 8px; border: 1px solid #e2e8f0;">Grupo</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let acc of mockAccounts" (click)="selectAccount(acc)" style="border-bottom: 1px solid #e2e8f0; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor='transparent'">
-              <td style="padding: 8px; border-right: 1px solid #e2e8f0; font-weight: 500; color: #0f172a;">{{ acc.code }}</td>
-              <td style="padding: 8px; border-right: 1px solid #e2e8f0; color: #0ea5e9; text-decoration: underline;">{{ acc.name }}</td>
-              <td style="padding: 8px; border-right: 1px solid #e2e8f0;">{{ acc.group }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
+  <app-account-selector-modal 
+    [isVisible]="showAccountModal" 
+    (close)="showAccountModal = false"
+    (accountSelected)="onAccountSelected($event)">
+  </app-account-selector-modal>
 </div>

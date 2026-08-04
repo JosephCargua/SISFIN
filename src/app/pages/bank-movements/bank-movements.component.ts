@@ -44,10 +44,6 @@ export class BankMovementsComponent implements OnInit {
     'Transferencia'
   ];
 
-  mockAccounts = [
-    { number: '3200059580', name: 'PAPANGU TURISMO CIA. LTDA', type: 'Corriente' }
-  ];
-
   movements: any[] = [];
   bankAccounts: BankAccount[] = [];
 

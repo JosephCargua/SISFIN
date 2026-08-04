@@ -30,7 +30,7 @@ export class RegisterAdvanceComponent implements OnInit {
     tipoAnticipo: 'Proveedor',
     metodo: 'Cheque', 
     fechaEmision: new Date().toISOString().split('T')[0],
-    cuentaBancaria: 'b567b458-1234-4567-8901-abcdefabcdef', 
+    cuentaBancaria: '', 
     persona: '',
     personaId: '',
     paguese: '',

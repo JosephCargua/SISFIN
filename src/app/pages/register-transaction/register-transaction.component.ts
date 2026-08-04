@@ -27,7 +27,7 @@ export class RegisterTransactionComponent implements OnInit {
     metodo: 'Transacción', 
     anulado: false,
     fechaEmision: new Date().toISOString().split('T')[0],
-    cuentaBancaria: 'b567b458-1234-4567-8901-abcdefabcdef', 
+    cuentaBancaria: '', 
     persona: '',
     personaId: '',
     paguese: '',

@@ -1,0 +1,71 @@
+<div class="page-container">
+  <div class="page-header">
+    <h1>Consultar Personas</h1>
+    <button class="btn btn-primary" (click)="goToRegister()">
+      <span class="material-icons">add</span>
+    </button>
+  </div>
+
+  <div class="filters-container card">
+    <div class="filter-group">
+      <label>Filtro:</label>
+      <input type="text" [(ngModel)]="filtro" (keyup.enter)="onSearch()" placeholder="Identificación, Razón Social..." />
+    </div>
+    
+    <div class="filter-group">
+      <label>Rol:</label>
+      <select [(ngModel)]="rolFilter" (change)="onSearch()">
+        <option value="Todos">Todos</option>
+        <option value="Cliente">Cliente</option>
+        <option value="Proveedor">Proveedor</option>
+        <option value="Empleado">Empleado</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Estado:</label>
+      <select [(ngModel)]="estadoFilter" (change)="onSearch()">
+        <option value="Todos">Todos</option>
+        <option value="Activo">Activo</option>
+        <option value="Inactivo">Inactivo</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="table-container card">
+    <table>
+      <thead>
+        <tr>
+          <th>Identificación</th>
+          <th>Razón Social</th>
+          <th>Nombre Comercial</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of personas">
+          <td>{{ p.cedula || p.ruc || 'N/A' }}</td>
+          <td>
+            <strong>{{ p.nombre }}</strong><br/>
+            <small>
+              <span class="status-indicator" [class.active]="p.estado === 'Activo'"></span>
+              {{ p.estado }} - {{ p.tipo }} - {{ getRoles(p) }}
+            </small>
+          </td>
+          <td>{{ p.nombreComercial || '' }}</td>
+          <td class="actions">
+            <button class="btn-icon btn-primary" (click)="editPersona(p.id!)" title="Editar">
+              <span class="material-icons">edit</span>
+            </button>
+            <button class="btn-icon btn-danger" (click)="deletePersona(p.id!)" title="Inactivar" *ngIf="p.estado === 'Activo'">
+              <span class="material-icons">delete</span>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="personas.length === 0">
+          <td colspan="4" class="text-center">No se encontraron personas</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

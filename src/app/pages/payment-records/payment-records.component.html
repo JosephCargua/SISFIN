@@ -1,58 +1,143 @@
-<div class="page-container" style="padding: 24px; background-color: #f8fafc; min-height: 100vh;">
-  <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-    <div>
-      <h1 style="margin: 0; font-size: 24px; color: #1e293b;">Registros de Pagos</h1>
-      <p style="margin: 4px 0 0; color: #64748b;">Listado de todos los documentos pagados</p>
+<div class="page-container">
+  <div class="page-header">
+    <h1>Consultar Cobros/Pagos</h1>
+    <div class="header-actions">
+      <button class="btn-icon" (click)="loadPayments()" title="Recargar"><span class="material-icons">refresh</span></button>
+      <button class="btn-primary" (click)="newPayment()" title="Nuevo"><span class="material-icons">add</span></button>
+      <button class="btn-icon" title="Eliminar"><span class="material-icons">delete</span></button>
+      <button class="btn-icon" title="Exportar"><span class="material-icons">save_alt</span></button>
+      <button class="btn-icon" title="Imprimir"><span class="material-icons">print</span></button>
     </div>
   </div>
 
-  <div class="card" style="padding: 20px; background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-    <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 12px;">
-      <label style="font-weight: 500; color: #475569;">Filtrar por forma de pago:</label>
-      <select [(ngModel)]="filterMethod" (change)="applyFilter()" class="form-control" style="width: 250px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 4px;">
-        <option *ngFor="let m of paymentMethods" [value]="m">{{ m }}</option>
-      </select>
+  <div class="card filters-section">
+    <div class="filters-header">
+      <h2>Búsqueda</h2>
     </div>
+    
+    <div class="form-grid">
+      <!-- Columna 1 -->
+      <div class="form-column">
+        <div class="form-group">
+          <label># Documento:</label>
+          <input type="text" [(ngModel)]="filters.documento">
+        </div>
+        <div class="form-group">
+          <label># Comprobante:</label>
+          <input type="text" [(ngModel)]="filters.comprobante">
+        </div>
+        <div class="form-group">
+          <label># Anticipo:</label>
+          <input type="text" [(ngModel)]="filters.anticipo">
+        </div>
+        <div class="form-group search-group">
+          <label>Persona:</label>
+          <div class="search-input">
+            <input type="text" placeholder="..." [(ngModel)]="filters.persona">
+            <span class="material-icons">search</span>
+          </div>
+        </div>
+        <div class="form-group search-group" style="align-items: center;">
+          <label># Cheque:</label>
+          <div style="display: flex; gap: 8px; flex: 1;">
+            <input type="text" [(ngModel)]="filters.cheque" style="flex: 1;">
+            <label class="checkbox-label" style="margin-left: 8px;">
+              <input type="checkbox" [(ngModel)]="filters.postfechados"> Postfechados
+            </label>
+          </div>
+        </div>
+        <div class="form-group search-group">
+          <label>Centro de Costo:</label>
+          <div class="search-input">
+            <input type="text" placeholder="..." [(ngModel)]="filters.centroCosto">
+            <span class="material-icons">search</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Reposicionado:</label>
+          <select [(ngModel)]="filters.reposicionado">
+            <option value="Todos">Todos</option>
+            <option value="Si">Sí</option>
+            <option value="No">No</option>
+          </select>
+        </div>
+      </div>
 
-    <div *ngIf="loading" style="padding: 20px; text-align: center; color: #64748b;">
-      Cargando registros...
+      <!-- Columna 2 -->
+      <div class="form-column">
+        <div class="form-group">
+          <label>Desde:</label>
+          <input type="date" [(ngModel)]="filters.desde">
+        </div>
+        <div class="form-group">
+          <label>Hasta:</label>
+          <input type="date" [(ngModel)]="filters.hasta">
+        </div>
+        <div class="form-group">
+          <label>Fecha cheque:</label>
+          <input type="date" [(ngModel)]="filters.fechaCheque">
+        </div>
+        <div class="form-group">
+          <label>Tipo:</label>
+          <select [(ngModel)]="filters.tipo">
+            <option value="Todos">Todos</option>
+            <option value="Ingreso">Cobros</option>
+            <option value="Egreso">Pagos</option>
+          </select>
+        </div>
+      </div>
     </div>
+    
+    <div class="filters-footer">
+      <button class="btn-link" (click)="search()">
+        Más Filtros <span class="material-icons">keyboard_arrow_down</span>
+      </button>
+    </div>
+  </div>
 
-    <table *ngIf="!loading && filteredPayments.length > 0" class="table" style="width: 100%; border-collapse: collapse;">
+  <div class="table-container">
+    <table class="data-table">
       <thead>
-        <tr style="border-bottom: 2px solid #e2e8f0; text-align: left;">
-          <th style="padding: 12px; color: #475569; font-weight: 600;">Fecha</th>
-          <th style="padding: 12px; color: #475569; font-weight: 600;">Documento</th>
-          <th style="padding: 12px; color: #475569; font-weight: 600;">Proveedor / Cliente</th>
-          <th style="padding: 12px; color: #475569; font-weight: 600;">Forma de Pago</th>
-          <th style="padding: 12px; text-align: right; color: #475569; font-weight: 600;">Monto</th>
-          <th style="padding: 12px; text-align: center; color: #475569; font-weight: 600;">Acciones</th>
+        <tr>
+          <th style="width: 40px; text-align: center;"><input type="checkbox"></th>
+          <th>Emisión</th>
+          <th># Comprobante</th>
+          <th>Persona</th>
+          <th>Transacción</th>
+          <th>Cuenta</th>
+          <th style="text-align: right;">Total</th>
+          <th style="text-align: center;">Acciones</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let payment of filteredPayments" style="border-bottom: 1px solid #e2e8f0;">
-          <td style="padding: 12px; color: #1e293b;">{{ payment.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
-          <td style="padding: 12px; color: #1e293b; font-weight: 500;">{{ payment.docNumber || 'N/A' }}</td>
-          <td style="padding: 12px; color: #475569;">{{ payment.personName || '-' }}</td>
-          <td style="padding: 12px;">
-            <span style="background-color: #f1f5f9; color: #475569; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">
-              {{ payment.paymentMethod }}
+        <tr *ngFor="let p of payments">
+          <td style="text-align: center;"><input type="checkbox"></td>
+          <td>{{ p.emision | date:'dd/MM/yyyy' }}</td>
+          <td>
+            <a href="javascript:void(0)" class="link-blue">{{ p.comprobante }}</a><br>
+            <span class="type-indicator" [ngClass]="p.tipoTransaccion === 'Ingreso' ? 'text-blue' : 'text-red'">
+              <span class="material-icons" style="font-size: 14px; vertical-align: middle;">
+                {{ p.tipoTransaccion === 'Ingreso' ? 'arrow_downward' : 'arrow_upward' }}
+              </span>
+              {{ p.tipoTransaccion === 'Ingreso' ? 'Cobro' : 'Pago' }}
             </span>
           </td>
-          <td style="padding: 12px; text-align: right; font-weight: 600; color: #10b981;">
-            {{ payment.amount | currency }}
+          <td>{{ p.persona }}</td>
+          <td>
+            <span class="material-icons" style="font-size: 14px; vertical-align: middle;">swap_horiz</span>
+            {{ p.transaccionStr }}
           </td>
-          <td style="padding: 12px; text-align: center;">
-            <button class="btn btn-outline" (click)="viewDocument(payment.documentId)" style="padding: 6px 12px; background: white; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer;">
-              <span class="material-icons" style="font-size: 16px; color: #3b82f6; vertical-align: middle;">visibility</span>
-            </button>
+          <td>{{ p.cuentaStr }}</td>
+          <td style="text-align: right;">{{ formatCurrency(p.total) }}</td>
+          <td class="actions">
+            <button class="btn-icon btn-blue" title="Editar"><span class="material-icons">edit_square</span></button>
+            <button class="btn-icon btn-blue" title="Eliminar"><span class="material-icons">delete</span></button>
           </td>
+        </tr>
+        <tr *ngIf="payments.length === 0">
+          <td colspan="8" class="text-center" style="padding: 20px;">No se encontraron registros</td>
         </tr>
       </tbody>
     </table>
-
-    <div *ngIf="!loading && filteredPayments.length === 0" style="padding: 40px 20px; text-align: center; color: #64748b;">
-      No se encontraron registros de pagos con este filtro.
-    </div>
   </div>
 </div>

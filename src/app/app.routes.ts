@@ -247,6 +247,27 @@ export const routes: Routes = [
             (m) => m.RegisterBankAccountComponent,
           ),
       },
+      {
+        path: 'personas',
+        loadComponent: () =>
+          import('./pages/personas/personas-list.component').then(
+            (m) => m.PersonasListComponent,
+          ),
+      },
+      {
+        path: 'personas-register',
+        loadComponent: () =>
+          import('./pages/personas-register/personas-register.component').then(
+            (m) => m.PersonasRegisterComponent,
+          ),
+      },
+      {
+        path: 'personas-register/:id',
+        loadComponent: () =>
+          import('./pages/personas-register/personas-register.component').then(
+            (m) => m.PersonasRegisterComponent,
+          ),
+      },
     ],
   },
 ];

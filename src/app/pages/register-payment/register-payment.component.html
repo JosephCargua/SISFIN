@@ -1,6 +1,6 @@
 <div class="page-container">
   <div class="page-header">
-    <h1>Registrar Cobro/Pago</h1>
+    <h1>Recibo de {{ transactionType === 'Pago' ? 'Egreso' : 'Cobro' }}</h1>
     <div class="header-actions">
       <button class="btn-primary" (click)="resetForm()" title="Nuevo"><span class="material-icons">add</span></button>
       <button class="btn-icon" title="Exportar"><span class="material-icons">save_alt</span></button>
@@ -8,18 +8,18 @@
     </div>
   </div>
 
-  <div class="card section">
-    <h2>Información de la Transacción</h2>
-    <div class="form-grid">
+  <!-- Cabecera Contífico-style -->
+  <div class="card section form-compact">
+    <div class="form-grid" style="grid-template-columns: repeat(4, 1fr);">
       <div class="form-group">
-        <label>Tipo de Transacción:</label>
+        <label>Tipo:</label>
         <select [(ngModel)]="transactionType" (ngModelChange)="onTransactionTypeChange()">
           <option value="Cobro">Cobro</option>
           <option value="Pago">Pago</option>
         </select>
       </div>
       <div class="form-group">
-        <label>{{ transactionType === 'Pago' ? 'Forma de Pago:' : 'Forma de Cobro:' }}</label>
+        <label>Forma de {{ transactionType === 'Pago' ? 'Pago' : 'Cobro' }}:</label>
         <select [(ngModel)]="paymentMethod">
           <option *ngFor="let method of paymentMethods" [value]="method">{{ method }}</option>
         </select>
@@ -28,45 +28,50 @@
         <label>Fecha de Emisión:</label>
         <input type="date" [(ngModel)]="issueDate">
       </div>
+      <div class="form-group">
+        <label>Referencia / Comprobante:</label>
+        <input type="text" [(ngModel)]="checkNumber">
+      </div>
       
-      <div class="form-group search-group">
+      <div class="form-group search-group" style="grid-column: span 2;">
         <label>Persona:</label>
         <div class="search-input" (click)="openPersonaModal()" style="cursor: pointer;">
-          <input type="text" [(ngModel)]="personSearch" placeholder="..." readonly style="cursor: pointer; background: white;">
+          <input type="text" [(ngModel)]="personSearch" placeholder="Buscar Cliente/Proveedor..." readonly style="cursor: pointer; background: white;">
           <span class="material-icons">search</span>
         </div>
       </div>
 
-      <div class="form-group search-group">
+      <div class="form-group search-group" style="grid-column: span 2;">
         <label>Cuenta Bancaria:</label>
         <div class="search-input">
           <select [(ngModel)]="bankAccount" style="border: none; flex: 1;">
-            <option value="">Seleccione una cuenta...</option>
+            <option value="">Caja / Seleccione Banco...</option>
             <option *ngFor="let acc of bankAccounts" [value]="acc.id">{{ acc.bankName }} - {{ acc.accountNumber }}</option>
           </select>
-          <span class="material-icons">search</span>
+          <span class="material-icons">account_balance</span>
         </div>
       </div>
 
-      <div class="form-group">
-        <label>Número de Comprobante:</label>
-        <input type="text" [(ngModel)]="checkNumber">
-      </div>
-
-      <div class="form-group full-width">
+      <div class="form-group full-width" style="grid-column: 1 / -1;">
         <label>Descripción:</label>
-        <textarea [(ngModel)]="description" rows="3"></textarea>
+        <input type="text" [(ngModel)]="description" placeholder="Concepto del cobro/pago">
       </div>
     </div>
   </div>
 
-  <div class="card tabs-card">
+  <!-- Sistema de Pestañas -->
+  <div class="card tabs-card" style="margin-top: 15px; display: flex; flex-direction: column; min-height: 300px;">
     <div class="tabs">
-      <div class="tab active">Documentos</div>
+      <div class="tab" [class.active]="activeTab === 'Documentos'" (click)="activeTab = 'Documentos'">Documentos ({{documents.length}})</div>
+      <div class="tab" [class.active]="activeTab === 'Anticipos'" (click)="activeTab = 'Anticipos'">Anticipos ({{advances.length}})</div>
+      <div class="tab" [class.active]="activeTab === 'Cuentas'" (click)="activeTab = 'Cuentas'">Cuentas ({{accounts.length}})</div>
+      <div class="tab" [class.active]="activeTab === 'Posfechados'" (click)="activeTab = 'Posfechados'">Cheques Posfechados</div>
     </div>
     
-    <div class="tab-content">
-      <div class="table-container">
+    <div class="tab-content" style="flex: 1; display: flex; flex-direction: column;">
+      
+      <!-- Pestaña Documentos -->
+      <div *ngIf="activeTab === 'Documentos'" style="flex: 1;">
         <table class="detail-table">
           <thead>
             <tr>
@@ -74,9 +79,9 @@
               <th>Documento</th>
               <th>Fecha Emisión</th>
               <th>Tipo Documento</th>
-              <th style="text-align: right;">Valor</th>
-              <th style="text-align: right;">Saldo</th>
-              <th style="text-align: right; width: 140px;">Valor a Pagar</th>
+              <th style="text-align: right;">Valor Documento</th>
+              <th style="text-align: right;">Saldo Actual</th>
+              <th style="text-align: right; width: 140px;">Valor a Aplicar</th>
             </tr>
           </thead>
           <tbody>
@@ -86,51 +91,157 @@
                   <span class="material-icons">delete</span>
                 </button>
               </td>
-              <td>
-                <div class="search-input-inline">
-                  <input type="text" [(ngModel)]="doc.documentLabel" placeholder="...">
-                  <span class="material-icons">search</span>
-                </div>
-              </td>
+              <td><input type="text" [(ngModel)]="doc.documentLabel" placeholder="Ej. FAC-001"></td>
               <td><input type="date" [(ngModel)]="doc.issueDate"></td>
               <td>
                 <select [(ngModel)]="doc.type">
                   <option value="Factura">Factura</option>
-                  <option value="Documento">Documento</option>
-                  <option value="Anticipo">Anticipo</option>
+                  <option value="Nota de Venta">Nota de Venta</option>
                 </select>
               </td>
               <td><input type="number" [(ngModel)]="doc.value" (ngModelChange)="doc.balance = doc.value" style="text-align: right;"></td>
               <td style="text-align: right; padding-right: 12px;">{{ formatCurrency(doc.balance) }}</td>
               <td class="amount-cell">
                 <input type="number" [(ngModel)]="doc.amountToPay" (ngModelChange)="recalcTotal()">
-                <span class="material-icons" title="Copiar saldo a valor a pagar" (click)="doc.amountToPay = doc.balance; recalcTotal()">flip_to_front</span>
+                <span class="material-icons" title="Aplicar todo" (click)="doc.amountToPay = doc.balance; recalcTotal()">flip_to_front</span>
               </td>
             </tr>
-          </tbody>
-          <tfoot>
-            <tr>
-              <td colspan="6" class="text-right"><strong>Total:</strong></td>
-              <td class="text-right amount-total"><strong>{{ formatCurrency(total) }}</strong></td>
+            <tr *ngIf="documents.length === 0">
+              <td colspan="7" style="text-align: center; color: #777; padding: 20px;">No hay documentos agregados. Haga clic en "Agregar" para aplicar el pago a un documento.</td>
             </tr>
-          </tfoot>
+          </tbody>
         </table>
+        <div class="add-detail-container">
+          <button class="btn-secondary" (click)="addDocument()">+ Agregar Documento</button>
+        </div>
+      </div>
+
+      <!-- Pestaña Anticipos -->
+      <div *ngIf="activeTab === 'Anticipos'" style="flex: 1;">
+        <table class="detail-table">
+          <thead>
+            <tr>
+              <th style="width: 40px; text-align: center;"></th>
+              <th>Referencia Anticipo</th>
+              <th>Fecha</th>
+              <th style="text-align: right;">Saldo Disponible</th>
+              <th style="text-align: right; width: 140px;">Valor a Aplicar</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let adv of advances; let i = index">
+              <td class="actions"><button class="btn-icon btn-danger" (click)="removeAdvance(i)"><span class="material-icons">delete</span></button></td>
+              <td><input type="text" [(ngModel)]="adv.advanceLabel" placeholder="Ej. ANT-004"></td>
+              <td><input type="date" [(ngModel)]="adv.issueDate"></td>
+              <td><input type="number" [(ngModel)]="adv.balance" style="text-align: right;"></td>
+              <td class="amount-cell">
+                <input type="number" [(ngModel)]="adv.amountToApply" (ngModelChange)="recalcTotal()">
+                <span class="material-icons" (click)="adv.amountToApply = adv.balance; recalcTotal()">flip_to_front</span>
+              </td>
+            </tr>
+            <tr *ngIf="advances.length === 0">
+              <td colspan="5" style="text-align: center; color: #777; padding: 20px;">No hay anticipos agregados.</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="add-detail-container">
+          <button class="btn-secondary" (click)="addAdvance()">+ Agregar Anticipo</button>
+        </div>
+      </div>
+
+      <!-- Pestaña Cuentas -->
+      <div *ngIf="activeTab === 'Cuentas'" style="flex: 1;">
+        <table class="detail-table">
+          <thead>
+            <tr>
+              <th style="width: 40px; text-align: center;"></th>
+              <th>Código Cuenta</th>
+              <th>Nombre de Cuenta</th>
+              <th>Descripción</th>
+              <th style="text-align: right; width: 140px;">Valor</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let acc of accounts; let i = index">
+              <td class="actions"><button class="btn-icon btn-danger" (click)="removeAccount(i)"><span class="material-icons">delete</span></button></td>
+              <td><input type="text" [(ngModel)]="acc.accountCode" placeholder="Ej. 1.1.01"></td>
+              <td><input type="text" [(ngModel)]="acc.accountName" placeholder="Caja General"></td>
+              <td><input type="text" [(ngModel)]="acc.description" placeholder="Ajuste / Retención"></td>
+              <td><input type="number" [(ngModel)]="acc.amount" (ngModelChange)="recalcTotal()" style="text-align: right;"></td>
+            </tr>
+            <tr *ngIf="accounts.length === 0">
+              <td colspan="5" style="text-align: center; color: #777; padding: 20px;">Utilice esta pestaña para afectar cuentas directamente (ej. Gastos bancarios, diferencias).</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="add-detail-container">
+          <button class="btn-secondary" (click)="addAccount()">+ Agregar Cuenta</button>
+        </div>
       </div>
       
-      <div class="add-detail-container">
-        <button class="btn-primary" (click)="addDocument()">
-          <span class="material-icons">add_circle</span> Agregar Detalle
-        </button>
+      <!-- Pestaña Posfechados -->
+      <div *ngIf="activeTab === 'Posfechados'" style="flex: 1;">
+        <table class="detail-table">
+          <thead>
+            <tr>
+              <th style="width: 40px; text-align: center;"></th>
+              <th>Banco</th>
+              <th>No. Cheque</th>
+              <th>Fecha a Cobrar</th>
+              <th style="text-align: right; width: 140px;">Valor</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let chq of postdatedChecks; let i = index">
+              <td class="actions"><button class="btn-icon btn-danger" (click)="removePostdatedCheck(i)"><span class="material-icons">delete</span></button></td>
+              <td><input type="text" [(ngModel)]="chq.bank" placeholder="Ej. Pichincha"></td>
+              <td><input type="text" [(ngModel)]="chq.checkNumber" placeholder="000123"></td>
+              <td><input type="date" [(ngModel)]="chq.date"></td>
+              <td><input type="number" [(ngModel)]="chq.amount" style="text-align: right;"></td>
+            </tr>
+            <tr *ngIf="postdatedChecks.length === 0">
+              <td colspan="5" style="text-align: center; color: #777; padding: 20px;">No hay cheques posfechados registrados en este cobro/pago.</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="add-detail-container">
+          <button class="btn-secondary" (click)="addPostdatedCheck()">+ Agregar Cheque</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Panel de Liquidación (Estilo Contífico) -->
+  <div class="liquidation-panel" style="margin-top: 20px; display: flex; justify-content: flex-end;">
+    <div class="summary-box" style="background: white; border: 1px solid #ddd; border-radius: 8px; width: 350px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+      <h3 style="margin-top: 0; margin-bottom: 15px; font-size: 16px; border-bottom: 1px solid #eee; padding-bottom: 8px;">Liquidación</h3>
+      
+      <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+        <span>(+) Documentos:</span>
+        <strong>{{ formatCurrency(totalDocuments) }}</strong>
+      </div>
+      <div style="display: flex; justify-content: space-between; margin-bottom: 8px; color: #e53935;">
+        <span>(-) Anticipos Aplicados:</span>
+        <strong>{{ formatCurrency(totalAdvances) }}</strong>
+      </div>
+      <div style="display: flex; justify-content: space-between; margin-bottom: 8px; color: #1e88e5;">
+        <span>(+/-) Otras Cuentas:</span>
+        <strong>{{ formatCurrency(totalAccounts) }}</strong>
+      </div>
+      <div style="border-top: 2px solid #ccc; margin-top: 12px; padding-top: 12px; display: flex; justify-content: space-between; font-size: 18px;">
+        <strong>Total a Pagar/Cobrar:</strong>
+        <strong style="color: #2e7d32;">{{ formatCurrency(totalToPay) }}</strong>
       </div>
     </div>
   </div>
 
-  <div class="footer-actions">
-    <label class="checkbox-label">
-      <input type="checkbox" [(ngModel)]="sendEmail"> Envío de correo cliente
+  <div class="footer-actions" style="margin-top: 20px; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05);">
+    <label class="checkbox-label" style="margin-right: auto;">
+      <input type="checkbox" [(ngModel)]="sendEmail"> Enviar notificación por correo
     </label>
     <button class="btn-primary btn-save" (click)="save()" [disabled]="saving">
-      <span class="material-icons">save</span> {{ saving ? 'Guardando...' : 'Guardar' }}
+      <span class="material-icons">save</span> {{ saving ? 'Procesando...' : 'Guardar Transacción' }}
     </button>
   </div>
 

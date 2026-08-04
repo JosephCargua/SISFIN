@@ -35,6 +35,7 @@ export interface CashAccount {
 export interface BankTransactionDetail {
   id?: string;
   bankTransactionId?: string;
+  sourceType?: string;
   accountName?: string;
   amount: number;
   costCenter?: string;

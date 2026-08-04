@@ -44,6 +44,7 @@ export class LayoutComponent implements OnInit {
       expanded: false,
       children: [
         { label: 'Compras o Gastos', route: '/register-purchase-expense', icon: 'shopping_cart' },
+        { label: 'Cobros/Pagos Masivos', route: '/register-mass-payment', icon: 'payments' },
         { label: 'Registro Electrónico', route: '/electronic-invoices', icon: 'receipt' },
         { label: 'Documentos no electrónicos', route: '/register-document', icon: 'description' },
         { label: 'Consultar Documentos', route: '/consult-documents', icon: 'manage_search' },

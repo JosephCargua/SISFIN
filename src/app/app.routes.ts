@@ -82,6 +82,13 @@ export const routes: Routes = [
           ).then((m) => m.RegisterPaymentComponent),
       },
       {
+        path: 'register-mass-payment',
+        loadComponent: () =>
+          import(
+            './pages/register-mass-payment/register-mass-payment.component'
+          ).then((m) => m.RegisterMassPaymentComponent),
+      },
+      {
         path: 'document-crossing',
         loadComponent: () =>
           import(

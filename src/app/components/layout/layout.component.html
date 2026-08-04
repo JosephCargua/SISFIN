@@ -36,13 +36,39 @@
           </button>
           
           <div class="nav-group-children" *ngIf="item.expanded">
-            <a *ngFor="let child of item.children"
-               [routerLink]="child.route"
-               routerLinkActive="active"
-               class="nav-item child-item">
-              <span class="material-icons" *ngIf="child.icon">{{ child.icon }}</span>
-              <span>{{ child.label }}</span>
-            </a>
+            <ng-container *ngFor="let child of item.children">
+              <!-- If child does NOT have its own children -->
+              <a *ngIf="!child.children"
+                 [routerLink]="child.route"
+                 routerLinkActive="active"
+                 class="nav-item child-item">
+                <span class="material-icons" *ngIf="child.icon">{{ child.icon }}</span>
+                <span>{{ child.label }}</span>
+              </a>
+
+              <!-- If child has its own children -->
+              <div *ngIf="child.children" class="nav-group child-group" [class.expanded]="child.expanded">
+                <button class="nav-group-header child-item" (click)="toggleGroup(child)" style="padding-left: 2rem;">
+                  <div class="nav-group-title">
+                    <span class="material-icons" *ngIf="child.icon">{{ child.icon }}</span>
+                    <span>{{ child.label }}</span>
+                  </div>
+                  <span class="material-icons toggle-icon">
+                    {{ child.expanded ? 'expand_less' : 'expand_more' }}
+                  </span>
+                </button>
+                
+                <div class="nav-group-children" *ngIf="child.expanded">
+                  <a *ngFor="let subchild of child.children"
+                     [routerLink]="subchild.route"
+                     routerLinkActive="active"
+                     class="nav-item subchild-item" style="padding-left: 3.5rem;">
+                    <span class="material-icons" *ngIf="subchild.icon">{{ subchild.icon }}</span>
+                    <span>{{ subchild.label }}</span>
+                  </a>
+                </div>
+              </div>
+            </ng-container>
           </div>
         </div>
       </ng-container>

@@ -17,6 +17,7 @@ export class PaymentRecordsComponent implements OnInit {
   payments: any[] = [];
   loading = false;
   showPersonaModal = false;
+  showActionMenu = false;
   
   filters = {
     documento: '',
@@ -32,6 +33,21 @@ export class PaymentRecordsComponent implements OnInit {
     fechaCheque: '',
     tipo: 'Todos'
   };
+
+  toggleActionMenu() {
+    this.showActionMenu = !this.showActionMenu;
+  }
+
+  navigateToAdd(type: string) {
+    this.showActionMenu = false;
+    if (type === 'pago') {
+      this.router.navigate(['/register-payment']);
+    } else if (type === 'masivo') {
+      this.router.navigate(['/register-mass-payment']);
+    } else if (type === 'cruce') {
+      this.router.navigate(['/document-crossing']);
+    }
+  }
 
   constructor(private apiService: ApiService, private router: Router) {}
 
@@ -62,10 +78,6 @@ export class PaymentRecordsComponent implements OnInit {
 
   search() {
     this.loadPayments();
-  }
-
-  newPayment() {
-    this.router.navigate(['/register-payment']);
   }
 
   formatCurrency(amount: number): string {

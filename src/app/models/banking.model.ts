@@ -35,10 +35,16 @@ export interface CashAccount {
 export interface BankTransactionDetail {
   id?: string;
   bankTransactionId?: string;
-  accountName: string;
+  accountName?: string;
   amount: number;
   costCenter?: string;
   project?: string;
+  
+  personaId?: string;
+  personName?: string;
+  documentNumber?: string;
+  documentType?: string;
+  documentIssueDate?: Date;
 }
 
 export interface BankTransaction {

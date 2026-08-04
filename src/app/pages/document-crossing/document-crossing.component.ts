@@ -5,6 +5,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FinancialDocumentService } from '../../core/services/financial-document.service';
 import { DocumentConsultService } from '../../core/services/document-consult.service';
 import { ApiService } from '../../core/services/api.service';
+import { BankingService } from '../../core/services/banking.service';
+import Swal from 'sweetalert2';
 
 import { PersonaSelectorModalComponent } from '../../components/persona-selector-modal/persona-selector-modal.component';
 import { Persona } from '../../models/persona.model';
@@ -40,7 +42,8 @@ export class DocumentCrossingComponent implements OnInit {
     private router: Router,
     private documentService: FinancialDocumentService,
     private documentConsultService: DocumentConsultService,
-    private documentPaymentService: ApiService
+    private documentPaymentService: ApiService,
+    private bankingService: BankingService
   ) {}
 
   ngOnInit() {
@@ -128,32 +131,37 @@ export class DocumentCrossingComponent implements OnInit {
 
   save() {
     this.saving = true;
-    const id = this.route.snapshot.queryParams['id'];
-    if (id) {
-      const totalPaid = this.documents.reduce((acc, doc) => acc + (doc.amountToPay || 0), 0);
-      const docType = this.documents[0]?.type === 'Factura' ? 'ELECTRONIC' : 'FINANCIAL';
-      this.documentPaymentService.post('document-payments', {
-        documentId: id,
-        documentType: docType,
-        amount: totalPaid,
-        transactionType: 'crossing',
-        transactionId: 'mock-crossing-id-' + Date.now() // Mock ID until crossing backend is fully implemented
-      }).subscribe({
-        next: () => {
-          alert('Cruce de documentos registrado correctamente en la base de datos');
-          this.saving = false;
-          this.router.navigate(['/consult-documents']);
-        },
-        error: (e) => {
-          console.error('Failed to register crossing:', e);
-          alert('Error al registrar el cruce');
-          this.saving = false;
-        }
-      });
-    } else {
-      alert('Cruce registrado (Sin documento vinculado)');
-      this.saving = false;
-      this.router.navigate(['/consult-documents']);
-    }
+    const totalPaid = this.documents.reduce((acc, doc) => acc + (doc.amountToPay || 0), 0);
+    
+    // Preparar transacción bancaria de tipo 'Cruce'
+    const bankPayload: any = {
+      bankAccountId: null, // As it is a crossing, might not hit a bank account directly, or could be mapped
+      date: this.issueDate,
+      description: this.description,
+      amount: totalPaid,
+      type: 'Egreso', // O Ingreso, dependiendo
+      transactionType: 'Cruce',
+      paymentMethod: this.transactionMethod,
+      payToOrderOf: this.personName,
+      personName: this.personName,
+      details: this.documents.map(d => ({
+        accountName: d.documentLabel || 'S/N',
+        amount: d.amountToPay,
+        costCenter: 'N/A'
+      }))
+    };
+
+    this.bankingService.createTransaction(bankPayload).subscribe({
+      next: () => {
+        Swal.fire('Éxito', 'Cruce de documentos registrado correctamente', 'success').then(() => {
+          this.router.navigate(['/payment-records']);
+        });
+        this.saving = false;
+      },
+      error: () => {
+        Swal.fire('Error', 'Hubo un problema al registrar el cruce', 'error');
+        this.saving = false;
+      }
+    });
   }
 }

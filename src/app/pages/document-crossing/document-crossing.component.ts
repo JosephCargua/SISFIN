@@ -6,10 +6,15 @@ import { FinancialDocumentService } from '../../core/services/financial-document
 import { DocumentConsultService } from '../../core/services/document-consult.service';
 import { ApiService } from '../../core/services/api.service';
 
+import { PersonaSelectorModalComponent } from '../../components/persona-selector-modal/persona-selector-modal.component';
+import { Persona } from '../../models/persona.model';
+import { AccountSelectorModalComponent } from '../../components/account-selector-modal/account-selector-modal.component';
+import { Account } from '../../models/account.model';
+
 @Component({
   selector: 'app-document-crossing',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PersonaSelectorModalComponent, AccountSelectorModalComponent],
   templateUrl: './document-crossing.component.html',
   styleUrl: './document-crossing.component.scss'
 })
@@ -27,18 +32,8 @@ export class DocumentCrossingComponent implements OnInit {
   accounts: any[] = [];
   activeTab = 'Documentos';
   showAccountModal = false;
-  
-  mockAccounts = [
-    { code: '1.1.1.1', name: 'Caja', group: 'Activo' },
-    { code: '1.1.1.2', name: 'Caja', group: 'Activo' },
-    { code: '1.1.1.3.1', name: 'Banco Internacional', group: 'Activo' },
-    { code: '1.1.1.4', name: 'Banco dinero electrónico', group: 'Activo' },
-    { code: '1.1.2.1', name: 'Activos Financieros con cambios en resultados', group: 'Activo' },
-    { code: '1.1.2.2', name: 'Activos Financieros Disponibles para la Venta', group: 'Activo' },
-    { code: '1.1.2.3', name: 'Activos Financieros mantenidos hasta el vencimiento', group: 'Activo' },
-    { code: '1.1.2.4', name: '(-) Provisión por Deterioro', group: 'Activo' },
-    { code: '1.1.2.5.1', name: 'Clientes Comerciales', group: 'Activo' },
-  ];
+  showPersonaModal = false;
+  targetPersonaIndex: number = -1; // -1 for main person, >=0 for advances
 
   constructor(
     private route: ActivatedRoute, 
@@ -111,12 +106,24 @@ export class DocumentCrossingComponent implements OnInit {
     this.showAccountModal = true;
   }
 
-  selectAccount(acc: any) {
+  onAccountSelected(acc: Account) {
     this.accounts.push({
       accountName: acc.name,
       amountToPay: 0
     });
-    this.showAccountModal = false;
+  }
+
+  openPersonaModal(index: number = -1) {
+    this.targetPersonaIndex = index;
+    this.showPersonaModal = true;
+  }
+
+  onPersonaSelected(persona: Persona) {
+    if (this.targetPersonaIndex === -1) {
+      this.personName = persona.nombre;
+    } else {
+      this.advances[this.targetPersonaIndex].person = persona.nombre;
+    }
   }
 
   save() {

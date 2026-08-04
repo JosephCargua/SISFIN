@@ -6,11 +6,13 @@ import { BankingService } from '../../core/services/banking.service';
 
 import { AccountSelectorModalComponent } from '../../components/account-selector-modal/account-selector-modal.component';
 import { Account } from '../../models/account.model';
+import { PersonaSelectorModalComponent } from '../../components/persona-selector-modal/persona-selector-modal.component';
+import { Persona } from '../../models/persona.model';
 
 @Component({
   selector: 'app-register-transaction',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, AccountSelectorModalComponent],
+  imports: [CommonModule, FormsModule, RouterModule, AccountSelectorModalComponent, PersonaSelectorModalComponent],
   templateUrl: './register-transaction.component.html',
   styleUrl: './register-transaction.component.scss'
 })
@@ -18,14 +20,16 @@ export class RegisterTransactionComponent implements OnInit {
   
   movementId: string | null = null;
   isAccountModalVisible = false;
+  isPersonaModalVisible = false;
   
   movement = {
     tipoMovimiento: 'Ingreso',
     metodo: 'Transacción', 
     anulado: false,
     fechaEmision: new Date().toISOString().split('T')[0],
-    cuentaBancaria: 'b567b458-1234-4567-8901-abcdefabcdef', 
+    cuentaBancaria: '', 
     persona: '',
+    personaId: '',
     paguese: '',
     numeroComprobante: '',
     esEfectivo: false,
@@ -59,6 +63,7 @@ export class RegisterTransactionComponent implements OnInit {
       this.movement.fechaEmision = tx.date ? new Date(tx.date).toISOString().split('T')[0] : '';
       this.movement.cuentaBancaria = tx.bankAccountId || '';
       this.movement.persona = tx.personName || '';
+      this.movement.personaId = tx.personaId || '';
       this.movement.numeroComprobante = tx.checkNumber || ''; // Reusing checkNumber for comprobante
       this.movement.descripcion = tx.description || '';
       
@@ -82,6 +87,15 @@ export class RegisterTransactionComponent implements OnInit {
 
   onAccountSelected(account: Account) {
     this.movement.cuentaBancaria = account.name;
+  }
+
+  openPersonaModal() {
+    this.isPersonaModalVisible = true;
+  }
+
+  onPersonaSelected(persona: Persona) {
+    this.movement.persona = persona.nombre;
+    this.movement.personaId = persona.id!;
   }
 
   addDetail() {
@@ -114,6 +128,7 @@ export class RegisterTransactionComponent implements OnInit {
       transactionType: this.movement.tipoMovimiento,
       paymentMethod: this.movement.metodo,
       isAnnulled: this.movement.anulado,
+      personaId: this.movement.personaId || null,
       personName: this.movement.persona,
       checkNumber: this.movement.numeroComprobante,
       details: this.documentsDetails.map(d => ({

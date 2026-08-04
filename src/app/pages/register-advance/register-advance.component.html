@@ -34,8 +34,8 @@
 
       <div class="form-row">
         <label class="required">Persona:</label>
-        <div class="input-with-icon" style="max-width: 400px;">
-          <input type="text" [(ngModel)]="movement.persona" placeholder="--" />
+        <div class="input-with-icon" style="max-width: 400px; background: white;" (click)="openPersonaModal()" style="cursor: pointer;">
+          <input type="text" [(ngModel)]="movement.persona" placeholder="--" readonly style="cursor: pointer; background: white;" />
           <span class="material-icons">search</span>
         </div>
       </div>
@@ -125,3 +125,9 @@
   (close)="isAccountModalVisible = false"
   (accountSelected)="onAccountSelected($event)">
 </app-account-selector-modal>
+
+<app-persona-selector-modal
+  [isVisible]="isPersonaModalVisible"
+  (close)="isPersonaModalVisible = false"
+  (personaSelected)="onPersonaSelected($event)">
+</app-persona-selector-modal>

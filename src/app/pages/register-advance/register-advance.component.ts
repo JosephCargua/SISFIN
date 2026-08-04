@@ -6,11 +6,13 @@ import { BankingService } from '../../core/services/banking.service';
 
 import { AccountSelectorModalComponent } from '../../components/account-selector-modal/account-selector-modal.component';
 import { Account } from '../../models/account.model';
+import { PersonaSelectorModalComponent } from '../../components/persona-selector-modal/persona-selector-modal.component';
+import { Persona } from '../../models/persona.model';
 
 @Component({
   selector: 'app-register-advance',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, AccountSelectorModalComponent],
+  imports: [CommonModule, FormsModule, RouterModule, AccountSelectorModalComponent, PersonaSelectorModalComponent],
   templateUrl: './register-advance.component.html',
   styleUrl: './register-advance.component.scss'
 })
@@ -19,6 +21,7 @@ export class RegisterAdvanceComponent implements OnInit {
   movementId: string | null = null;
   
   isAccountModalVisible = false;
+  isPersonaModalVisible = false;
   currentEditingRowIndex: number | null = null;
   targetField: 'main' | 'detail' = 'main';
   
@@ -27,8 +30,9 @@ export class RegisterAdvanceComponent implements OnInit {
     tipoAnticipo: 'Proveedor',
     metodo: 'Cheque', 
     fechaEmision: new Date().toISOString().split('T')[0],
-    cuentaBancaria: 'b567b458-1234-4567-8901-abcdefabcdef', 
+    cuentaBancaria: '', 
     persona: '',
+    personaId: '',
     paguese: '',
     numeroCheque: '',
     fechaCheque: new Date().toISOString().split('T')[0],
@@ -62,6 +66,7 @@ export class RegisterAdvanceComponent implements OnInit {
       this.movement.fechaEmision = tx.date ? new Date(tx.date).toISOString().split('T')[0] : '';
       this.movement.cuentaBancaria = tx.bankAccountId || '';
       this.movement.persona = tx.personName || '';
+      this.movement.personaId = tx.personaId || '';
       this.movement.paguese = tx.payToOrderOf || '';
       this.movement.numeroCheque = tx.checkNumber || '';
       this.movement.fechaCheque = tx.checkDate ? new Date(tx.checkDate).toISOString().split('T')[0] : '';
@@ -92,6 +97,15 @@ export class RegisterAdvanceComponent implements OnInit {
     }
   }
 
+  openPersonaModal() {
+    this.isPersonaModalVisible = true;
+  }
+
+  onPersonaSelected(persona: Persona) {
+    this.movement.persona = persona.nombre;
+    this.movement.personaId = persona.id!;
+  }
+
   formatCurrency(amount: number): string {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -110,6 +124,7 @@ export class RegisterAdvanceComponent implements OnInit {
       type: this.movement.tipoMovimiento,
       transactionType: this.movement.tipoMovimiento,
       paymentMethod: 'Anticipo',
+      personaId: this.movement.personaId || null,
       personName: this.movement.persona,
       payToOrderOf: this.movement.paguese,
       checkNumber: this.movement.numeroCheque,

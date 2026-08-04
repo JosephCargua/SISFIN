@@ -4,17 +4,20 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { BankingService } from '../../core/services/banking.service';
 import { BankAccount } from '../../models/banking.model';
+import { PersonaSelectorModalComponent } from '../../components/persona-selector-modal/persona-selector-modal.component';
+import { Persona } from '../../models/persona.model';
 
 @Component({
   selector: 'app-bank-movements',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, PersonaSelectorModalComponent],
   templateUrl: './bank-movements.component.html',
   styleUrl: './bank-movements.component.scss'
 })
 export class BankMovementsComponent implements OnInit {
   searchExpanded = true;
   showActionMenu = false;
+  showPersonaModal = false;
   
   filters = {
     banco: '',
@@ -39,10 +42,6 @@ export class BankMovementsComponent implements OnInit {
     'Nota de Crédito',
     'Nota de Débito',
     'Transferencia'
-  ];
-
-  mockAccounts = [
-    { number: '3200059580', name: 'PAPANGU TURISMO CIA. LTDA', type: 'Corriente' }
   ];
 
   movements: any[] = [];
@@ -118,5 +117,13 @@ export class BankMovementsComponent implements OnInit {
     } else {
       this.router.navigate(['/register-bank-movement', m.id]);
     }
+  }
+
+  openPersonaModal() {
+    this.showPersonaModal = true;
+  }
+
+  onPersonaSelected(persona: Persona) {
+    this.filters.persona = persona.nombre;
   }
 }

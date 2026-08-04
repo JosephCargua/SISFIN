@@ -3,17 +3,20 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/services/api.service';
 import { Router } from '@angular/router';
+import { PersonaSelectorModalComponent } from '../../components/persona-selector-modal/persona-selector-modal.component';
+import { Persona } from '../../models/persona.model';
 
 @Component({
   selector: 'app-payment-records',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PersonaSelectorModalComponent],
   templateUrl: './payment-records.component.html',
   styleUrls: ['./payment-records.component.scss']
 })
 export class PaymentRecordsComponent implements OnInit {
   payments: any[] = [];
   loading = false;
+  showPersonaModal = false;
   
   filters = {
     documento: '',
@@ -72,5 +75,13 @@ export class PaymentRecordsComponent implements OnInit {
       currency: 'USD',
       minimumFractionDigits: 2,
     }).format(amount);
+  }
+
+  openPersonaModal() {
+    this.showPersonaModal = true;
+  }
+
+  onPersonaSelected(persona: Persona) {
+    this.filters.persona = persona.nombre;
   }
 }

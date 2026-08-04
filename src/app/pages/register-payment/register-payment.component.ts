@@ -5,11 +5,13 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { BankingService } from '../../core/services/banking.service';
 import { PersonaService } from '../../core/services/persona.service';
 import Swal from 'sweetalert2';
+import { PersonaSelectorModalComponent } from '../../components/persona-selector-modal/persona-selector-modal.component';
+import { Persona } from '../../models/persona.model';
 
 @Component({
   selector: 'app-register-payment',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PersonaSelectorModalComponent],
   templateUrl: './register-payment.component.html',
   styleUrls: ['./register-payment.component.scss']
 })
@@ -20,8 +22,7 @@ export class RegisterPaymentComponent implements OnInit {
   
   personSearch = '';
   selectedPersonId = '';
-  persons: any[] = [];
-  showPersonResults = false;
+  showPersonaModal = false;
   
   bankAccount = '';
   bankAccounts: any[] = [];
@@ -53,36 +54,18 @@ export class RegisterPaymentComponent implements OnInit {
     this.paymentMethod = 'Transferencia';
   }
 
-  searchPersons() {
-    if (this.personSearch.length < 2) {
-      this.showPersonResults = false;
-      return;
-    }
-    
-    // Filtro rápido de personas (idealmente llamar a la API con param q)
-    this.personaService.getPersonas().subscribe(data => {
-      this.persons = data.filter(p => 
-        p.nombre.toLowerCase().includes(this.personSearch.toLowerCase()) || 
-        (p.ruc && p.ruc.includes(this.personSearch)) ||
-        (p.cedula && p.cedula.includes(this.personSearch))
-      );
-      this.showPersonResults = true;
-    });
+  openPersonaModal() {
+    this.showPersonaModal = true;
   }
 
-  selectPerson(person: any) {
+  onPersonaSelected(person: Persona) {
     this.personSearch = person.nombre;
-    this.selectedPersonId = person.id;
-    this.showPersonResults = false;
+    this.selectedPersonId = person.id!;
     
     // Autocompletar cuenta bancaria si aplica
     if (person.bancoId) {
       this.bankAccount = person.bancoId;
     }
-  }
-
-  hidePersonResults() {
-    setTimeout(() => this.showPersonResults = false, 200);
   }
 
   addDocument() {

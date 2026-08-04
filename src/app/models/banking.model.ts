@@ -51,10 +51,10 @@ export interface BankTransaction {
   reference: string | null;
   date: Date;
   
-  // Nuevos campos
   transactionType?: string;
   paymentMethod?: string;
   isAnnulled?: boolean;
+  personaId?: string;
   personName?: string;
   payToOrderOf?: string;
   checkNumber?: string;
@@ -96,6 +96,7 @@ export interface CreateBankTransactionDto {
   transactionType?: string;
   paymentMethod?: string;
   isAnnulled?: boolean;
+  personaId?: string;
   personName?: string;
   payToOrderOf?: string;
   checkNumber?: string;

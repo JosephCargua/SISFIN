@@ -6,16 +6,23 @@ import { PersonaService } from '../../core/services/persona.service';
 import { Persona } from '../../models/persona.model';
 import Swal from 'sweetalert2';
 
+import { AccountSelectorModalComponent } from '../../components/account-selector-modal/account-selector-modal.component';
+import { Account } from '../../models/account.model';
+
 @Component({
   selector: 'app-personas-register',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AccountSelectorModalComponent],
   templateUrl: './personas-register.component.html',
   styleUrls: ['./personas-register.component.scss']
 })
 export class PersonasRegisterComponent implements OnInit {
   isEditing = false;
   activeTab = 'datos-generales';
+
+  isAccountModalVisible = false;
+  currentAccountField = '';
+  accountNames: { [key: string]: string } = {};
 
   persona: Persona = {
     estado: 'Activo',
@@ -36,7 +43,6 @@ export class PersonasRegisterComponent implements OnInit {
   };
 
   // Mock data for dropdowns
-  cuentasContables = [{id: '1', name: 'Cuenta de Prueba'}];
   bancos = [{id: '1', name: 'Banco Internacional'}];
   vendedores = [{id: '1', name: 'Vendedor 1'}];
 
@@ -95,5 +101,15 @@ export class PersonasRegisterComponent implements OnInit {
     if (this.persona.autorizacionesSri) {
       this.persona.autorizacionesSri.splice(index, 1);
     }
+  }
+
+  openAccountModal(field: string): void {
+    this.currentAccountField = field;
+    this.isAccountModalVisible = true;
+  }
+
+  onAccountSelected(account: Account): void {
+    (this.persona as any)[this.currentAccountField] = account.id;
+    this.accountNames[this.currentAccountField] = account.name;
   }
 }

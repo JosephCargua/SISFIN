@@ -12,82 +12,105 @@
     <div class="section-header">
       <h2>Información de la Transacción</h2>
     </div>
-    <div class="form-grid">
-      <!-- Fila 1 -->
-      <div class="form-row">
+    <div class="form-container" style="display: flex; justify-content: space-between; padding: 24px;">
+      
+      <!-- Lado Izquierdo: Campos del formulario -->
+      <div class="form-fields" style="flex: 1; max-width: 600px; display: flex; flex-direction: column; gap: 12px;">
+        
         <div class="form-group">
           <label>Tipo de Transacción:</label>
-          <select [(ngModel)]="transactionType" (ngModelChange)="onTransactionTypeChange()">
-            <option value="Cobro">Cobro</option>
-            <option value="Pago">Pago</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Forma de {{ transactionType === 'Pago' ? 'Pago' : 'Cobro' }}:</label>
-          <select [(ngModel)]="paymentMethod">
-            <option *ngFor="let method of paymentMethods" [value]="method">{{ method }}</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Fila 2 -->
-      <div class="form-row">
-        <div class="form-group">
-          <label></label>
-          <div class="checkbox-wrapper">
-            <label class="inline-checkbox">Anulado <input type="checkbox"></label>
+          <div class="input-container" style="display: flex; gap: 10px; flex: 1;">
+            <select [(ngModel)]="transactionType" (ngModelChange)="onTransactionTypeChange()" style="flex: 1;">
+              <option value="Cobro">Cobro</option>
+              <option value="Pago">Pago</option>
+            </select>
           </div>
         </div>
+
+        <div class="form-group">
+          <label>Forma de {{ transactionType === 'Pago' ? 'Pago' : 'Cobro' }}:</label>
+          <div class="input-container" style="display: flex; gap: 10px; flex: 1;">
+            <select [(ngModel)]="paymentMethod" style="flex: 1;">
+              <option *ngFor="let method of paymentMethods" [value]="method">{{ method }}</option>
+            </select>
+            <!-- Dropdown secundario para Pago con Cheque -->
+            <select *ngIf="transactionType === 'Pago' && paymentMethod === 'Cheque'" style="flex: 1;">
+              <option value="Cheque propio">Cheque propio</option>
+            </select>
+          </div>
+        </div>
+
         <div class="form-group">
           <label>Fecha de Emisión:</label>
-          <input type="date" [(ngModel)]="issueDate">
+          <input type="date" [(ngModel)]="issueDate" style="background-color: #f1f5f9;">
         </div>
-      </div>
 
-      <!-- Fila 3 -->
-      <div class="form-row full-row">
         <div class="form-group">
           <label>Persona:</label>
-          <div class="search-input" (click)="openPersonaModal()" style="cursor: pointer;">
-            <input type="text" [(ngModel)]="personSearch" placeholder="Buscar Cliente/Proveedor..." readonly style="cursor: pointer; background: white;">
+          <div class="search-input" (click)="openPersonaModal()" style="cursor: pointer; flex: 1;">
+            <input type="text" [(ngModel)]="personSearch" placeholder="..." readonly style="cursor: pointer; background: white;">
             <span class="material-icons">search</span>
           </div>
         </div>
-      </div>
+        
+        <div class="form-group" *ngIf="transactionType === 'Pago' && paymentMethod === 'Cheque'">
+          <label>Páguese a la orden de:</label>
+          <input type="text" placeholder="">
+        </div>
 
-      <!-- Fila 4 -->
-      <div class="form-row">
-        <div class="form-group">
+        <div class="form-group" *ngIf="paymentMethod === 'Caja' || paymentMethod === 'Cheque' && transactionType === 'Cobro'">
+          <label>Cuenta Pago/Cobro:</label>
+          <div class="search-input" style="cursor: pointer; flex: 1;">
+            <input type="text" placeholder="..." readonly style="cursor: pointer; background: white;">
+            <span class="material-icons">search</span>
+          </div>
+        </div>
+        
+        <div class="form-group" *ngIf="paymentMethod === 'Transferencia' || (paymentMethod === 'Cheque' && transactionType === 'Pago')">
           <label>Cuenta Bancaria:</label>
-          <div class="search-input">
-            <select [(ngModel)]="bankAccount" style="border: none; flex: 1; outline: none; background: transparent;">
-              <option value="">Seleccione Banco...</option>
+          <div class="search-input" style="cursor: pointer; flex: 1;">
+            <select [(ngModel)]="bankAccount" style="border: none; flex: 1; outline: none; background: transparent; padding: 0;">
+              <option value="">...</option>
               <option *ngFor="let acc of bankAccounts" [value]="acc.id">{{ acc.bankName }} - {{ acc.accountNumber }}</option>
             </select>
             <span class="material-icons">search</span>
           </div>
         </div>
-      </div>
 
-      <!-- Fila 5 -->
-      <div class="form-row">
-        <div class="form-group">
+        <div class="form-group" *ngIf="paymentMethod === 'Caja' || paymentMethod === 'Transferencia'">
+          <label># de Comprobante:</label>
+          <div style="display: flex; gap: 12px; align-items: center; flex: 1;">
+            <input type="text" style="flex: 1;">
+            <label class="inline-checkbox" *ngIf="paymentMethod === 'Caja'" style="margin: 0;">
+              <input type="checkbox"> EFECTIVO
+            </label>
+          </div>
+        </div>
+        
+        <div class="form-group" *ngIf="paymentMethod === 'Cheque'">
           <label>Número de cheque:</label>
           <input type="text" [(ngModel)]="checkNumber">
         </div>
+        
         <div class="form-group" *ngIf="paymentMethod === 'Cheque'">
           <label>Fecha de cheque:</label>
-          <input type="date" [(ngModel)]="issueDate">
+          <input type="date">
         </div>
-      </div>
 
-      <!-- Fila 6 -->
-      <div class="form-row full-row" style="align-items: flex-start;">
         <div class="form-group" style="align-items: flex-start;">
           <label style="padding-top: 8px;">Descripción:</label>
-          <textarea [(ngModel)]="description" rows="2"></textarea>
+          <textarea [(ngModel)]="description" rows="3"></textarea>
         </div>
+
       </div>
+
+      <!-- Lado Derecho: Checkbox Anulado -->
+      <div class="form-right" style="padding-right: 20px;">
+        <label class="inline-checkbox" style="font-size: 12px;">
+          Anulado <input type="checkbox">
+        </label>
+      </div>
+      
     </div>
   </div>
 

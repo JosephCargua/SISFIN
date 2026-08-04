@@ -78,89 +78,193 @@
       
       <!-- Cliente -->
       <div class="role-group">
-        <label class="role-header">
+        <label class="role-header" [class.active]="persona.esCliente">
           <input type="checkbox" [(ngModel)]="persona.esCliente"> Cliente
         </label>
-        <div class="role-details form-grid" *ngIf="persona.esCliente">
-          <div class="form-group">
-            <label>Cuenta Por Cobrar</label>
-            <select [(ngModel)]="persona.cliCuentaPorCobrarId">
-              <option *ngFor="let c of cuentasContables" [value]="c.id">{{c.name}}</option>
-            </select>
+        <div class="role-details form-grid role-grid" *ngIf="persona.esCliente">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Cuenta Por Cobrar:</label>
+              <div class="search-input">
+                <input type="text" placeholder="Clientes Comerciales">
+                <span class="material-icons">search</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Saldo inicial:</label>
+              <div>
+                <input type="number" [(ngModel)]="persona.cliSaldoInicial">
+                <div class="help-text">(No afecta la contabilidad)</div>
+              </div>
+            </div>
           </div>
-          <div class="form-group">
-            <label>Vendedor</label>
-            <select [(ngModel)]="persona.cliVendedorId">
-              <option *ngFor="let v of vendedores" [value]="v.id">{{v.name}}</option>
-            </select>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label>Vendedor:</label>
+              <select [(ngModel)]="persona.cliVendedorId">
+                <option value="">---------</option>
+                <option *ngFor="let v of vendedores" [value]="v.id">{{v.name}}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>PVP por defecto:</label>
+              <div style="display: flex; gap: 16px; align-items: center; width: 100%;">
+                <select [(ngModel)]="persona.cliPvpPorDefecto" style="flex: 1;">
+                  <option value="">-</option>
+                  <option value="1">Precio 1</option>
+                </select>
+                <label class="inline-checkbox">
+                  <input type="checkbox"> Manual
+                </label>
+              </div>
+            </div>
           </div>
-          <div class="form-group">
-            <label>Saldo Inicial</label>
-            <input type="number" [(ngModel)]="persona.cliSaldoInicial">
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label>Descuento:</label>
+              <input type="number" [(ngModel)]="persona.cliDescuento">
+            </div>
+            <div class="form-group">
+              <label></label>
+              <label class="inline-checkbox">
+                <input type="checkbox" [(ngModel)]="persona.cliCupoCredito"> Cupo de Crédito:
+              </label>
+            </div>
           </div>
-          <div class="form-group checkbox-group">
-            <label><input type="checkbox" [(ngModel)]="persona.cliCupoCredito"> Cupo de Crédito</label>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label></label>
+              <label class="inline-checkbox">
+                <input type="checkbox" [(ngModel)]="persona.cliParaExportacion"> Para Exportación:
+              </label>
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label>Centro de Costo:</label>
+              <div class="search-input">
+                <input type="text" placeholder="...">
+                <span class="material-icons">search</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Proveedor -->
       <div class="role-group">
-        <label class="role-header">
+        <label class="role-header" [class.active]="persona.esProveedor">
           <input type="checkbox" [(ngModel)]="persona.esProveedor"> Proveedor
         </label>
-        <div class="role-details form-grid" *ngIf="persona.esProveedor">
-          <div class="form-group">
-            <label>Cuenta Por Pagar</label>
-            <select [(ngModel)]="persona.provCuentaPorPagarId">
-              <option *ngFor="let c of cuentasContables" [value]="c.id">{{c.name}}</option>
-            </select>
+        <div class="role-details form-grid role-grid" *ngIf="persona.esProveedor">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Cuenta Por Pagar:</label>
+              <div class="search-input">
+                <input type="text" placeholder="Proveedores">
+                <span class="material-icons">search</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Saldo inicial:</label>
+              <div>
+                <input type="number" [(ngModel)]="persona.provSaldoInicial">
+                <div class="help-text">(No afecta la contabilidad)</div>
+              </div>
+            </div>
           </div>
-          <div class="form-group">
-            <label>Saldo Inicial</label>
-            <input type="number" [(ngModel)]="persona.provSaldoInicial">
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label>Cuenta Recurrente:</label>
+              <div class="search-input">
+                <input type="text" placeholder="...">
+                <span class="material-icons">search</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Ret. IR:</label>
+              <div class="search-input">
+                <input type="text" placeholder="...">
+                <span class="material-icons">search</span>
+              </div>
+            </div>
           </div>
-          <div class="form-group checkbox-group">
-            <label><input type="checkbox" [(ngModel)]="persona.provArtesano"> Artesano</label>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label>Centro de Costo:</label>
+              <div class="search-input">
+                <input type="text" placeholder="...">
+                <span class="material-icons">search</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Ret. IVA:</label>
+              <div class="search-input">
+                <input type="text" placeholder="...">
+                <span class="material-icons">search</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label></label>
+              <label class="inline-checkbox">
+                <input type="checkbox" [(ngModel)]="persona.provCtaRelacionada"> Cía Relacionada:
+              </label>
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label></label>
+              <label class="inline-checkbox">
+                <input type="checkbox" [(ngModel)]="persona.provArtesano"> Artesano:
+              </label>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Empleado -->
       <div class="role-group">
-        <label class="role-header">
+        <label class="role-header" [class.active]="persona.esEmpleado">
           <input type="checkbox" [(ngModel)]="persona.esEmpleado"> Empleado
         </label>
-        <div class="role-details form-grid" *ngIf="persona.esEmpleado">
-          <div class="form-group">
-            <label>Contrato</label>
-            <input type="text" [(ngModel)]="persona.empContrato">
-          </div>
-          <div class="form-group">
-            <label>Sueldo</label>
-            <input type="number" [(ngModel)]="persona.empSueldo">
+        <div class="role-details form-grid role-grid" *ngIf="persona.esEmpleado">
+          <div class="form-row" style="margin-bottom: 8px;">
+            <div class="form-group">
+              <label>Contrato:</label>
+              <select [(ngModel)]="persona.empContrato">
+                <option value="-">-</option>
+                <option value="Relación de Dependencia">Relación de Dependencia</option>
+                <option value="Otros">Otros</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Sueldo:</label>
+              <input type="number" [(ngModel)]="persona.empSueldo">
+            </div>
           </div>
         </div>
       </div>
       
       <!-- Accionista -->
-      <div class="role-group">
-        <label class="role-header">
+      <div class="role-group sub-role-group">
+        <label class="role-header border-top">
           <input type="checkbox" [(ngModel)]="persona.esAccionista"> Accionista
         </label>
-        <div class="role-details form-grid" *ngIf="persona.esAccionista">
-          <div class="form-group">
-            <label>Cuenta por Pagar</label>
-            <select [(ngModel)]="persona.accCuentaPorPagarId">
-              <option *ngFor="let c of cuentasContables" [value]="c.id">{{c.name}}</option>
-            </select>
-          </div>
-        </div>
       </div>
       
       <!-- Vendedor -->
-      <div class="role-group">
-        <label class="role-header">
+      <div class="role-group sub-role-group">
+        <label class="role-header border-top">
           <input type="checkbox" [(ngModel)]="persona.esVendedor"> Vendedor
         </label>
       </div>

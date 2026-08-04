@@ -21,13 +21,22 @@
   flex-direction: column;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
   z-index: 50;
-  transition: transform 0.3s ease;
+  transition: all 0.3s ease;
+  overflow: hidden;
+
+  /* Desktop collapsed state */
+  &:not(.open) {
+    width: 0;
+    opacity: 0;
+  }
 
   @media (max-width: 768px) {
     position: fixed;
     top: 0;
     left: 0;
     bottom: 0;
+    width: 260px; /* ensure width on mobile */
+    opacity: 1; /* override desktop opacity */
     transform: translateX(-100%);
     &.open {
       transform: translateX(0);

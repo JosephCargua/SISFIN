@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/services/api.service';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { PersonaSelectorModalComponent } from '../../components/persona-selector-modal/persona-selector-modal.component';
 import { Persona } from '../../models/persona.model';
 
@@ -17,7 +17,8 @@ export class PaymentRecordsComponent implements OnInit {
   payments: any[] = [];
   loading = false;
   showPersonaModal = false;
-  showActionMenu = false;
+  
+  currentView = 'pago'; // 'pago', 'masivo', or 'cruce'
   
   filters = {
     documento: '',
@@ -34,25 +35,38 @@ export class PaymentRecordsComponent implements OnInit {
     tipo: 'Todos'
   };
 
-  toggleActionMenu() {
-    this.showActionMenu = !this.showActionMenu;
-  }
-
-  navigateToAdd(type: string) {
-    this.showActionMenu = false;
-    if (type === 'pago') {
-      this.router.navigate(['/register-payment']);
-    } else if (type === 'masivo') {
-      this.router.navigate(['/register-mass-payment']);
-    } else if (type === 'cruce') {
-      this.router.navigate(['/document-crossing']);
-    }
-  }
-
-  constructor(private apiService: ApiService, private router: Router) {}
+  constructor(
+    private apiService: ApiService, 
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit() {
-    this.loadPayments();
+    this.route.queryParams.subscribe(params => {
+      this.currentView = params['view'] || 'pago';
+      
+      // Auto-set the filter based on the view
+      if (this.currentView === 'masivo') {
+        this.filters.tipo = 'Cobro/Pago Masivo';
+      } else if (this.currentView === 'cruce') {
+        this.filters.tipo = 'Cruce';
+      } else {
+        // By default, just reset or leave as Todos. We can leave it as Todos or Ingreso/Egreso
+        this.filters.tipo = 'Todos';
+      }
+      
+      this.loadPayments();
+    });
+  }
+
+  newPayment() {
+    if (this.currentView === 'masivo') {
+      this.router.navigate(['/register-mass-payment']);
+    } else if (this.currentView === 'cruce') {
+      this.router.navigate(['/document-crossing']);
+    } else {
+      this.router.navigate(['/register-payment']);
+    }
   }
 
   loadPayments() {

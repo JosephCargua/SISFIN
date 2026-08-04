@@ -1,17 +1,9 @@
 <div class="page-container">
   <div class="page-header">
     <h1>Consultar Cobros/Pagos</h1>
-    <div class="header-actions" style="position: relative;">
+    <div class="header-actions">
       <button class="btn-icon" (click)="loadPayments()" title="Recargar"><span class="material-icons">refresh</span></button>
-      <button class="btn-primary" (click)="toggleActionMenu()" title="Nuevo">
-        <span class="material-icons">add</span>
-        <span class="material-icons" style="font-size: 16px; margin-left: -4px;">arrow_drop_down</span>
-      </button>
-      <div class="dropdown-menu" *ngIf="showActionMenu" style="position: absolute; top: 100%; right: 90px; background: white; border: 1px solid #ccc; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 1000; display: flex; flex-direction: column; min-width: 180px;">
-        <a (click)="navigateToAdd('pago')" style="padding: 10px 16px; cursor: pointer; border-bottom: 1px solid #eee; text-decoration: none; color: #333;">Cobros/Pagos</a>
-        <a (click)="navigateToAdd('masivo')" style="padding: 10px 16px; cursor: pointer; border-bottom: 1px solid #eee; text-decoration: none; color: #333;">Cobros/Pagos Masivos</a>
-        <a (click)="navigateToAdd('cruce')" style="padding: 10px 16px; cursor: pointer; text-decoration: none; color: #333;">Pagos con Cruce</a>
-      </div>
+      <button class="btn-primary" (click)="newPayment()" title="Nuevo"><span class="material-icons">add</span></button>
       <button class="btn-icon" title="Eliminar"><span class="material-icons">delete</span></button>
       <button class="btn-icon" title="Exportar"><span class="material-icons">save_alt</span></button>
       <button class="btn-icon" title="Imprimir"><span class="material-icons">print</span></button>

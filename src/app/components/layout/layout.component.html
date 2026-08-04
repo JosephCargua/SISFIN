@@ -16,6 +16,7 @@
         <!-- Item without children -->
         <a *ngIf="!item.children"
            [routerLink]="item.route"
+           [queryParams]="item.queryParams"
            routerLinkActive="active"
            [routerLinkActiveOptions]="{exact: true}"
            class="nav-item">
@@ -40,6 +41,7 @@
               <!-- If child does NOT have its own children -->
               <a *ngIf="!child.children"
                  [routerLink]="child.route"
+                 [queryParams]="child.queryParams"
                  routerLinkActive="active"
                  class="nav-item child-item">
                 <span class="material-icons" *ngIf="child.icon">{{ child.icon }}</span>
@@ -61,6 +63,7 @@
                 <div class="nav-group-children" *ngIf="child.expanded">
                   <a *ngFor="let subchild of child.children"
                      [routerLink]="subchild.route"
+                     [queryParams]="subchild.queryParams"
                      routerLinkActive="active"
                      class="nav-item subchild-item" style="padding-left: 3.5rem;">
                     <span class="material-icons" *ngIf="subchild.icon">{{ subchild.icon }}</span>

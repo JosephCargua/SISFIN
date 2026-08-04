@@ -275,10 +275,8 @@
       <h2>Datos Bancarios</h2>
       <div class="form-grid">
         <div class="form-group">
-          <label>Banco</label>
-          <select [(ngModel)]="persona.bancoId">
-            <option *ngFor="let b of bancos" [value]="b.id">{{b.name}}</option>
-          </select>
+          <label>Banco:</label>
+          <input type="text" [(ngModel)]="persona.bancoId" placeholder="Nombre del banco">
         </div>
         <div class="form-group">
           <label>Tipo Cuenta Bancaria</label>

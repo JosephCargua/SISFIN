@@ -85,8 +85,8 @@
           <div class="form-row">
             <div class="form-group">
               <label>Cuenta Por Cobrar:</label>
-              <div class="search-input">
-                <input type="text" placeholder="Clientes Comerciales">
+              <div class="search-input" style="cursor: pointer;" (click)="openAccountModal('cliCuentaPorCobrarId')">
+                <input type="text" placeholder="Clientes Comerciales" [value]="accountNames['cliCuentaPorCobrarId'] || ''" readonly style="cursor: pointer;">
                 <span class="material-icons">search</span>
               </div>
             </div>
@@ -164,8 +164,8 @@
           <div class="form-row">
             <div class="form-group">
               <label>Cuenta Por Pagar:</label>
-              <div class="search-input">
-                <input type="text" placeholder="Proveedores">
+              <div class="search-input" style="cursor: pointer;" (click)="openAccountModal('provCuentaPorPagarId')">
+                <input type="text" placeholder="Proveedores" [value]="accountNames['provCuentaPorPagarId'] || ''" readonly style="cursor: pointer;">
                 <span class="material-icons">search</span>
               </div>
             </div>
@@ -181,15 +181,15 @@
           <div class="form-row">
             <div class="form-group">
               <label>Cuenta Recurrente:</label>
-              <div class="search-input">
-                <input type="text" placeholder="...">
+              <div class="search-input" style="cursor: pointer;" (click)="openAccountModal('provCuentaRecurrenteId')">
+                <input type="text" placeholder="..." [value]="accountNames['provCuentaRecurrenteId'] || ''" readonly style="cursor: pointer;">
                 <span class="material-icons">search</span>
               </div>
             </div>
             <div class="form-group">
               <label>Ret. IR:</label>
-              <div class="search-input">
-                <input type="text" placeholder="...">
+              <div class="search-input" style="cursor: pointer;" (click)="openAccountModal('provRetIrId')">
+                <input type="text" placeholder="..." [value]="accountNames['provRetIrId'] || ''" readonly style="cursor: pointer;">
                 <span class="material-icons">search</span>
               </div>
             </div>
@@ -205,8 +205,8 @@
             </div>
             <div class="form-group">
               <label>Ret. IVA:</label>
-              <div class="search-input">
-                <input type="text" placeholder="...">
+              <div class="search-input" style="cursor: pointer;" (click)="openAccountModal('provRetIvaId')">
+                <input type="text" placeholder="..." [value]="accountNames['provRetIvaId'] || ''" readonly style="cursor: pointer;">
                 <span class="material-icons">search</span>
               </div>
             </div>
@@ -351,4 +351,12 @@
       </div>
     </div>
   </div>
+
+  <!-- Modal for Account Selection -->
+  <app-account-selector-modal
+    [isVisible]="isAccountModalVisible"
+    (accountSelected)="onAccountSelected($event)"
+    (close)="isAccountModalVisible = false">
+  </app-account-selector-modal>
+
 </div>

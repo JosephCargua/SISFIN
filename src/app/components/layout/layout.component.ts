@@ -41,10 +41,19 @@ export class LayoutComponent implements OnInit {
     {
       label: 'Transacciones',
       icon: 'swap_horiz',
-      expanded: false,
+      expanded: true,
       children: [
         { label: 'Compras o Gastos', route: '/register-purchase-expense', icon: 'shopping_cart' },
-        { label: 'Cobros/Pagos Masivos', route: '/register-mass-payment', icon: 'payments' },
+        { 
+          label: 'Cobros/Pagos', 
+          icon: 'payments',
+          expanded: true,
+          children: [
+            { label: 'Cobros/Pagos', route: '/register-payment' },
+            { label: 'Cobros/Pagos Masivos', route: '/register-mass-payment' },
+            { label: 'Pagos con Cruce', route: '/document-crossing' }
+          ]
+        },
         { label: 'Registro Electrónico', route: '/electronic-invoices', icon: 'receipt' },
         { label: 'Documentos no electrónicos', route: '/register-document', icon: 'description' },
         { label: 'Consultar Documentos', route: '/consult-documents', icon: 'manage_search' },

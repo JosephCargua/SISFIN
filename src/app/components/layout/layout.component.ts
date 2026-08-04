@@ -8,6 +8,7 @@ interface MenuItem {
   icon?: string;
   children?: MenuItem[];
   expanded?: boolean;
+  queryParams?: any;
 }
 
 @Component({
@@ -49,9 +50,9 @@ export class LayoutComponent implements OnInit {
           icon: 'payments',
           expanded: true,
           children: [
-            { label: 'Cobros/Pagos', route: '/register-payment' },
-            { label: 'Cobros/Pagos Masivos', route: '/register-mass-payment' },
-            { label: 'Pagos con Cruce', route: '/document-crossing' }
+            { label: 'Cobros/Pagos', route: '/payment-records' },
+            { label: 'Cobros/Pagos Masivos', route: '/payment-records', queryParams: { view: 'masivo' } },
+            { label: 'Pagos con Cruce', route: '/payment-records', queryParams: { view: 'cruce' } }
           ]
         },
         { label: 'Registro Electrónico', route: '/electronic-invoices', icon: 'receipt' },

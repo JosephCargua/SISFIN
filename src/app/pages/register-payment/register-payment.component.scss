@@ -92,10 +92,23 @@
     align-items: start;
   }
 
+  &.form-compact {
+    .form-group {
+      grid-template-columns: 1fr;
+      gap: 4px;
+      
+      label {
+        text-align: left;
+        margin-bottom: 2px;
+      }
+    }
+  }
+
   label {
     text-align: right;
     font-size: 13px;
     color: #64748b;
+    font-weight: 500;
   }
 
   input[type="text"],
@@ -325,6 +338,21 @@
     }
 
     &:hover { background: #0284c7; }
+  }
+
+  .btn-secondary {
+    background: white;
+    color: #334155;
+    border: 1px solid #cbd5e1;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    
+    &:hover { background: #f8fafc; }
   }
 }
 

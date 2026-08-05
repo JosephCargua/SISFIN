@@ -323,17 +323,15 @@
             <!-- Pie del asiento (Totales y Glosa) -->
             <tr class="entry-footer-row">
               <td class="footer-glosa">
-                <strong>Glosa:</strong> {{ entry.description || '-' }}
-              </td>
-              <td colspan="4" class="footer-totals-container">
-                <div class="footer-totals-flex">
-                  <span class="total-label">TOTAL:</span>
-                  <span class="total-val debe-val">{{ entry.totalDebit | currency:'USD' }}</span>
-                  <span class="total-val haber-val">{{ entry.totalCredit | currency:'USD' }}</span>
-                  <span class="total-val cc-val"></span>
-                  <span class="total-val project-val"></span>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span><strong>Glosa:</strong> {{ entry.description || '-' }}</span>
+                  <span style="font-weight: bold; padding-right: 16px;">TOTAL:</span>
                 </div>
               </td>
+              <td class="col-debe footer-total">{{ entry.totalDebit | currency:'USD' }}</td>
+              <td class="col-haber footer-total">{{ entry.totalCredit | currency:'USD' }}</td>
+              <td class="col-cc"></td>
+              <td class="col-proyecto"></td>
             </tr>
           </tbody>
         </table>

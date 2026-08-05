@@ -40,6 +40,7 @@ export class JournalEntriesComponent implements OnInit {
 
   isAccountModalVisible = false;
   activeLineIndex: number = -1;
+  accountSelectorTarget: 'filter' | 'line' = 'line';
 
   // Exponer el enum para el template
   JournalEntryStatus = JournalEntryStatus;
@@ -108,13 +109,21 @@ export class JournalEntriesComponent implements OnInit {
     this.newEntry.lines.push({ accountId: '', accountName: '', debit: 0, credit: 0 });
   }
 
-  openAccountModal(index: number) {
-    this.activeLineIndex = index;
+  openAccountModal(index: number | null) {
+    if (index === null) {
+      this.accountSelectorTarget = 'filter';
+    } else {
+      this.accountSelectorTarget = 'line';
+      this.activeLineIndex = index;
+    }
     this.isAccountModalVisible = true;
   }
 
   onAccountSelected(account: Account) {
-    if (this.activeLineIndex >= 0 && this.activeLineIndex < this.newEntry.lines.length) {
+    if (this.accountSelectorTarget === 'filter') {
+      // Usar el código para el filtro, ya que la búsqueda backend busca por texto
+      this.accountFilter = account.code; 
+    } else if (this.activeLineIndex >= 0 && this.activeLineIndex < this.newEntry.lines.length) {
       this.newEntry.lines[this.activeLineIndex].accountId = account.id;
       this.newEntry.lines[this.activeLineIndex].accountName = `${account.code} - ${account.name}`;
     }

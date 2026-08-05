@@ -314,76 +314,136 @@ export class JournalEntriesComponent implements OnInit {
 
   exportToExcel() {
     if (!this.entries || this.entries.length === 0) return;
-    const dataToExport: any[] = [];
+    
+    const wsData: any[][] = [];
+    // Cabecera principal
+    wsData.push(['Fecha / Referencia', 'Cuenta', 'Detalle', 'Débito', 'Crédito', 'Centro de Costo', 'Proyecto', 'Estado']);
     
     this.entries.forEach((entry) => {
+      const dateStr = new Date(entry.date).toLocaleDateString();
+      const statusStr = this.statusLabels[entry.status] + (entry.status === JournalEntryStatus.CANCELLED ? ' (ANULADO)' : '');
+      
+      // Fila de cabecera del asiento
+      wsData.push([`-- ${dateStr} -- | ${entry.entryNumber}`, '', '', '', '', '', '', statusStr]);
+      
       if (entry.lines && entry.lines.length > 0) {
         entry.lines.forEach((line) => {
-          dataToExport.push({
-            'Número Asiento': entry.entryNumber,
-            Fecha: new Date(entry.date).toLocaleDateString(),
-            'Descripción Asiento': entry.description || '-',
-            Cuenta: line.account ? `${line.account.code} - ${line.account.name}` : '-',
-            'Detalle Línea': line.description || '-',
-            Débito: line.debit || 0,
-            Crédito: line.credit || 0,
-            Estado: this.statusLabels[entry.status]
-          });
-        });
-      } else {
-        dataToExport.push({
-          'Número Asiento': entry.entryNumber,
-          Fecha: new Date(entry.date).toLocaleDateString(),
-          'Descripción Asiento': entry.description || '-',
-          Cuenta: '-',
-          'Detalle Línea': '-',
-          Débito: entry.totalDebit || 0,
-          Crédito: entry.totalCredit || 0,
-          Estado: this.statusLabels[entry.status]
+          let accountName = line.account ? `${line.account.code} - ${line.account.name}` : 'N/A';
+          if ((line.credit || 0) > 0) {
+            accountName = '      ' + accountName; // Sangría para cuentas de crédito
+          }
+          wsData.push([
+            '', // Fecha vacía para las líneas
+            accountName,
+            line.description || '-',
+            line.debit || '',
+            line.credit || '',
+            '', // Centro Costo
+            '', // Proyecto
+            ''  // Estado
+          ]);
         });
       }
+      
+      // Fila de totales y glosa
+      wsData.push([
+        `Glosa: ${entry.description || '-'}`,
+        'TOTAL:',
+        '',
+        entry.totalDebit || 0,
+        entry.totalCredit || 0,
+        '',
+        '',
+        ''
+      ]);
+      
+      // Fila vacía separadora
+      wsData.push([]);
     });
     
-    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(dataToExport);
+    const ws: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet(wsData);
+    
+    // Auto-ajuste simple de columnas
+    ws['!cols'] = [
+      { wch: 30 }, // Fecha / Referencia / Glosa
+      { wch: 40 }, // Cuenta
+      { wch: 25 }, // Detalle
+      { wch: 12 }, // Débito
+      { wch: 12 }, // Crédito
+      { wch: 15 }, // CC
+      { wch: 15 }, // Proyecto
+      { wch: 15 }  // Estado
+    ];
+
     const wb: XLSX.WorkBook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Libro Diario');
-    XLSX.writeFile(wb, `Asientos_Contables_${new Date().toISOString().split('T')[0]}.xlsx`);
+    XLSX.writeFile(wb, `Libro_Diario_${new Date().toISOString().split('T')[0]}.xlsx`);
   }
 
   exportToPDF() {
     if (!this.entries || this.entries.length === 0) return;
-    const doc = new jsPDF('landscape'); // Landscape to fit more columns
+    const doc = new jsPDF('landscape');
     doc.text('Libro Diario - Asientos Contables', 14, 15);
 
-    const tableData: any[] = [];
+    const tableData: any[][] = [];
     
     this.entries.forEach((entry) => {
+      const dateStr = new Date(entry.date).toLocaleDateString();
+      const statusStr = this.statusLabels[entry.status] + (entry.status === JournalEntryStatus.CANCELLED ? ' (ANULADO)' : '');
+      
+      // Fila principal
+      tableData.push([
+        { content: `-- ${dateStr} -- | ${entry.entryNumber}`, colSpan: 2, styles: { fontStyle: 'bold', fillColor: [241, 245, 249] } },
+        { content: '', styles: { fillColor: [241, 245, 249] } },
+        { content: '', styles: { fillColor: [241, 245, 249] } },
+        { content: '', styles: { fillColor: [241, 245, 249] } },
+        { content: statusStr, styles: { fontStyle: 'bold', fillColor: [241, 245, 249] } }
+      ]);
+      
       if (entry.lines && entry.lines.length > 0) {
         entry.lines.forEach((line) => {
+          let accountName = line.account ? `${line.account.code} - ${line.account.name}` : 'N/A';
+          if ((line.credit || 0) > 0) {
+            accountName = '      ' + accountName;
+          }
           tableData.push([
-            entry.entryNumber,
-            new Date(entry.date).toLocaleDateString(),
-            line.account ? `${line.account.code} - ${line.account.name}` : '-',
+            '', // Vacío para alinear bajo cabecera
+            accountName,
             line.description || '-',
             Number(line.debit || 0).toFixed(2),
             Number(line.credit || 0).toFixed(2),
-            this.statusLabels[entry.status]
+            ''
           ]);
         });
       }
+      
+      // Footer
+      tableData.push([
+        { content: `Glosa: ${entry.description || '-'}`, styles: { fontStyle: 'bold' } },
+        { content: 'TOTAL:', styles: { fontStyle: 'bold', halign: 'right' } },
+        '',
+        { content: Number(entry.totalDebit || 0).toFixed(2), styles: { fontStyle: 'bold', halign: 'right' } },
+        { content: Number(entry.totalCredit || 0).toFixed(2), styles: { fontStyle: 'bold', halign: 'right' } },
+        ''
+      ]);
+      
+      // Espacio separador
+      tableData.push([{ content: '', colSpan: 6, styles: { cellPadding: 2, fillColor: [255, 255, 255], lineWidth: 0 } }]);
     });
 
     autoTable(doc, {
       startY: 25,
-      head: [['Número', 'Fecha', 'Cuenta', 'Detalle', 'Débito', 'Crédito', 'Estado']],
+      head: [['Fecha/Ref', 'Cuenta', 'Detalle', 'Débito', 'Crédito', 'Estado/CC']],
       body: tableData,
       styles: { fontSize: 8 },
       columnStyles: {
-        4: { halign: 'right' },
-        5: { halign: 'right' }
-      }
+        3: { halign: 'right' },
+        4: { halign: 'right' }
+      },
+      theme: 'grid'
     });
-    doc.save(`Asientos_Contables_${new Date().toISOString().split('T')[0]}.pdf`);
+    
+    doc.save(`Libro_Diario_${new Date().toISOString().split('T')[0]}.pdf`);
   }
 }
 

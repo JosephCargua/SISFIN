@@ -33,6 +33,10 @@ export class JournalEntriesComponent implements OnInit {
   startDateFilter: string = '';
   endDateFilter: string = '';
   searchTerm: string = '';
+  accountFilter: string = '';
+  costCenterFilter: string = '';
+  projectFilter: string = '';
+  isSearchExpanded: boolean = true;
 
   isAccountModalVisible = false;
   activeLineIndex: number = -1;
@@ -83,6 +87,10 @@ export class JournalEntriesComponent implements OnInit {
         alert('Error al cargar los asientos');
       },
     });
+  }
+
+  toggleSearch() {
+    this.isSearchExpanded = !this.isSearchExpanded;
   }
 
   loadAccounts() {

@@ -273,10 +273,7 @@
       <div class="entry-header-actions">
         <div class="action-buttons-right">
           <button class="btn-icon btn-view" title="Ver / Editar" (click)="editEntry(entry)">
-            <span class="material-icons">search</span>
-          </button>
-          <button class="btn-icon btn-print" title="Imprimir / Exportar" (click)="exportToPDF()">
-            <span class="material-icons">description</span>
+            <span class="material-icons">edit</span>
           </button>
           <button class="btn-icon btn-cancel" title="Anular" *ngIf="entry.status !== JournalEntryStatus.CANCELLED" (click)="cancelEntry(entry.id)">
             <span class="material-icons">close</span>

@@ -198,83 +198,146 @@
     </form>
   </div>
 
-  <div class="entries-list card">
-    <div class="list-header">
-      <h2>Asientos Contables</h2>
-      <div class="filters-row" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-        <input type="date" [(ngModel)]="startDateFilter" (change)="loadEntries()" placeholder="Fecha Inicio" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;" />
-        <input type="date" [(ngModel)]="endDateFilter" (change)="loadEntries()" placeholder="Fecha Fin" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;" />
-        <select [(ngModel)]="statusFilter" (change)="loadEntries()" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;">
-          <option value="">Todos los estados</option>
-          <option [value]="JournalEntryStatus.DRAFT">Borrador</option>
-          <option [value]="JournalEntryStatus.POSTED">Posteado</option>
-          <option [value]="JournalEntryStatus.CANCELLED">Anulado</option>
-        </select>
-        <input type="text" [(ngModel)]="searchTerm" (keyup.enter)="loadEntries()" placeholder="Buscar por N° o descripción..." style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; flex: 1; min-width: 200px;" />
-        <button class="btn btn-secondary btn-sm" (click)="loadEntries()"><span class="material-icons">search</span></button>
+  <div class="search-accordion card" [class.expanded]="isSearchExpanded">
+    <div class="accordion-header" (click)="toggleSearch()">
+      <div class="header-title">
+        <span class="material-icons chevron">{{ isSearchExpanded ? 'keyboard_arrow_down' : 'keyboard_arrow_right' }}</span>
+        <span class="title-text">Búsqueda</span>
       </div>
     </div>
+    <div class="accordion-content" *ngIf="isSearchExpanded">
+      <div class="search-grid">
+        <div class="search-col">
+          <div class="form-group-horizontal">
+            <label>Cuenta:</label>
+            <div class="search-input-box">
+              <input type="text" placeholder="..." [(ngModel)]="accountFilter" />
+              <button class="icon-btn"><span class="material-icons">search</span></button>
+            </div>
+          </div>
+          <div class="form-group-horizontal">
+            <label>Centro Costo:</label>
+            <div class="search-input-box">
+              <input type="text" placeholder="..." [(ngModel)]="costCenterFilter" />
+              <button class="icon-btn"><span class="material-icons">search</span></button>
+            </div>
+          </div>
+          <div class="form-group-horizontal">
+            <label>Filtro:</label>
+            <input type="text" placeholder="" [(ngModel)]="searchTerm" />
+          </div>
+          <div class="form-group-horizontal">
+            <label>Proyecto:</label>
+            <div class="search-input-box">
+              <input type="text" placeholder="..." [(ngModel)]="projectFilter" />
+              <button class="icon-btn"><span class="material-icons">search</span></button>
+            </div>
+          </div>
+        </div>
 
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>Número</th>
-            <th>Fecha</th>
-            <th>Descripción</th>
-            <th>Débito</th>
-            <th>Crédito</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let entry of entries">
-            <td>{{ entry.entryNumber }}</td>
-            <td>{{ entry.date | date: 'dd/MM/yyyy' }}</td>
-            <td>{{ entry.description || '-' }}</td>
-            <td>{{ entry.totalDebit | number: '1.2-2' }}</td>
-            <td>{{ entry.totalCredit | number: '1.2-2' }}</td>
-            <td>
-              <span
-                class="badge"
-                [class.badge-warning]="entry.status === JournalEntryStatus.DRAFT"
-                [class.badge-success]="entry.status === JournalEntryStatus.POSTED"
-                [class.badge-danger]="entry.status === JournalEntryStatus.CANCELLED"
-              >
-                {{ statusLabels[entry.status] }}
-              </span>
-            </td>
-            <td>
-              <div class="action-buttons">
-                <button
-                  class="btn-icon btn-primary"
-                  (click)="editEntry(entry)"
-                  title="Editar"
-                >
-                  <span class="material-icons">edit</span>
-                </button>
-                <button
-                  *ngIf="entry.status === JournalEntryStatus.DRAFT"
-                  class="btn-icon btn-success"
-                  (click)="postEntry(entry.id)"
-                  title="Postear"
-                >
-                  <span class="material-icons">check</span>
-                </button>
-                <button
-                  *ngIf="entry.status !== JournalEntryStatus.CANCELLED"
-                  class="btn-icon btn-danger"
-                  (click)="cancelEntry(entry.id)"
-                  title="Anular"
-                >
-                  <span class="material-icons">cancel</span>
-                </button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+        <div class="search-col right-col">
+          <div class="form-group-horizontal">
+            <label>Desde:*</label>
+            <input type="date" [(ngModel)]="startDateFilter" />
+          </div>
+          <div class="form-group-horizontal">
+            <label>Hasta:*</label>
+            <input type="date" [(ngModel)]="endDateFilter" />
+          </div>
+          <div class="form-group-horizontal">
+            <label>Tipo:</label>
+            <select [(ngModel)]="statusFilter">
+              <option value="">Todos</option>
+              <option [value]="JournalEntryStatus.DRAFT">Borrador</option>
+              <option [value]="JournalEntryStatus.POSTED">Posteado</option>
+              <option [value]="JournalEntryStatus.CANCELLED">Anulado</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      
+      <div class="search-actions">
+        <button class="btn btn-primary" (click)="loadEntries()">
+          <span class="material-icons">search</span> Consultar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="entries-blocks">
+    <div *ngIf="entries.length === 0" class="empty-state">
+      <p>No se encontraron asientos contables.</p>
+    </div>
+
+    <div class="entry-card" *ngFor="let entry of entries">
+      <div class="entry-header-actions">
+        <div class="action-buttons-right">
+          <button class="btn-icon btn-view" title="Ver / Editar" (click)="editEntry(entry)">
+            <span class="material-icons">search</span>
+          </button>
+          <button class="btn-icon btn-print" title="Imprimir / Exportar" (click)="exportToPDF()">
+            <span class="material-icons">description</span>
+          </button>
+          <button class="btn-icon btn-cancel" title="Anular" *ngIf="entry.status !== JournalEntryStatus.CANCELLED" (click)="cancelEntry(entry.id)">
+            <span class="material-icons">close</span>
+          </button>
+          <button class="btn-icon btn-post" title="Postear" *ngIf="entry.status === JournalEntryStatus.DRAFT" (click)="postEntry(entry.id)">
+            <span class="material-icons">check</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="entry-table-wrapper">
+        <table class="entry-inner-table">
+          <thead>
+            <tr>
+              <th class="col-cuenta">Cuenta</th>
+              <th class="col-debe">Debe</th>
+              <th class="col-haber">Haber</th>
+              <th class="col-cc">Centro de Costo</th>
+              <th class="col-proyecto">Proyecto</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Fila agrupada principal: Fecha y Referencia -->
+            <tr class="entry-info-row">
+              <td colspan="5" class="entry-info-cell">
+                <div class="entry-info-content">
+                  -- {{ entry.date | date: 'dd/MM/yyyy' }} -- <br/>
+                  {{ entry.entryNumber }} <span *ngIf="entry.status === JournalEntryStatus.CANCELLED" class="text-danger">(ANULADO)</span>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Líneas del asiento -->
+            <tr *ngFor="let line of entry.lines" class="entry-line-row">
+              <td class="col-cuenta" [class.is-credit]="(line.credit || 0) > 0">
+                {{ line.account ? line.account.code + ' - ' + line.account.name : 'N/A' }}
+              </td>
+              <td class="col-debe">{{ (line.debit > 0 ? (line.debit | currency:'USD') : '') }}</td>
+              <td class="col-haber">{{ (line.credit > 0 ? (line.credit | currency:'USD') : '') }}</td>
+              <td class="col-cc"></td>
+              <td class="col-proyecto"></td>
+            </tr>
+            
+            <!-- Pie del asiento (Totales y Glosa) -->
+            <tr class="entry-footer-row">
+              <td class="footer-glosa">
+                <strong>Glosa:</strong> {{ entry.description || '-' }}
+              </td>
+              <td colspan="4" class="footer-totals-container">
+                <div class="footer-totals-flex">
+                  <span class="total-label">TOTAL:</span>
+                  <span class="total-val debe-val">{{ entry.totalDebit | currency:'USD' }}</span>
+                  <span class="total-val haber-val">{{ entry.totalCredit | currency:'USD' }}</span>
+                  <span class="total-val cc-val"></span>
+                  <span class="total-val project-val"></span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>

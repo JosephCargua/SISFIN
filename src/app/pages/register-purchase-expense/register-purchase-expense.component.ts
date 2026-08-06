@@ -253,10 +253,8 @@ export class RegisterPurchaseExpenseComponent implements OnInit {
       if (doc.history) {
         this.history = doc.history;
       } else {
-        this.history = [
-          { date: '09/07/2026 01:12 p.m.', user: 'DANIELA REYES D', role: 'Contador', activity: 'Agregó "Pago" con valor "$30.00".' },
-          { date: '09/07/2026 01:12 p.m.', user: 'DANIELA REYES D', role: 'Contador', activity: 'Cambió estado de documento de "Pendiente" a "Pagado".' }
-        ];
+        // Simular obtención de historial
+        this.history = [];
       }
 
     if(this.serviceLines.length === 0 && this.accountLines.length === 0) {

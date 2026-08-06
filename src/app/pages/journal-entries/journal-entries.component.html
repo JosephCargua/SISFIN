@@ -212,14 +212,14 @@
             <label>Cuenta:</label>
             <div class="search-input-box">
               <input type="text" placeholder="..." [(ngModel)]="accountFilter" />
-              <button class="icon-btn"><span class="material-icons">search</span></button>
+              <button class="icon-btn" (click)="openAccountModal(null)"><span class="material-icons">search</span></button>
             </div>
           </div>
           <div class="form-group-horizontal">
             <label>Centro Costo:</label>
             <div class="search-input-box">
               <input type="text" placeholder="..." [(ngModel)]="costCenterFilter" />
-              <button class="icon-btn"><span class="material-icons">search</span></button>
+              <button class="icon-btn" onclick="alert('Próximamente: Búsqueda de Centro de Costo')"><span class="material-icons">search</span></button>
             </div>
           </div>
           <div class="form-group-horizontal">
@@ -230,7 +230,7 @@
             <label>Proyecto:</label>
             <div class="search-input-box">
               <input type="text" placeholder="..." [(ngModel)]="projectFilter" />
-              <button class="icon-btn"><span class="material-icons">search</span></button>
+              <button class="icon-btn" onclick="alert('Próximamente: Búsqueda de Proyecto')"><span class="material-icons">search</span></button>
             </div>
           </div>
         </div>

@@ -81,7 +81,7 @@
               {{ movement.balance | number: '1.2-2' }}
             </td>
             <td style="text-align: center;">
-              <button class="btn-icon btn-primary" title="Ver / Modificar Asiento" (click)="editJournalEntry(movement.journalEntry?.id)">
+              <button class="btn-icon btn-primary" title="Ver / Modificar Asiento" (click)="editJournalEntry(movement.journalEntryId || movement.journalEntry?.id)">
                 <span class="material-icons" style="font-size: 18px;">edit</span>
               </button>
             </td>

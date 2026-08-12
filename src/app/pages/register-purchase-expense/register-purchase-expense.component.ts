@@ -264,7 +264,27 @@ export class RegisterPurchaseExpenseComponent implements OnInit {
       }
 
     if(this.serviceLines.length === 0 && this.accountLines.length === 0) {
-      this.addServiceLine();
+      if (isElectronic && doc && Number(doc.total) > 0) {
+        const totalVal = Number(doc.total);
+        const subtotal15 = this.round2(totalVal / 1.15);
+        this.accountLines.push({
+          quantity: 1,
+          accountId: doc.payableAccountId || '',
+          accountCode: '',
+          accountName: '',
+          unitValue: subtotal15,
+          ivaRate: 15,
+          icePercent: 0,
+          retIr: '',
+          retIva: '',
+          discountPercent: 0,
+          discount: 0,
+          subtotal: subtotal15
+        });
+        this.activeTab = 'accounts';
+      } else {
+        this.addServiceLine();
+      }
     }
     this.recalcTotals();
   }

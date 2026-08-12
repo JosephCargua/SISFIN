@@ -6,12 +6,14 @@ import { BankingService } from '../../core/services/banking.service';
 import { PersonaService } from '../../core/services/persona.service';
 import Swal from 'sweetalert2';
 import { PersonaSelectorModalComponent } from '../../components/persona-selector-modal/persona-selector-modal.component';
+import { AccountSelectorModalComponent } from '../../components/account-selector-modal/account-selector-modal.component';
 import { Persona } from '../../models/persona.model';
+import { Account } from '../../models/account.model';
 
 @Component({
   selector: 'app-register-payment',
   standalone: true,
-  imports: [CommonModule, FormsModule, PersonaSelectorModalComponent],
+  imports: [CommonModule, FormsModule, PersonaSelectorModalComponent, AccountSelectorModalComponent],
   templateUrl: './register-payment.component.html',
   styleUrls: ['./register-payment.component.scss']
 })
@@ -23,6 +25,10 @@ export class RegisterPaymentComponent implements OnInit {
   personSearch = '';
   selectedPersonId = '';
   showPersonaModal = false;
+  
+  showAccountModal = false;
+  accountSearch = '';
+  selectedAccountId = '';
   
   bankAccount = '';
   bankAccounts: any[] = [];
@@ -78,6 +84,15 @@ export class RegisterPaymentComponent implements OnInit {
     this.personSearch = person.nombre;
     this.selectedPersonId = person.id!;
     if (person.bancoId) this.bankAccount = person.bancoId;
+  }
+
+  openAccountModal() {
+    this.showAccountModal = true;
+  }
+
+  onAccountSelected(account: Account) {
+    this.accountSearch = `${account.code} - ${account.name}`;
+    this.selectedAccountId = account.id!;
   }
 
   // --- Documentos ---

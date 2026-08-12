@@ -74,8 +74,8 @@
 
         <div class="form-group" *ngIf="paymentMethod === 'Caja' || paymentMethod === 'Transferencia' || paymentMethod === 'Tarjeta de Crédito' || paymentMethod === 'Dinero electrónico' || (paymentMethod === 'Cheque' && transactionType === 'Cobro')">
           <label>Cuenta Pago/Cobro:</label>
-          <div class="search-input" style="cursor: pointer; flex: 1;">
-            <input type="text" placeholder="..." readonly style="cursor: pointer; background: white;">
+          <div class="search-input" (click)="openAccountModal()" style="cursor: pointer; flex: 1;">
+            <input type="text" [(ngModel)]="accountSearch" placeholder="..." readonly style="cursor: pointer; background: white;">
             <span class="material-icons">search</span>
           </div>
         </div>
@@ -319,4 +319,10 @@
     (close)="showPersonaModal = false"
     (personaSelected)="onPersonaSelected($event)">
   </app-persona-selector-modal>
+
+  <app-account-selector-modal
+    [isVisible]="showAccountModal"
+    (close)="showAccountModal = false"
+    (accountSelected)="onAccountSelected($event)">
+  </app-account-selector-modal>
 </div>

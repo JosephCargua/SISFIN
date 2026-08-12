@@ -361,7 +361,7 @@ export class RegisterPurchaseExpenseComponent implements OnInit {
         }
 
         this.serviceLines = parsed.lines
-          .filter((l) => l.lineType === 'SERVICE')
+          .filter((l) => l.lineType === 'SERVICE' && l.data['mappedProductId'])
           .map((l) => {
             const d = l.data as Record<string, number | string>;
             const quantity = Number(d['quantity']) || 1;
@@ -408,7 +408,7 @@ export class RegisterPurchaseExpenseComponent implements OnInit {
           });
 
         this.accountLines = parsed.lines
-          .filter((l) => l.lineType === 'ACCOUNT')
+          .filter((l) => l.lineType === 'ACCOUNT' || (l.lineType === 'SERVICE' && !l.data['mappedProductId']))
           .map((l) => {
             const d = l.data as Record<string, number | string>;
             const quantity = Number(d['quantity']) || 1;
@@ -653,6 +653,7 @@ export class RegisterPurchaseExpenseComponent implements OnInit {
         subtotal5 += base;
         iva5 += base * 0.05;
       } else {
+        // 0% or any non-standard rate (e.g. parsed from TXT description)
         subtotal0 += base;
       }
     };
@@ -732,8 +733,8 @@ export class RegisterPurchaseExpenseComponent implements OnInit {
       alert('Seleccione o indique la persona del documento');
       return;
     }
-    if (this.serviceLines.length === 0) {
-      alert('Agregue al menos un detalle en la pestaña Servicios');
+    if (this.serviceLines.length === 0 && this.accountLines.length === 0) {
+      alert('Agregue al menos un detalle en la pestaña Servicios o Cuentas');
       return;
     }
 

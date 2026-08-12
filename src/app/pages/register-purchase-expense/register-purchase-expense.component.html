@@ -85,9 +85,9 @@
           <button type="button" class="btn-icon" title="Buscar" (click)="openPersonSearch()">
             <span class="material-icons">search</span>
           </button>
-          <a routerLink="/payables" class="btn-icon" title="Agregar persona">
+          <button type="button" class="btn-icon" title="Agregar persona" (click)="openCreatePersonModal()">
             <span class="material-icons">add</span>
-          </a>
+          </button>
         </div>
         <select
           #personSelect
@@ -510,3 +510,12 @@
     </div>
   </section>
 </div>
+
+<app-create-person-modal
+  [isVisible]="isPersonModalVisible"
+  [personType]="personType === 'CUSTOMER' ? 'CUSTOMER' : 'SUPPLIER'"
+  [prefillIdentification]="prefillPersonIdentification"
+  [prefillName]="prefillPersonName"
+  (close)="isPersonModalVisible = false"
+  (personCreated)="onPersonCreated($event)"
+></app-create-person-modal>

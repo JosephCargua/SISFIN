@@ -69,22 +69,28 @@
       </div>
     </div>
 
-    <div class="form-row">
-      <div class="form-group">
-        <label>Persona *</label>
-        <select
-          [(ngModel)]="personId"
-          name="personId"
-          required
-          (ngModelChange)="onPersonSelected()"
-        >
-          <option value="">Buscar persona...</option>
-          <option *ngFor="let p of personOptions" [value]="p.id">
-            {{ p.identification }} - {{ p.name }}
-          </option>
-        </select>
-      </div>
-      <div class="form-group">
+      <div class="form-row">
+        <div class="form-group" style="flex: 1;">
+          <label>Persona *</label>
+          <div style="display: flex; gap: 8px;">
+            <select
+              [(ngModel)]="personId"
+              name="personId"
+              required
+              (ngModelChange)="onPersonSelected()"
+              style="flex: 1;"
+            >
+              <option value="">Buscar persona...</option>
+              <option *ngFor="let p of personOptions" [value]="p.id">
+                {{ p.identification }} - {{ p.name }}
+              </option>
+            </select>
+            <button type="button" class="btn btn-outline" (click)="openCreatePersonModal()" title="Nueva Persona" style="padding: 0 10px; display: flex; align-items: center;">
+              <span class="material-icons">add</span>
+            </button>
+          </div>
+        </div>
+        <div class="form-group">
         <label>Referencia</label>
         <input type="text" [(ngModel)]="reference" name="reference" />
       </div>
@@ -630,3 +636,12 @@
     </div>
   </section>
 </div>
+
+<app-create-person-modal
+  [isVisible]="isPersonModalVisible"
+  [personType]="personType === 'CUSTOMER' ? 'CUSTOMER' : 'SUPPLIER'"
+  [prefillIdentification]="prefillPersonIdentification"
+  [prefillName]="prefillPersonName"
+  (close)="isPersonModalVisible = false"
+  (personCreated)="onPersonCreated($event)"
+></app-create-person-modal>

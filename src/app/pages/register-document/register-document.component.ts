@@ -26,6 +26,7 @@ import { Customer } from '../../models/receivables.model';
 import { Account } from '../../models/account.model';
 import { Product } from '../../models/inventory.model';
 import { CostCenter } from '../../models/automation.model';
+import { CreatePersonModalComponent } from '../../components/create-person-modal/create-person-modal.component';
 
 type DetailTab = 'services' | 'accounts' | 'costCenter' | 'retention' | 'payment' | 'history';
 
@@ -38,11 +39,15 @@ interface PersonOption {
 @Component({
   selector: 'app-register-document',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, CreatePersonModalComponent],
   templateUrl: './register-document.component.html',
   styleUrl: './register-document.component.scss',
 })
 export class RegisterDocumentComponent implements OnInit {
+  isPersonModalVisible = false;
+  prefillPersonIdentification = '';
+  prefillPersonName = '';
+
   activeTab: DetailTab = 'services';
   saving = false;
   history: any[] = [];
@@ -322,6 +327,22 @@ export class RegisterDocumentComponent implements OnInit {
       this.personName = person.name;
       this.personIdentification = person.identification;
     }
+  }
+
+  openCreatePersonModal() {
+    this.prefillPersonIdentification = '';
+    this.prefillPersonName = '';
+    this.isPersonModalVisible = true;
+  }
+
+  onPersonCreated(newPerson: any) {
+    if (this.personType === 'CUSTOMER') {
+      this.customers.push(newPerson);
+    } else {
+      this.suppliers.push(newPerson);
+    }
+    this.personId = newPerson.id;
+    this.onPersonSelected();
   }
 
   addServiceLine() {

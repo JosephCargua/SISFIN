@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { JournalEntryService } from '../../core/services/journal-entry.service';
 import { AccountService } from '../../core/services/account.service';
+import { ExcelExportService } from '../../core/services/excel-export.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   JournalEntry,
@@ -64,7 +65,8 @@ export class JournalEntriesComponent implements OnInit {
     private journalEntryService: JournalEntryService,
     private accountService: AccountService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private excelService: ExcelExportService
   ) {}
 
   ngOnInit() {
@@ -345,8 +347,8 @@ export class JournalEntriesComponent implements OnInit {
             '', // Fecha vacía para las líneas
             accountName,
             line.description || '-',
-            line.debit || '',
-            line.credit || '',
+            line.debit > 0 ? Number(line.debit) : '',
+            line.credit > 0 ? Number(line.credit) : '',
             '', // Centro Costo
             '', // Proyecto
             ''  // Estado
@@ -359,8 +361,8 @@ export class JournalEntriesComponent implements OnInit {
         `Glosa: ${entry.description || '-'}`,
         'TOTAL:',
         '',
-        entry.totalDebit || 0,
-        entry.totalCredit || 0,
+        Number(entry.totalDebit || 0),
+        Number(entry.totalCredit || 0),
         '',
         '',
         ''
@@ -369,24 +371,12 @@ export class JournalEntriesComponent implements OnInit {
       // Fila vacía separadora
       wsData.push([]);
     });
-    
-    const ws: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet(wsData);
-    
-    // Auto-ajuste simple de columnas
-    ws['!cols'] = [
-      { wch: 30 }, // Fecha / Referencia / Glosa
-      { wch: 40 }, // Cuenta
-      { wch: 25 }, // Detalle
-      { wch: 12 }, // Débito
-      { wch: 12 }, // Crédito
-      { wch: 15 }, // CC
-      { wch: 15 }, // Proyecto
-      { wch: 15 }  // Estado
-    ];
 
-    const wb: XLSX.WorkBook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Libro Diario');
-    XLSX.writeFile(wb, `Libro_Diario_${new Date().toISOString().split('T')[0]}.xlsx`);
+    this.excelService.exportRawDataToExcel({
+      fileName: `Libro_Diario_${new Date().toISOString().split('T')[0]}`,
+      data: wsData,
+      sheetName: 'Libro Diario'
+    });
   }
 
   exportToPDF() {

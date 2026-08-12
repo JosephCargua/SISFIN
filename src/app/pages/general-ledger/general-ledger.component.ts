@@ -6,7 +6,7 @@ import { AccountService } from '../../core/services/account.service';
 import { Router } from '@angular/router';
 import { Account } from '../../models/account.model';
 import { AccountSelectorModalComponent } from '../../components/account-selector-modal/account-selector-modal.component';
-import * as XLSX from 'xlsx';
+import { ExcelExportService, ExcelColumn } from '../../core/services/excel-export.service';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -30,7 +30,8 @@ export class GeneralLedgerComponent {
   constructor(
     private journalEntryService: JournalEntryService,
     private accountService: AccountService,
-    private router: Router
+    private router: Router,
+    private excelService: ExcelExportService
   ) {}
 
   ngOnInit() {
@@ -113,19 +114,32 @@ export class GeneralLedgerComponent {
 
   exportToExcel() {
     if (!this.ledgerData || !this.ledgerData.movements) return;
+    
+    const columns: ExcelColumn[] = [
+      { header: 'Fecha', key: 'Fecha', width: 15 },
+      { header: 'Comprobante', key: 'Comprobante', width: 25 },
+      { header: 'Detalle', key: 'Detalle', width: 45 },
+      { header: 'Débito', key: 'Debe', width: 15, isCurrency: true },
+      { header: 'Crédito', key: 'Haber', width: 15, isCurrency: true },
+      { header: 'Saldo', key: 'Saldo', width: 15, isCurrency: true }
+    ];
+
     const dataToExport = this.ledgerData.movements.map((mov: any) => ({
       Fecha: new Date(mov.date).toLocaleDateString(),
       Comprobante: mov.reference,
-      Detalle: mov.description,
-      Debe: mov.debit > 0 ? mov.debit : 0,
-      Haber: mov.credit > 0 ? mov.credit : 0,
-      Saldo: mov.balance
+      Detalle: mov.description || '-',
+      Debe: mov.debit > 0 ? Number(mov.debit) : 0,
+      Haber: mov.credit > 0 ? Number(mov.credit) : 0,
+      Saldo: Number(mov.balance)
     }));
     
-    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(dataToExport);
-    const wb: XLSX.WorkBook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Libro Diario');
-    XLSX.writeFile(wb, `Libro_Diario_${this.accountName}_${this.startDate}.xlsx`);
+    this.excelService.exportToExcel({
+      title: `Libro Mayor: ${this.accountName}`,
+      subtitle: `Período: ${this.startDate} a ${this.endDate}`,
+      fileName: `Libro_Mayor_${this.accountName.split(' - ')[0]}_${this.startDate}`,
+      columns: columns,
+      data: dataToExport
+    });
   }
 
   exportToPDF() {

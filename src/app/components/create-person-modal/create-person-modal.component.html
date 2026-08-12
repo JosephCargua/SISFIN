@@ -1,0 +1,40 @@
+﻿<div class="modal-backdrop" *ngIf="isVisible" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Crear {{ personType === 'CUSTOMER' ? 'Cliente' : 'Proveedor' }}</h2>
+      <button class="btn-close" (click)="closeModal()"><span class="material-icons">close</span></button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="required">Identificación (RUC/Cédula)</label>
+        <input type="text" [(ngModel)]="identification" placeholder="Ej. 0999999999001" />
+      </div>
+      <div class="form-group">
+        <label class="required">Razón Social / Nombre Comercial</label>
+        <input type="text" [(ngModel)]="name" placeholder="Ej. Empresa S.A." />
+      </div>
+      <div class="form-group">
+        <label>Correo Electrónico</label>
+        <input type="email" [(ngModel)]="email" placeholder="correo@ejemplo.com" />
+      </div>
+      <div class="form-group">
+        <label>Teléfono</label>
+        <input type="text" [(ngModel)]="phone" placeholder="0999999999" />
+      </div>
+      <div class="form-group">
+        <label>Dirección</label>
+        <input type="text" [(ngModel)]="address" placeholder="Av. Principal" />
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" (click)="save()" [disabled]="saving">
+        <span class="material-icons" *ngIf="!saving">save</span>
+        <span *ngIf="saving">Guardando...</span>
+        <span *ngIf="!saving">Guardar</span>
+      </button>
+    </div>
+  </div>
+</div>

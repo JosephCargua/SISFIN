@@ -407,6 +407,46 @@ export class RegisterPurchaseExpenseComponent implements OnInit {
             };
           });
 
+        this.accountLines = parsed.lines
+          .filter((l) => l.lineType === 'ACCOUNT')
+          .map((l) => {
+            const d = l.data as Record<string, number | string>;
+            const quantity = Number(d['quantity']) || 1;
+            const unitPrice = Number(d['unitPrice']) || 0;
+            const discount = Number(d['discount']) || 0;
+            const extraDiscount = Number(d['extraDiscount']) || 0;
+            const gross = quantity * unitPrice;
+            const discountPercent =
+              gross > 0 ? this.round2((discount / gross) * 100) : 0;
+              
+            let accountId = String(d['accountId'] || '');
+            let accountCode = '';
+            let accountName = '';
+            
+            if (accountId) {
+              const matchedAccount = this.accounts.find(a => a.id === accountId);
+              if (matchedAccount) {
+                accountCode = matchedAccount.code;
+                accountName = matchedAccount.name;
+              }
+            }
+            
+            return {
+              quantity,
+              accountId,
+              accountCode,
+              accountName,
+              unitValue: unitPrice,
+              ivaRate: Number(d['ivaRate']) || 0,
+              icePercent: 0,
+              retIr: String(d['retIr'] || ''),
+              retIva: String(d['retIva'] || ''),
+              discountPercent,
+              discount,
+              subtotal: Number(d['subtotal']) || 0,
+            };
+          });
+
         if (this.serviceLines.length === 0 && this.accountLines.length === 0) {
           this.addServiceLine();
         } else {

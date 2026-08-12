@@ -7,6 +7,15 @@ import { BankingService } from '../../core/services/banking.service';
 import { AccountService } from '../../core/services/account.service';
 import { AccountSelectorModalComponent } from '../../components/account-selector-modal/account-selector-modal.component';
 import { Account } from '../../models/account.model';
+import * as XLSX from 'xlsx';
+
+export interface BankStatementLine {
+  id: string;
+  date: string;
+  description: string;
+  amount: number;
+  matchedTransactionId?: string;
+}
 
 @Component({
   selector: 'app-register-reconciliation',
@@ -34,7 +43,12 @@ export class RegisterReconciliationComponent implements OnInit {
   allMovements: any[] = [];
   movements: any[] = [];
   selectedMovementIds: Set<string> = new Set();
+  
+  bankStatementLines: BankStatementLine[] = [];
+  
   initialBalance: number = 0;
+  totalIncomes: number = 0;
+  totalExpenses: number = 0;
 
   constructor(
     private router: Router, 
@@ -60,13 +74,14 @@ export class RegisterReconciliationComponent implements OnInit {
       this.reconciliation = {
         reconciliationDate: recon.reconciliationDate ? new Date(recon.reconciliationDate).toISOString().split('T')[0] : '',
         bankAccountId: recon.bankAccountId,
-        accountName: '', // will fetch
+        accountName: '', 
         description: recon.description || '',
         status: recon.status || 'Pendiente',
         statementBalance: recon.statementBalance,
         accountingBalance: recon.accountingBalance,
         difference: recon.difference
       };
+      this.initialBalance = Number(recon.initialBalance) || 0;
       
       if (recon.bankAccountId) {
         this.accountService.getById(recon.bankAccountId).subscribe(acc => {
@@ -74,19 +89,15 @@ export class RegisterReconciliationComponent implements OnInit {
         });
       }
       
-      // Load movements for this reconciliation + unassigned if we want them to add more.
       if (recon.bankAccountId) {
         this.bankingService.getTransactions(recon.bankAccountId).subscribe(txs => {
           this.allMovements = txs.filter(tx => !tx.bankReconciliationId || tx.bankReconciliationId === id);
-          
-          // Mark as selected those that belong to this reconciliation
           this.selectedMovementIds.clear();
           this.allMovements.forEach(tx => {
             if (tx.bankReconciliationId === id) {
               this.selectedMovementIds.add(tx.id);
             }
           });
-          
           this.filterMovements();
         });
       }
@@ -94,8 +105,6 @@ export class RegisterReconciliationComponent implements OnInit {
   }
   
   loadUnreconciledMovements() {
-    // When creating a new one, don't load all cross-account movements.
-    // Wait until they select an account.
     this.allMovements = [];
     this.movements = [];
   }
@@ -109,14 +118,11 @@ export class RegisterReconciliationComponent implements OnInit {
     this.reconciliation.accountName = account.name;
     this.isAccountModalVisible = false;
     
-    // Fetch account statement to get the actual initial balance
     this.bankingService.getAccountStatement(account.id, undefined, this.reconciliation.reconciliationDate).subscribe(statement => {
       this.initialBalance = statement.initialBalance || 0;
       
       this.bankingService.getTransactions(account.id).subscribe(txs => {
         this.allMovements = txs.filter(tx => !tx.bankReconciliationId || tx.bankReconciliationId === this.reconciliationId);
-        
-        // Ensure selectedMovementIds is populated correctly if editing
         if (this.reconciliationId) {
           this.allMovements.forEach(tx => {
             if (tx.bankReconciliationId === this.reconciliationId) {
@@ -124,7 +130,6 @@ export class RegisterReconciliationComponent implements OnInit {
             }
           });
         }
-        
         this.filterMovements();
       });
     });
@@ -141,19 +146,15 @@ export class RegisterReconciliationComponent implements OnInit {
       return;
     }
     
-    // Parse strictly YYYY-MM-DD to avoid timezone shifts
     const parts = this.reconciliation.reconciliationDate.split('-');
     const cutDate = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 23, 59, 59, 999);
     
     this.movements = this.allMovements.filter(tx => {
       let txDate = new Date(tx.date);
-      
-      // If backend sends YYYY-MM-DD directly without time, parse locally
       if (typeof tx.date === 'string' && tx.date.length === 10 && tx.date.indexOf('-') === 4) {
         const txParts = tx.date.split('-');
         txDate = new Date(Number(txParts[0]), Number(txParts[1]) - 1, Number(txParts[2]), 12, 0, 0);
       }
-      
       return txDate.getTime() <= cutDate.getTime();
     });
     this.calculateTotals();
@@ -173,19 +174,21 @@ export class RegisterReconciliationComponent implements OnInit {
   }
 
   calculateTotals() {
-    let accBal = 0;
-    this.movements.forEach(m => {
+    this.totalIncomes = 0;
+    this.totalExpenses = 0;
 
+    this.movements.forEach(m => {
       if (this.selectedMovementIds.has(m.id)) {
         const amount = Number(m.amount) || 0;
         if (m.transactionType === 'Egreso' || m.type === 'Egreso') {
-          accBal -= amount;
+          this.totalExpenses += amount;
         } else {
-          accBal += amount;
+          this.totalIncomes += amount;
         }
       }
     });
-    this.reconciliation.accountingBalance = this.initialBalance + accBal;
+
+    this.reconciliation.accountingBalance = this.initialBalance + this.totalIncomes - this.totalExpenses;
     this.reconciliation.difference = Number(this.reconciliation.statementBalance) - this.reconciliation.accountingBalance;
   }
 
@@ -206,12 +209,90 @@ export class RegisterReconciliationComponent implements OnInit {
     return new Date(dateStr).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
   }
 
-  save() {
-    if (Math.abs(this.reconciliation.difference) <= 0.01) {
-      this.reconciliation.status = 'Concluida';
-    } else {
-      this.reconciliation.status = 'Pendiente';
+  // --- Bank Statement Import Logic ---
+  onFileChange(evt: any) {
+    const target: DataTransfer = <DataTransfer>(evt.target);
+    if (target.files.length !== 1) throw new Error('Cannot use multiple files');
+    const reader: FileReader = new FileReader();
+    reader.onload = (e: any) => {
+      const bstr: string = e.target.result;
+      const wb: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary' });
+      const wsname: string = wb.SheetNames[0];
+      const ws: XLSX.WorkSheet = wb.Sheets[wsname];
+      const data = XLSX.utils.sheet_to_json(ws, { header: 1 }) as any[][];
+      
+      this.bankStatementLines = [];
+      let startParsing = false;
+
+      for (let i = 0; i < data.length; i++) {
+        const row = data[i];
+        if (!row || row.length === 0) continue;
+        
+        // Assume format is [Date, Description, Amount]
+        // Very basic parsing for demo.
+        if (row[0] && String(row[0]).match(/\d/)) {
+          const rawDate = row[0];
+          const rawDesc = row[1] || '';
+          const rawAmount = Number(row[2]) || 0;
+
+          if (rawAmount !== 0) {
+            this.bankStatementLines.push({
+              id: Math.random().toString(36).substring(7),
+              date: this.parseExcelDate(rawDate),
+              description: rawDesc,
+              amount: rawAmount
+            });
+          }
+        }
+      }
+    };
+    reader.readAsBinaryString(target.files[0]);
+  }
+
+  parseExcelDate(excelDate: any): string {
+    if (typeof excelDate === 'number') {
+      const d = new Date((excelDate - (25567 + 2)) * 86400 * 1000);
+      return d.toISOString().split('T')[0];
     }
+    // assume string YYYY-MM-DD or DD/MM/YYYY
+    if (typeof excelDate === 'string' && excelDate.includes('/')) {
+      const parts = excelDate.split('/');
+      if (parts[2].length === 4) return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    }
+    return String(excelDate);
+  }
+
+  autoReconcile() {
+    // Basic auto-match logic: find same amount (+/- margin)
+    this.bankStatementLines.forEach(bl => {
+      if (bl.matchedTransactionId) return;
+
+      const bankAmount = Math.abs(bl.amount);
+      const possibleMatches = this.movements.filter(m => {
+        if (this.selectedMovementIds.has(m.id)) return false; // already selected
+        const mAmount = Number(m.amount);
+        return Math.abs(mAmount - bankAmount) < 0.01;
+      });
+
+      if (possibleMatches.length > 0) {
+        // match the first one
+        const match = possibleMatches[0];
+        bl.matchedTransactionId = match.id;
+        this.selectedMovementIds.add(match.id);
+      }
+    });
+
+    this.calculateTotals();
+  }
+  // ------------------------------------
+
+  save(close: boolean) {
+    if (close && Math.abs(this.reconciliation.difference) > 0.001) {
+      alert('No se puede cerrar la conciliación si la diferencia no es cero.');
+      return;
+    }
+
+    this.reconciliation.status = close ? 'Concluida' : 'Pendiente';
 
     const payload = {
       bankAccountId: this.reconciliation.bankAccountId,
@@ -220,6 +301,10 @@ export class RegisterReconciliationComponent implements OnInit {
       status: this.reconciliation.status,
       statementBalance: this.reconciliation.statementBalance,
       accountingBalance: this.reconciliation.accountingBalance,
+      initialBalance: this.initialBalance,
+      totalIncomes: this.totalIncomes,
+      totalExpenses: this.totalExpenses,
+      reconciledBalance: this.reconciliation.accountingBalance,
       difference: this.reconciliation.difference,
       transactionIds: Array.from(this.selectedMovementIds)
     };
@@ -228,11 +313,15 @@ export class RegisterReconciliationComponent implements OnInit {
       this.bankingService.updateReconciliation(this.reconciliationId, payload).subscribe(() => {
         alert('Conciliación actualizada exitosamente');
         this.router.navigate(['/bank-reconciliations']);
+      }, err => {
+        alert(err.error?.message || 'Error al guardar');
       });
     } else {
       this.bankingService.createReconciliation(payload).subscribe(() => {
         alert('Conciliación guardada exitosamente');
         this.router.navigate(['/bank-reconciliations']);
+      }, err => {
+        alert(err.error?.message || 'Error al guardar');
       });
     }
   }
@@ -254,7 +343,7 @@ export class RegisterReconciliationComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error al descargar PDF:', error);
-        alert('Error al generar el reporte PDF. Revise la consola.');
+        alert('Error al generar el reporte PDF.');
       }
     });
   }

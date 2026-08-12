@@ -1,132 +1,168 @@
-<div class="register-container">
-  <section class="card form-section" style="display: flex; gap: 32px; padding: 24px;">
-    
-    <!-- Lado Izquierdo: Información Básica -->
-    <div style="flex: 1;">
-      <div class="section-title" style="margin-bottom: 24px; font-size: 1.1rem; color: #334155; font-weight: 600; display: flex; justify-content: space-between; align-items: center;">
-        <span>Información de la Conciliación</span>
-        <button *ngIf="reconciliationId" class="btn" style="background: white; border: 1px solid #e2e8f0; border-radius: 4px; padding: 4px 8px; cursor: pointer; display: flex; align-items: center;" (click)="downloadPDF()">
-          <span class="material-icons" style="color: #0ea5e9;">picture_as_pdf</span>
+﻿<div class="register-container">
+  <div class="reconciliation-header card">
+    <div class="header-top">
+      <div class="title-section">
+        <h2>Conciliación Bancaria</h2>
+        <span class="status-badge" [class.success]="reconciliation.status === 'Concluida'" [class.pending]="reconciliation.status === 'Pendiente'">
+          {{ reconciliation.status }}
+        </span>
+      </div>
+      <div class="header-actions">
+        <button *ngIf="reconciliationId" class="btn-icon" (click)="downloadPDF()" title="Descargar PDF">
+          <span class="material-icons">picture_as_pdf</span>
         </button>
       </div>
-      
-      <div class="form-grid" style="display: flex; flex-direction: column; gap: 16px;">
-        
-        <div class="form-row" style="display: flex; align-items: center; justify-content: flex-end; gap: 16px;">
-          <label class="required" style="width: 140px; text-align: right; margin: 0;">Fecha de Corte:</label>
-          <input type="date" [(ngModel)]="reconciliation.reconciliationDate" (ngModelChange)="onDateChange()" style="width: 250px;" />
-        </div>
+    </div>
 
-        <div class="form-row" style="display: flex; align-items: center; justify-content: flex-end; gap: 16px;">
-          <label class="required" style="width: 140px; text-align: right; margin: 0;">Cuenta de Banco:</label>
-          <div class="input-with-icon" style="width: 250px;">
-            <input type="text" [(ngModel)]="reconciliation.accountName" placeholder="..." readonly />
-            <span class="material-icons" style="cursor: pointer;" (click)="openAccountModal()">search</span>
-          </div>
+    <div class="header-filters">
+      <div class="filter-group">
+        <label class="required">Cuenta Bancaria</label>
+        <div class="input-with-icon">
+          <input type="text" [(ngModel)]="reconciliation.accountName" placeholder="Seleccione cuenta..." readonly />
+          <span class="material-icons" (click)="openAccountModal()">search</span>
         </div>
-
-        <div class="form-row" style="display: flex; align-items: flex-start; justify-content: flex-end; gap: 16px;">
-          <label class="required" style="width: 140px; text-align: right; margin-top: 8px;">Descripción:</label>
-          <textarea [(ngModel)]="reconciliation.description" rows="4" style="width: 250px;"></textarea>
-        </div>
-
-        <div class="form-row" style="display: flex; align-items: center; justify-content: flex-end; gap: 16px;">
-          <label style="width: 140px; text-align: right; margin: 0;">Estado:</label>
-          <div style="width: 250px; text-align: left;">
-            <span class="status-badge" [class.success]="reconciliation.status === 'Concluida'" [class.pending]="reconciliation.status === 'Pendiente'" style="padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: 600;">
-              {{ reconciliation.status }}
-            </span>
-          </div>
-        </div>
-
+      </div>
+      <div class="filter-group">
+        <label class="required">Fecha de Corte</label>
+        <input type="date" [(ngModel)]="reconciliation.reconciliationDate" (ngModelChange)="onDateChange()" />
+      </div>
+      <div class="filter-group" style="flex: 2;">
+        <label>Descripción</label>
+        <input type="text" [(ngModel)]="reconciliation.description" placeholder="Ej. Conciliación Mayo 2026" />
       </div>
     </div>
+  </div>
 
-    <!-- Lado Derecho: Saldos -->
-    <div style="flex: 1;">
-      <div style="height: 32px;"></div> <!-- Spacer para alinear con el lado izq -->
-      
-      <div class="form-grid" style="display: flex; flex-direction: column; gap: 16px;">
-        
-        <div class="form-row" style="display: flex; align-items: center; justify-content: flex-end; gap: 16px;">
-          <label style="width: 140px; text-align: right; margin: 0;">Saldo Bancario:</label>
-          <input type="number" [(ngModel)]="reconciliation.statementBalance" (input)="onStatementBalanceChange()" style="width: 150px; text-align: right;" />
+  <!-- Dashboard Resumen -->
+  <div class="summary-dashboard card">
+    <div class="summary-item">
+      <span class="label">Saldo Inicial</span>
+      <span class="value">{{ formatCurrency(initialBalance) }}</span>
+    </div>
+    <div class="summary-operator">+</div>
+    <div class="summary-item success">
+      <span class="label">Ingresos del Sistema</span>
+      <span class="value">{{ formatCurrency(totalIncomes) }}</span>
+    </div>
+    <div class="summary-operator">-</div>
+    <div class="summary-item danger">
+      <span class="label">Egresos del Sistema</span>
+      <span class="value">{{ formatCurrency(totalExpenses) }}</span>
+    </div>
+    <div class="summary-operator">=</div>
+    <div class="summary-item highlight">
+      <span class="label">Saldo Contable</span>
+      <span class="value">{{ formatCurrency(reconciliation.accountingBalance) }}</span>
+    </div>
+    <div class="summary-divider"></div>
+    <div class="summary-item statement">
+      <label class="label required">Saldo Estado de Cuenta</label>
+      <input type="number" [(ngModel)]="reconciliation.statementBalance" (input)="onStatementBalanceChange()" class="statement-input" step="0.01" />
+    </div>
+    <div class="summary-item difference">
+      <span class="label">Diferencia</span>
+      <span class="value" [ngClass]="{'diff-zero': reconciliation.difference === 0, 'diff-error': reconciliation.difference !== 0}">
+        {{ formatCurrency(reconciliation.difference) }}
+      </span>
+    </div>
+  </div>
+
+  <div class="split-pane">
+    <!-- Panel Izquierdo: Movimientos del Sistema -->
+    <div class="pane system-pane card">
+      <div class="pane-header">
+        <div class="pane-title">
+          <span class="material-icons">account_balance_wallet</span>
+          <h3>Movimientos del Sistema</h3>
         </div>
-
-        <div class="form-row" style="display: flex; align-items: center; justify-content: flex-end; gap: 16px;">
-          <label style="width: 140px; text-align: right; margin: 0;">Saldo Contable:</label>
-          <div style="width: 150px; text-align: right; font-weight: 500;">
-            {{ formatCurrency(reconciliation.accountingBalance) }}
-          </div>
-        </div>
-
-        <div class="form-row" style="display: flex; align-items: center; justify-content: flex-end; gap: 16px;">
-          <label style="width: 140px; text-align: right; margin: 0;">Diferencia:</label>
-          <div style="width: 150px; text-align: right; font-weight: 600;" [ngStyle]="{'color': reconciliation.difference === 0 ? '#10b981' : '#ef4444'}">
-            {{ formatCurrency(reconciliation.difference) }}
-          </div>
-        </div>
-
       </div>
-    </div>
-
-  </section>
-
-  <section class="card detail-section" style="margin-top: 16px;">
-    <div class="tabs">
-      <div class="tab active">Movimientos</div>
-    </div>
-    
-    <div class="tab-content" style="padding: 16px;">
+      
       <div class="table-scroll">
-        <table class="grid-table" style="width: 100%; border-collapse: collapse;">
-          <thead style="background-color: #f1f5f9; border-bottom: 1px solid #e2e8f0;">
+        <table class="grid-table">
+          <thead>
             <tr>
-              <th style="width: 40px; text-align: center; padding: 12px;"></th>
-              <th style="width: 120px; padding: 12px; font-weight: 600; color: #475569;">Fecha</th>
-              <th style="padding: 12px; font-weight: 600; color: #475569;">Detalle</th>
-              <th style="width: 150px; padding: 12px; font-weight: 600; color: #475569;">Referencia</th>
-              <th style="width: 150px; padding: 12px; font-weight: 600; color: #475569;">Tipo</th>
-              <th style="width: 120px; text-align: right; padding: 12px; font-weight: 600; color: #475569;">Monto</th>
+              <th style="width: 40px;"></th>
+              <th style="width: 90px;">Fecha</th>
+              <th>Detalle</th>
+              <th style="width: 100px;">Ref.</th>
+              <th style="width: 100px; text-align: right;">Monto</th>
             </tr>
           </thead>
           <tbody>
-            <tr style="border-bottom: 1px solid #e2e8f0; background-color: #f8fafc; font-weight: 600;">
-              <td style="text-align: center; padding: 12px;"></td>
-              <td style="padding: 12px;"></td>
-              <td style="padding: 12px; color: #334155;">Saldo Inicial:</td>
-              <td style="padding: 12px;"></td>
-              <td style="padding: 12px;"></td>
-              <td style="text-align: right; padding: 12px; color: #334155;">{{ formatCurrency(initialBalance) }}</td>
-            </tr>
-            <tr *ngFor="let m of movements" style="border-bottom: 1px solid #e2e8f0;">
-              <td style="text-align: center; padding: 12px;">
+            <tr *ngFor="let m of movements" [class.selected-row]="isSelected(m.id)">
+              <td style="text-align: center;">
                 <input type="checkbox" [checked]="isSelected(m.id)" (change)="toggleMovement(m.id, $event)" />
               </td>
-              <td style="padding: 12px;">{{ formatDate(m.date) }}</td>
-              <td style="padding: 12px;">{{ m.description || m.transactionType }}</td>
-              <td style="padding: 12px;">{{ m.reference || m.checkNumber || m.paymentMethod }}</td>
-              <td style="padding: 12px;">{{ m.type }}</td>
-              <td style="text-align: right; padding: 12px;">{{ formatCurrency(m.amount) }}</td>
+              <td>{{ formatDate(m.date) }}</td>
+              <td class="ellipsis-cell" [title]="m.description || m.transactionType">{{ m.description || m.transactionType }}</td>
+              <td class="ellipsis-cell">{{ m.reference || m.checkNumber || m.paymentMethod }}</td>
+              <td style="text-align: right; font-weight: 500;" [ngClass]="{'income-text': m.transactionType === 'Ingreso' || m.type === 'Ingreso', 'expense-text': m.transactionType === 'Egreso' || m.type === 'Egreso'}">
+                {{ formatCurrency(m.amount) }}
+              </td>
             </tr>
             <tr *ngIf="movements.length === 0">
-              <td colspan="6" style="text-align: center; padding: 24px; color: #64748b;">
-                No hay movimientos para esta cuenta.
+              <td colspan="5" class="empty-state">No hay movimientos en este período.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Panel Derecho: Estado de Cuenta (Excel) -->
+    <div class="pane bank-pane card">
+      <div class="pane-header">
+        <div class="pane-title">
+          <span class="material-icons">description</span>
+          <h3>Estado de Cuenta Bancario</h3>
+        </div>
+        <div class="pane-actions">
+          <label class="upload-btn">
+            <span class="material-icons">upload_file</span> Cargar Excel
+            <input type="file" (change)="onFileChange($event)" accept=".xlsx, .xls, .csv" style="display: none;" />
+          </label>
+          <button class="btn-primary-outline" (click)="autoReconcile()" *ngIf="bankStatementLines.length > 0" title="Conciliar Automáticamente">
+            <span class="material-icons">auto_fix_high</span> Auto
+          </button>
+        </div>
+      </div>
+      
+      <div class="table-scroll">
+        <table class="grid-table">
+          <thead>
+            <tr>
+              <th style="width: 30px;"></th>
+              <th style="width: 90px;">Fecha</th>
+              <th>Descripción</th>
+              <th style="width: 100px; text-align: right;">Monto</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let bl of bankStatementLines" [class.matched-row]="bl.matchedTransactionId">
+              <td style="text-align: center;">
+                <span class="material-icons match-icon" *ngIf="bl.matchedTransactionId">check_circle</span>
+              </td>
+              <td>{{ formatDate(bl.date) }}</td>
+              <td class="ellipsis-cell" [title]="bl.description">{{ bl.description }}</td>
+              <td style="text-align: right; font-weight: 500;">{{ formatCurrency(bl.amount) }}</td>
+            </tr>
+            <tr *ngIf="bankStatementLines.length === 0">
+              <td colspan="4" class="empty-state upload-prompt">
+                <span class="material-icons">upload_file</span>
+                <p>Importe un archivo Excel con el estado de cuenta.</p>
+                <small>Columnas sugeridas: Fecha, Descripción, Monto</small>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
-  </section>
+  </div>
 
-  <!-- Botones de Acción -->
-  <div class="action-buttons-footer" style="display: flex; justify-content: flex-end; gap: 16px; margin-top: 24px; padding-bottom: 32px;">
-    <button class="btn-cancel" (click)="cancel()">
-      <span class="material-icons">close</span> Cancelar
-    </button>
-    <button class="btn-primary" (click)="save()">
-      <span class="material-icons">save</span> Guardar
+  <div class="action-buttons-footer">
+    <button class="btn-cancel" (click)="cancel()">Cancelar</button>
+    <button class="btn-secondary" (click)="save(false)">Guardar Borrador</button>
+    <button class="btn-primary" (click)="save(true)" [disabled]="reconciliation.difference !== 0 && !reconciliationId">
+      <span class="material-icons">lock</span> Cerrar Conciliación
     </button>
   </div>
 </div>

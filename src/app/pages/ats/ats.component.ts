@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TaxService } from '../../core/services/tax.service';
 import { ATS } from '../../models/tax.model';
-import * as XLSX from 'xlsx';
+import { ExcelExportService } from '../../core/services/excel-export.service';
 
 @Component({
   selector: 'app-ats',
@@ -40,15 +40,18 @@ export class ATSComponent implements OnInit {
     { value: 12, name: 'Diciembre' },
   ];
 
-  constructor(private taxService: TaxService) {
+  constructor(
+    private taxService: TaxService,
+    private excelService: ExcelExportService
+  ) {
     const currentYear = new Date().getFullYear();
     for (let i = currentYear - 5; i <= currentYear + 5; i++) {
       this.years.push(i);
     }
   }
 
-  ngOnInit() {
-    // this.loadATS();
+  ngOnInit(): void {
+    // defaults
   }
 
   exportExcel() {
@@ -76,12 +79,11 @@ export class ATSComponent implements OnInit {
       ["R", r, rs, this.selectedYear, monthStr, "001", 0, "IVA", "07", "001", "011", "000006098", "000006098", `2406202607169170329700120010110000060980000609811`]
     ];
 
-    const ws: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet(data);
-    const wb: XLSX.WorkBook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'ReporteATS');
-    
-    // Generar archivo
-    XLSX.writeFile(wb, `ReporteATSM${monthStr}${this.selectedYear}182838.xls`);
+    this.excelService.exportRawDataToExcel({
+      fileName: `ATS_${this.selectedYear}_${monthStr}`,
+      data: data,
+      sheetName: 'ATS'
+    });
   }
 
   generateXML() {

@@ -7,6 +7,7 @@ import {
   TrialBalanceNode,
   TrialBalanceReport,
 } from '../../models/trial-balance.model';
+import { ExcelExportService } from '../../core/services/excel-export.service';
 
 interface AccountOption {
   id: string;
@@ -35,7 +36,10 @@ export class TrialBalanceComponent implements OnInit {
     dateTo: '',
   };
 
-  constructor(private api: ApiService) {}
+  constructor(
+    private api: ApiService,
+    private excelService: ExcelExportService
+  ) {}
 
   ngOnInit() {
     const year = new Date().getFullYear();
@@ -131,38 +135,41 @@ export class TrialBalanceComponent implements OnInit {
 
   exportExcel() {
     if (!this.report) return;
-    const headers = [
-      'Cuenta',
-      'Saldo Inicial',
-      'Debe',
-      'Haber',
-      'Deudor',
-      'Acreedor',
+
+    const columns = [
+      { header: 'Cuenta', key: 'Cuenta', width: 45 },
+      { header: 'Saldo Inicial', key: 'SaldoInicial', width: 15, isCurrency: true },
+      { header: 'Debe', key: 'Debe', width: 15, isCurrency: true },
+      { header: 'Haber', key: 'Haber', width: 15, isCurrency: true },
+      { header: 'Deudor', key: 'Deudor', width: 15, isCurrency: true },
+      { header: 'Acreedor', key: 'Acreedor', width: 15, isCurrency: true }
     ];
-    const rows = this.flatRows.map((r) => [
-      `${'  '.repeat(r.depth)}${r.code} ${r.name}`,
-      r.initialBalance,
-      r.periodDebit,
-      r.periodCredit,
-      r.debtorBalance,
-      r.creditorBalance,
-    ]);
+
+    const dataToExport = this.flatRows.map((r) => ({
+      Cuenta: `${'  '.repeat(r.depth)}${r.code} ${r.name}`,
+      SaldoInicial: Number(r.initialBalance),
+      Debe: Number(r.periodDebit),
+      Haber: Number(r.periodCredit),
+      Deudor: Number(r.debtorBalance),
+      Acreedor: Number(r.creditorBalance)
+    }));
+
     const totals = this.report.totals;
-    rows.push([
-      'TOTALES',
-      totals.initialBalance,
-      totals.periodDebit,
-      totals.periodCredit,
-      totals.debtorBalance,
-      totals.creditorBalance,
-    ]);
-    const csv = [headers, ...rows].map((r) => r.join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `balance-comprobacion-${this.report.startDate}-${this.report.endDate}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    dataToExport.push({
+      Cuenta: 'TOTALES',
+      SaldoInicial: Number(totals.initialBalance),
+      Debe: Number(totals.periodDebit),
+      Haber: Number(totals.periodCredit),
+      Deudor: Number(totals.debtorBalance),
+      Acreedor: Number(totals.creditorBalance)
+    });
+
+    this.excelService.exportToExcel({
+      title: 'Balance de Comprobación',
+      subtitle: `Período: ${this.filters.dateFrom || '-'} a ${this.filters.dateTo || '-'}`,
+      fileName: `Balance_Comprobacion_${new Date().toISOString().split('T')[0]}`,
+      columns: columns,
+      data: dataToExport
+    });
   }
 }

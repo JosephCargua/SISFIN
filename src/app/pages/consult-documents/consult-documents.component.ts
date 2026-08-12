@@ -7,6 +7,7 @@ import { DocumentConsultItem } from '../../models/document-consult.model';
 import { BankingService } from '../../core/services/banking.service';
 import { JournalEntryService } from '../../core/services/journal-entry.service';
 import Swal from 'sweetalert2';
+import { ExcelExportService } from '../../core/services/excel-export.service';
 
 @Component({
   selector: 'app-consult-documents',
@@ -48,9 +49,14 @@ export class ConsultDocumentsComponent implements OnInit {
   statusOptions = [
     { value: 'ALL', label: 'Todos' },
     { value: 'PENDING_REVIEW', label: 'Por revisar' },
-    { value: 'REVIEWED', label: 'Revisado' },
-    { value: 'NOT_REVIEWED', label: 'No revisado' },
+    { value: 'PROCESSED', label: 'Procesados' },
   ];
+
+  DocumentStatus = {
+    DRAFT: 'DRAFT',
+    POSTED: 'POSTED',
+    CANCELLED: 'CANCELLED'
+  };
 
   processingOptions = [
     { value: 'ALL', label: 'Todos' },
@@ -73,7 +79,8 @@ export class ConsultDocumentsComponent implements OnInit {
     private consultService: DocumentConsultService,
     private bankingService: BankingService,
     private journalEntryService: JournalEntryService,
-    private router: Router
+    private router: Router,
+    private excelService: ExcelExportService
   ) {}
 
   ngOnInit() {
@@ -214,34 +221,35 @@ export class ConsultDocumentsComponent implements OnInit {
   }
 
   exportExcel() {
-    const headers = [
-      'Emisión',
-      'Persona',
-      'Documento',
-      'Estado',
-      'Neto',
-      'Imp.',
-      'Total',
-      'Ret.',
+    const columns = [
+      { header: 'Emisión', key: 'Emision', width: 12 },
+      { header: 'Persona', key: 'Persona', width: 35 },
+      { header: 'Documento', key: 'Documento', width: 25 },
+      { header: 'Estado', key: 'Estado', width: 15 },
+      { header: 'Neto', key: 'Neto', width: 12, isCurrency: true },
+      { header: 'Impuestos', key: 'Imp', width: 12, isCurrency: true },
+      { header: 'Total', key: 'Total', width: 12, isCurrency: true },
+      { header: 'Retención', key: 'Ret', width: 12, isCurrency: true }
     ];
-    const rows = this.documents.map((d) => [
-      d.issueDate,
-      d.supplierName,
-      d.documentLabel,
-      d.statusLabel,
-      d.netAmount,
-      d.taxAmount,
-      d.total,
-      d.retentionAmount,
-    ]);
-    const csv = [headers, ...rows].map((r) => r.join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `documentos-${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+
+    const dataToExport = this.documents.map((d) => ({
+      Emision: new Date(d.issueDate).toLocaleDateString(),
+      Persona: d.supplierName,
+      Documento: d.documentLabel,
+      Estado: d.statusLabel,
+      Neto: Number(d.netAmount) || 0,
+      Imp: Number(d.taxAmount) || 0,
+      Total: Number(d.total) || 0,
+      Ret: Number(d.retentionAmount) || 0
+    }));
+
+    this.excelService.exportToExcel({
+      title: 'Consulta de Documentos',
+      subtitle: `Período: ${this.filters.dateFrom || '-'} a ${this.filters.dateTo || '-'}`,
+      fileName: `Consulta_Documentos_${new Date().toISOString().split('T')[0]}`,
+      columns: columns,
+      data: dataToExport
+    });
   }
 
   viewDocument(doc: DocumentConsultItem) {

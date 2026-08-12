@@ -26,17 +26,23 @@ import { Product } from '../../models/inventory.model';
 import { CostCenter } from '../../models/automation.model';
 import { CashAccount } from '../../models/banking.model';
 
+import { CreatePersonModalComponent } from '../../components/create-person-modal/create-person-modal.component';
+
 type DetailTab = 'services' | 'accounts' | 'costCenter' | 'retention' | 'payment' | 'history';
 
 @Component({
   selector: 'app-register-purchase-expense',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, CreatePersonModalComponent],
   templateUrl: './register-purchase-expense.component.html',
   styleUrl: './register-purchase-expense.component.scss',
 })
 export class RegisterPurchaseExpenseComponent implements OnInit {
   @ViewChild('personSelect') personSelect?: ElementRef<HTMLSelectElement>;
+  
+  isPersonModalVisible = false;
+  prefillPersonIdentification = '';
+  prefillPersonName = '';
 
   activeTab: DetailTab = 'services';
   saving = false;
@@ -299,6 +305,18 @@ export class RegisterPurchaseExpenseComponent implements OnInit {
     }
   }
 
+  openCreatePersonModal() {
+    this.prefillPersonIdentification = '';
+    this.prefillPersonName = '';
+    this.isPersonModalVisible = true;
+  }
+
+  onPersonCreated(newPerson: any) {
+    this.suppliers.push(newPerson);
+    this.personId = newPerson.id;
+    this.onPersonSelected();
+  }
+
   onXmlSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
@@ -319,6 +337,27 @@ export class RegisterPurchaseExpenseComponent implements OnInit {
         );
         if (matched) {
           this.personId = matched.id;
+        } else {
+          // Auto-create or Prompt
+          if (parsed.personIdentification && parsed.personName) {
+            this.payablesService.createSupplier({
+              identification: parsed.personIdentification,
+              name: parsed.personName
+            }).subscribe({
+              next: (newSupplier) => {
+                this.suppliers.push(newSupplier);
+                this.personId = newSupplier.id;
+              },
+              error: (err) => {
+                alert('No se pudo crear el proveedor automáticamente. Error: ' + err.message);
+              }
+            });
+          } else {
+            alert('La persona no existe en el sistema y el XML no tiene suficiente información. Se la debe crear para ingresar el documento.');
+            this.prefillPersonIdentification = parsed.personIdentification || '';
+            this.prefillPersonName = parsed.personName || '';
+            this.isPersonModalVisible = true;
+          }
         }
 
         this.serviceLines = parsed.lines

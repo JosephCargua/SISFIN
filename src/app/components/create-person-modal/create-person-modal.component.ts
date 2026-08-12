@@ -1,8 +1,8 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { PayablesService } from '../../core/services/payables.service';
-import { ReceivablesService } from '../../core/services/receivables.service';
+import { PayablesService } from '../../services/payables.service';
+import { ReceivablesService } from '../../services/receivables.service';
 
 @Component({
   selector: 'app-create-person-modal',

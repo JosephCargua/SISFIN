@@ -25,20 +25,40 @@ export class ATSComponent implements OnInit {
 
   years: number[] = [];
 
-  months = [
-    { value: 1, name: 'Enero' },
-    { value: 2, name: 'Febrero' },
-    { value: 3, name: 'Marzo' },
-    { value: 4, name: 'Abril' },
-    { value: 5, name: 'Mayo' },
-    { value: 6, name: 'Junio' },
-    { value: 7, name: 'Julio' },
-    { value: 8, name: 'Agosto' },
-    { value: 9, name: 'Septiembre' },
-    { value: 10, name: 'Octubre' },
-    { value: 11, name: 'Noviembre' },
-    { value: 12, name: 'Diciembre' },
-  ];
+  get availableMonths() {
+    if (this.selectedType === 'semestral') {
+      return [
+        { value: 6, name: 'Enero a Junio' },
+        { value: 12, name: 'Julio a Diciembre' },
+      ];
+    } else if (this.selectedType === 'anual') {
+      return [
+        { value: 12, name: 'Enero a Diciembre' },
+      ];
+    } else {
+      return [
+        { value: 1, name: 'Enero' },
+        { value: 2, name: 'Febrero' },
+        { value: 3, name: 'Marzo' },
+        { value: 4, name: 'Abril' },
+        { value: 5, name: 'Mayo' },
+        { value: 6, name: 'Junio' },
+        { value: 7, name: 'Julio' },
+        { value: 8, name: 'Agosto' },
+        { value: 9, name: 'Septiembre' },
+        { value: 10, name: 'Octubre' },
+        { value: 11, name: 'Noviembre' },
+        { value: 12, name: 'Diciembre' },
+      ];
+    }
+  }
+
+  onTypeChange() {
+    const opts = this.availableMonths;
+    if (!opts.find(m => m.value === this.selectedMonth)) {
+      this.selectedMonth = opts[0].value;
+    }
+  }
 
   constructor(
     private taxService: TaxService,

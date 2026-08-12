@@ -450,6 +450,9 @@ export class RegisterPurchaseExpenseComponent implements OnInit {
         if (this.serviceLines.length === 0 && this.accountLines.length === 0) {
           this.addServiceLine();
         } else {
+          if (this.serviceLines.length === 0 && this.accountLines.length > 0) {
+            this.activeTab = 'accounts';
+          }
           this.serviceLines.forEach((line) => this.recalcServiceLine(line));
           this.accountLines.forEach((line) => this.recalcAccountLine(line));
         }

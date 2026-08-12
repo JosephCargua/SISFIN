@@ -275,7 +275,7 @@
                       Homologación de Productos y Cuentas
                     </h3>
 
-                    <ng-container *ngIf="getPendingLineItem(doc.id) as line; else allHomologated">
+                    <ng-container *ngIf="getPendingLineItem(doc.id) as line">
                       <div class="product-homologation-grid">
                         <div class="product-homologation-side">
                           <h4>Mis Productos y Cuentas Contables</h4>
@@ -380,13 +380,7 @@
                       </p>
                     </ng-container>
 
-                    <ng-template #allHomologated>
-                      <p class="all-homologated-msg" *ngIf="doc.processingStatus !== 'PROCESSED'">
-                        <span class="material-icons">check_circle</span>
-                        Todos los productos del proveedor han sido homologados.
-                        Puede presionar Homologar para finalizar el documento.
-                      </p>
-                    </ng-template>
+
                   </div>
                 </div>
               </td>

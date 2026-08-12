@@ -361,7 +361,7 @@ export class RegisterPurchaseExpenseComponent implements OnInit {
         }
 
         this.serviceLines = parsed.lines
-          .filter((l) => l.lineType === 'SERVICE')
+          .filter((l) => l.lineType === 'SERVICE' && l.data['mappedProductId'])
           .map((l) => {
             const d = l.data as Record<string, number | string>;
             const quantity = Number(d['quantity']) || 1;
@@ -408,7 +408,7 @@ export class RegisterPurchaseExpenseComponent implements OnInit {
           });
 
         this.accountLines = parsed.lines
-          .filter((l) => l.lineType === 'ACCOUNT')
+          .filter((l) => l.lineType === 'ACCOUNT' || (l.lineType === 'SERVICE' && !l.data['mappedProductId']))
           .map((l) => {
             const d = l.data as Record<string, number | string>;
             const quantity = Number(d['quantity']) || 1;

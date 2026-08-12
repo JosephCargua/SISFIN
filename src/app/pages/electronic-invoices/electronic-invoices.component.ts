@@ -208,11 +208,11 @@ export class ElectronicInvoicesComponent implements OnInit {
   }
 
   getPendingLineItem(docId: string): DocumentLineItem | null {
-    return this.getLineItems(docId).find((l) => !l.isHomologated) || null;
+    return this.getLineItems(docId).find((l) => !l.isHomologated && l.supplierCode !== 'TXT') || null;
   }
 
   getPendingLineItemsCount(docId: string): number {
-    return this.getLineItems(docId).filter((l) => !l.isHomologated).length;
+    return this.getLineItems(docId).filter((l) => !l.isHomologated && l.supplierCode !== 'TXT').length;
   }
 
   getLineForm(docId: string, lineId: string): LineItemHomologationForm {

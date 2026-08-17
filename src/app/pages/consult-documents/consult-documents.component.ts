@@ -78,11 +78,7 @@ export class ConsultDocumentsComponent implements OnInit {
     { value: 'SUPPLIER', label: 'Proveedor' },
   ];
 
-  quickFilters = [
-    { key: 'ELECTRONIC', label: 'Seleccionar Electrónicos' },
-    { key: 'UNAUTHORIZED', label: 'Documentos no autorizados' },
-    { key: 'RETENTION_PENDING', label: 'Retenciones no autorizadas' },
-  ];
+
 
   constructor(
     private consultService: DocumentConsultService,
@@ -100,11 +96,7 @@ export class ConsultDocumentsComponent implements OnInit {
     this.searchExpanded = !this.searchExpanded;
   }
 
-  applyQuickFilter(key: string) {
-    this.filters.quickFilter =
-      this.filters.quickFilter === key ? '' : key;
-    this.search();
-  }
+
 
   search() {
     this.loading = true;
@@ -150,14 +142,12 @@ export class ConsultDocumentsComponent implements OnInit {
       documentNumber: '',
       person: '',
       documentTypeCode: 'ALL',
-      reviewStatus: 'ALL',
-      processingStatus: 'ALL',
+      statusFilter: 'ALL',
       emissionFilter: 'ALL',
       dateFrom: '',
       dateTo: '',
-      personType: 'SUPPLIER',
+      personType: 'ALL',
       purchaseOrder: '',
-      quickFilter: '',
     };
     this.search();
   }

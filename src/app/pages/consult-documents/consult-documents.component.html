@@ -60,16 +60,16 @@
         </div>
         <div class="form-group">
           <label>Estado</label>
-          <select [(ngModel)]="filters.reviewStatus" name="reviewStatus">
+          <select [(ngModel)]="filters.statusFilter" name="statusFilter" (change)="search()">
             <option *ngFor="let s of statusOptions" [value]="s.value">
               {{ s.label }}
             </option>
           </select>
         </div>
         <div class="form-group">
-          <label>Procesamiento</label>
-          <select [(ngModel)]="filters.processingStatus" name="processingStatus">
-            <option *ngFor="let p of processingOptions" [value]="p.value">
+          <label>Emisión</label>
+          <select [(ngModel)]="filters.emissionFilter" name="emissionFilter" (change)="search()">
+            <option *ngFor="let p of emissionOptions" [value]="p.value">
               {{ p.label }}
             </option>
           </select>
@@ -97,7 +97,7 @@
         </div>
         <div class="form-group">
           <label>Tipo</label>
-          <select [(ngModel)]="filters.personType" name="personType">
+          <select [(ngModel)]="filters.personType" name="personType" (change)="search()">
             <option *ngFor="let pt of personTypes" [value]="pt.value">
               {{ pt.label }}
             </option>
@@ -105,18 +105,7 @@
         </div>
       </div>
 
-      <div class="quick-filters">
-        <span class="quick-filters-label">Filtros rápidos:</span>
-        <button
-          type="button"
-          *ngFor="let qf of quickFilters"
-          class="quick-filter-link"
-          [class.active]="filters.quickFilter === qf.key"
-          (click)="applyQuickFilter(qf.key)"
-        >
-          {{ qf.label }}
-        </button>
-      </div>
+
 
       <div class="search-actions">
         <button type="button" class="btn btn-secondary" (click)="clearFilters()">

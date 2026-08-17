@@ -27,47 +27,55 @@ export class ConsultDocumentsComponent implements OnInit {
     documentNumber: '',
     person: '',
     documentTypeCode: 'ALL',
-    reviewStatus: 'ALL',
-    processingStatus: 'ALL',
+    statusFilter: 'ALL',
     emissionFilter: 'ALL',
     dateFrom: '',
     dateTo: '',
-    personType: 'SUPPLIER',
+    personType: 'ALL',
     purchaseOrder: '',
-    quickFilter: '',
   };
 
   documentTypes = [
     { value: 'ALL', label: 'Todos' },
     { value: '01', label: 'Factura' },
-    { value: '03', label: 'Liquidación de compra' },
-    { value: '04', label: 'Nota de crédito' },
-    { value: '05', label: 'Nota de débito' },
-    { value: '07', label: 'Retención' },
+    { value: '02', label: 'Nota de Venta' },
+    { value: '03', label: 'Liquidación de Compra' },
+    { value: '41', label: 'Liquidación de Compra por Reembolso' },
+    { value: '48', label: 'Liquidación de Compra de Bienes Muebles Usados' },
+    { value: '06', label: 'Documentos Emitidos por Instituciones Financieras' },
+    { value: '08', label: 'Documentos de Importación' },
+    { value: '09', label: 'Otros Documentos Autorizados' },
+    { value: '05', label: 'Nota de Débito' },
+    { value: '04', label: 'Nota de Crédito' },
+    { value: '00', label: 'Nota de Crédito Interna' },
+    { value: 'NA', label: 'Documento no autorizado' },
+    { value: '11', label: 'DNA de Importacion / Factura Proforma' },
+    { value: '12', label: 'Declaración Aduanera Única' },
+    { value: '15', label: 'Tickets Aéreos' },
+    { value: '16', label: 'Boletos o entradas a espectáculos públicos' },
+    { value: '17', label: 'Carta de porte aéreo' },
+    { value: '19', label: 'Tiquetes o vales emitidos por maquinas registradoras' },
+    { value: '20', label: 'Documentos Emitidos por Instituciones del Estado' },
   ];
 
   statusOptions = [
     { value: 'ALL', label: 'Todos' },
-    { value: 'PENDING_REVIEW', label: 'Por revisar' },
-    { value: 'REVIEWED', label: 'Revisados' },
+    { value: 'PENDING', label: 'Pendiente' },
+    { value: 'ANNULLED', label: 'Anulado' },
+    { value: 'COLLECTED', label: 'Cobrado' },
+    { value: 'PAID', label: 'Pagado' },
   ];
 
-  DocumentStatus = {
-    DRAFT: 'DRAFT',
-    POSTED: 'POSTED',
-    CANCELLED: 'CANCELLED'
-  };
-
-  processingOptions = [
+  emissionOptions = [
     { value: 'ALL', label: 'Todos' },
-    { value: 'PARTIAL', label: 'Parcial' },
-    { value: 'PENDING_PROCESS', label: 'Por procesar' },
+    { value: 'FISICA', label: 'Fisica' },
+    { value: 'ELECTRONICA', label: 'Electronica' },
   ];
 
   personTypes = [
     { value: 'ALL', label: 'Todos' },
-    { value: 'SUPPLIER', label: 'Proveedor' },
     { value: 'CUSTOMER', label: 'Cliente' },
+    { value: 'SUPPLIER', label: 'Proveedor' },
   ];
 
   quickFilters = [
@@ -109,11 +117,11 @@ export class ConsultDocumentsComponent implements OnInit {
     if (this.filters.documentTypeCode !== 'ALL') {
       payload['documentTypeCode'] = this.filters.documentTypeCode;
     }
-    if (this.filters.reviewStatus !== 'ALL') {
-      payload['reviewStatus'] = this.filters.reviewStatus;
+    if (this.filters.statusFilter !== 'ALL') {
+      payload['statusFilter'] = this.filters.statusFilter;
     }
-    if (this.filters.processingStatus !== 'ALL') {
-      payload['processingStatus'] = this.filters.processingStatus;
+    if (this.filters.emissionFilter !== 'ALL') {
+      payload['emissionFilter'] = this.filters.emissionFilter;
     }
     if (this.filters.dateFrom) payload['dateFrom'] = this.filters.dateFrom;
     if (this.filters.dateTo) payload['dateTo'] = this.filters.dateTo;
@@ -122,9 +130,6 @@ export class ConsultDocumentsComponent implements OnInit {
     }
     if (this.filters.purchaseOrder) {
       payload['purchaseOrder'] = this.filters.purchaseOrder;
-    }
-    if (this.filters.quickFilter) {
-      payload['quickFilter'] = this.filters.quickFilter;
     }
 
     this.consultService.search(payload).subscribe({

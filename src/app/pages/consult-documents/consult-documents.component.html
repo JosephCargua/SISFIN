@@ -34,6 +34,7 @@
             [(ngModel)]="filters.documentNumber"
             name="documentNumber"
             placeholder="Buscar por número de documento"
+            (keyup.enter)="search()"
           />
         </div>
         <div class="form-group">
@@ -45,12 +46,13 @@
               [(ngModel)]="filters.person"
               name="person"
               placeholder="Buscar persona"
+              (keyup.enter)="search()"
             />
           </div>
         </div>
         <div class="form-group">
           <label>Tipo Documento</label>
-          <select [(ngModel)]="filters.documentTypeCode" name="documentTypeCode">
+          <select [(ngModel)]="filters.documentTypeCode" name="documentTypeCode" (change)="search()">
             <option *ngFor="let t of documentTypes" [value]="t.value">
               {{ t.label }}
             </option>
@@ -81,6 +83,7 @@
               [(ngModel)]="filters.purchaseOrder"
               name="purchaseOrder"
               placeholder="Buscar orden"
+              (keyup.enter)="search()"
             />
           </div>
         </div>

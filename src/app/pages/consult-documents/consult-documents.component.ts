@@ -49,7 +49,7 @@ export class ConsultDocumentsComponent implements OnInit {
   statusOptions = [
     { value: 'ALL', label: 'Todos' },
     { value: 'PENDING_REVIEW', label: 'Por revisar' },
-    { value: 'PROCESSED', label: 'Procesados' },
+    { value: 'REVIEWED', label: 'Revisados' },
   ];
 
   DocumentStatus = {
@@ -65,6 +65,7 @@ export class ConsultDocumentsComponent implements OnInit {
   ];
 
   personTypes = [
+    { value: 'ALL', label: 'Todos' },
     { value: 'SUPPLIER', label: 'Proveedor' },
     { value: 'CUSTOMER', label: 'Cliente' },
   ];
@@ -116,6 +117,12 @@ export class ConsultDocumentsComponent implements OnInit {
     }
     if (this.filters.dateFrom) payload['dateFrom'] = this.filters.dateFrom;
     if (this.filters.dateTo) payload['dateTo'] = this.filters.dateTo;
+    if (this.filters.personType && this.filters.personType !== 'ALL') {
+      payload['personType'] = this.filters.personType;
+    }
+    if (this.filters.purchaseOrder) {
+      payload['purchaseOrder'] = this.filters.purchaseOrder;
+    }
     if (this.filters.quickFilter) {
       payload['quickFilter'] = this.filters.quickFilter;
     }

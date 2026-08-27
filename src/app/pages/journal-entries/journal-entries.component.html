@@ -190,9 +190,9 @@
         <button
           type="submit"
           class="btn btn-primary"
-          [disabled]="!validateDoubleEntry() || getDifference() > 0.01"
+          [disabled]="!validateDoubleEntry() || getDifference() > 0.01 || isSaving"
         >
-          {{ isEditing ? 'Guardar Cambios' : 'Crear Asiento' }}
+          {{ isEditing ? (isSaving ? 'Guardando...' : 'Guardar Cambios') : (isSaving ? 'Creando...' : 'Crear Asiento') }}
         </button>
       </div>
     </form>

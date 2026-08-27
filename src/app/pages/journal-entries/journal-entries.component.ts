@@ -29,6 +29,7 @@ export class JournalEntriesComponent implements OnInit {
   accounts: Account[] = [];
   showCreateForm = false;
   isEditing = false;
+  isSaving = false;
   editingEntryId: string | null = null;
   statusFilter: JournalEntryStatus | '' = '';
   startDateFilter: string = '';
@@ -164,30 +165,36 @@ export class JournalEntriesComponent implements OnInit {
     };
 
     if (this.isEditing && this.editingEntryId) {
+      this.isSaving = true;
       this.journalEntryService.update(this.editingEntryId, payload).subscribe({
         next: () => {
           alert('Asiento actualizado exitosamente');
           this.showCreateForm = false;
           this.isEditing = false;
+          this.isSaving = false;
           this.editingEntryId = null;
           this.router.navigate([], { queryParams: { edit: null }, queryParamsHandling: 'merge' });
           this.resetForm();
           this.loadEntries();
         },
         error: (error) => {
+          this.isSaving = false;
           console.error('Error updating entry:', error);
           alert(error.error?.message || 'Error al actualizar el asiento');
         },
       });
     } else {
+      this.isSaving = true;
       this.journalEntryService.create(payload).subscribe({
         next: () => {
           alert('Asiento creado exitosamente');
           this.showCreateForm = false;
+          this.isSaving = false;
           this.resetForm();
           this.loadEntries();
         },
         error: (error) => {
+          this.isSaving = false;
           console.error('Error creating entry:', error);
           alert(error.error?.message || 'Error al crear el asiento');
         },

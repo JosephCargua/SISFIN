@@ -1,4 +1,4 @@
-﻿<div class="register-container">
+<div class="register-container">
   <div class="reconciliation-header card">
     <div class="header-top">
       <div class="title-section">
@@ -160,9 +160,9 @@
 
   <div class="action-buttons-footer">
     <button class="btn-cancel" (click)="cancel()">Cancelar</button>
-    <button class="btn-secondary" (click)="save(false)">Guardar Borrador</button>
-    <button class="btn-primary" (click)="save(true)" [disabled]="reconciliation.difference !== 0 && !reconciliationId">
-      <span class="material-icons">lock</span> Cerrar Conciliación
+    <button class="btn-secondary" (click)="save(false)" [disabled]="isSaving">{{ isSaving ? 'Procesando...' : 'Guardar Borrador' }}</button>
+    <button class="btn-primary" (click)="save(true)" [disabled]="(reconciliation.difference !== 0 && !reconciliationId) || isSaving">
+      <span class="material-icons">lock</span> {{ isSaving ? 'Cerrando...' : 'Cerrar Conciliación' }}
     </button>
   </div>
 </div>

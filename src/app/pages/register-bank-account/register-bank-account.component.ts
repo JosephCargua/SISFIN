@@ -16,6 +16,7 @@ import { AccountSelectorModalComponent } from '../../components/account-selector
 export class RegisterBankAccountComponent implements OnInit {
   activeTab: string = 'datosGenerales';
   isAccountModalVisible = false;
+  isSaving = false;
 
   formData: CreateBankAccountDto = {
     accountNumber: '',
@@ -157,12 +158,14 @@ export class RegisterBankAccountComponent implements OnInit {
       return;
     }
 
+    this.isSaving = true;
     this.bankingService.createBankAccount(this.formData).subscribe({
       next: (res) => {
         alert('Cuenta bancaria guardada con éxito');
         this.router.navigate(['/banking']); // O donde corresponda
       },
       error: (err) => {
+        this.isSaving = false;
         console.error(err);
         alert('Error al guardar la cuenta');
       }

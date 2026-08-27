@@ -24,6 +24,7 @@ export class ReceivablesComponent implements OnInit {
   showCustomerForm = false;
   showInvoiceForm = false;
   showPaymentForm = false;
+  isSaving = false;
   selectedInvoiceId = '';
 
   newCustomer: CreateCustomerDto = {
@@ -78,42 +79,51 @@ export class ReceivablesComponent implements OnInit {
   }
 
   createCustomer() {
+    this.isSaving = true;
     this.receivablesService.createCustomer(this.newCustomer).subscribe({
       next: () => {
         alert('Cliente creado exitosamente');
         this.showCustomerForm = false;
+        this.isSaving = false;
         this.resetCustomerForm();
         this.loadCustomers();
       },
       error: (error) => {
+        this.isSaving = false;
         alert(error.error?.message || 'Error al crear el cliente');
       },
     });
   }
 
   createInvoice() {
+    this.isSaving = true;
     this.receivablesService.createInvoice(this.newInvoice).subscribe({
       next: () => {
         alert('Factura creada exitosamente');
         this.showInvoiceForm = false;
+        this.isSaving = false;
         this.resetInvoiceForm();
         this.loadInvoices();
       },
       error: (error) => {
+        this.isSaving = false;
         alert(error.error?.message || 'Error al crear la factura');
       },
     });
   }
 
   createPayment() {
+    this.isSaving = true;
     this.receivablesService.createPayment(this.newPayment).subscribe({
       next: () => {
         alert('Pago registrado exitosamente');
         this.showPaymentForm = false;
+        this.isSaving = false;
         this.resetPaymentForm();
         this.loadInvoices();
       },
       error: (error) => {
+        this.isSaving = false;
         alert(error.error?.message || 'Error al registrar el pago');
       },
     });

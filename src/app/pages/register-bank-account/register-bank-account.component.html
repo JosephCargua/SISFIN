@@ -152,8 +152,8 @@
 
     <!-- Action Bar -->
     <div class="action-bar" style="padding: 16px 24px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end;">
-      <button class="btn btn-primary" (click)="save()" style="background-color: #0ea5e9; color: white; border: none; padding: 8px 24px; border-radius: 4px; font-size: 13px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-        <span class="material-icons" style="font-size: 16px;">save</span> Guardar
+      <button class="btn btn-primary" (click)="save()" [disabled]="isSaving" style="background-color: #0ea5e9; color: white; border: none; padding: 8px 24px; border-radius: 4px; font-size: 13px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+        <span class="material-icons" style="font-size: 16px;">save</span> {{ isSaving ? 'Guardando...' : 'Guardar' }}
       </button>
     </div>
 

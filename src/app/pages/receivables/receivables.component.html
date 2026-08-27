@@ -35,7 +35,7 @@
         <button type="button" class="btn btn-secondary" (click)="showCustomerForm = false">
           Cancelar
         </button>
-        <button type="submit" class="btn btn-primary">Crear Cliente</button>
+        <button type="submit" class="btn btn-primary" [disabled]="isSaving">{{ isSaving ? 'Procesando...' : 'Crear Cliente' }}</button>
       </div>
     </form>
   </div>
@@ -94,7 +94,7 @@
         <button type="button" class="btn btn-secondary" (click)="showInvoiceForm = false">
           Cancelar
         </button>
-        <button type="submit" class="btn btn-primary">Crear Factura</button>
+        <button type="submit" class="btn btn-primary" [disabled]="isSaving">{{ isSaving ? 'Procesando...' : 'Crear Factura' }}</button>
       </div>
     </form>
   </div>
@@ -131,7 +131,7 @@
         <button type="button" class="btn btn-secondary" (click)="showPaymentForm = false">
           Cancelar
         </button>
-        <button type="submit" class="btn btn-primary">Registrar Pago</button>
+        <button type="submit" class="btn btn-primary" [disabled]="isSaving">{{ isSaving ? 'Procesando...' : 'Registrar Pago' }}</button>
       </div>
     </form>
   </div>

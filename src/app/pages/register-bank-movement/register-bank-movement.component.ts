@@ -19,6 +19,7 @@ import { Persona } from '../../models/persona.model';
 export class RegisterBankMovementComponent implements OnInit {
   
   movementId: string | null = null;
+  isSaving = false;
   
   isAccountModalVisible = false;
   isPersonaModalVisible = false;
@@ -149,15 +150,22 @@ export class RegisterBankMovementComponent implements OnInit {
       }))
     };
 
+    this.isSaving = true;
     if (this.movementId) {
-      this.bankingService.updateTransaction(this.movementId, payload).subscribe(() => {
-        alert('Movimiento actualizado exitosamente');
-        this.router.navigate(['/bank-movements']);
+      this.bankingService.updateTransaction(this.movementId, payload).subscribe({
+        next: () => {
+          alert('Movimiento actualizado exitosamente');
+          this.router.navigate(['/bank-movements']);
+        },
+        error: () => this.isSaving = false
       });
     } else {
-      this.bankingService.createTransaction(payload).subscribe(() => {
-        alert('Movimiento registrado exitosamente');
-        this.router.navigate(['/bank-movements']);
+      this.bankingService.createTransaction(payload).subscribe({
+        next: () => {
+          alert('Movimiento registrado exitosamente');
+          this.router.navigate(['/bank-movements']);
+        },
+        error: () => this.isSaving = false
       });
     }
   }

@@ -131,8 +131,8 @@
     <button class="btn-cancel" (click)="cancel()">
       <span class="material-icons">close</span> Cancelar
     </button>
-    <button class="btn-primary" (click)="save()">
-      <span class="material-icons">save</span> Guardar
+    <button class="btn-primary" (click)="save()" [disabled]="isSaving">
+      <span class="material-icons">save</span> {{ isSaving ? 'Guardando...' : 'Guardar' }}
     </button>
   </div>
 </div>

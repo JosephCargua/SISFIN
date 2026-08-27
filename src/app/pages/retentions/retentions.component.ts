@@ -14,6 +14,7 @@ import { Retention, CreateRetentionDto } from '../../models/tax.model';
 export class RetentionsComponent implements OnInit {
   retentions: Retention[] = [];
   showCreateForm = false;
+  isSaving = false;
 
   newRetention: CreateRetentionDto = {
     issueDate: new Date().toISOString().split('T')[0],
@@ -48,14 +49,17 @@ export class RetentionsComponent implements OnInit {
   }
 
   createRetention() {
+    this.isSaving = true;
     this.taxService.createRetention(this.newRetention).subscribe({
       next: () => {
         alert('Retención creada exitosamente');
         this.showCreateForm = false;
+        this.isSaving = false;
         this.resetForm();
         this.loadRetentions();
       },
       error: (error) => {
+        this.isSaving = false;
         alert(error.error?.message || 'Error al crear la retención');
       },
     });

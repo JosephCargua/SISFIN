@@ -85,7 +85,7 @@
         <button type="button" class="btn btn-secondary" (click)="showCreateForm = false">
           Cancelar
         </button>
-        <button type="submit" class="btn btn-primary">Crear Retención</button>
+        <button type="submit" class="btn btn-primary" [disabled]="isSaving">{{ isSaving ? 'Procesando...' : 'Crear Retención' }}</button>
       </div>
     </form>
   </div>

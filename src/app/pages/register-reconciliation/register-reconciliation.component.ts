@@ -28,6 +28,7 @@ export class RegisterReconciliationComponent implements OnInit {
   
   reconciliationId: string | null = null;
   isAccountModalVisible = false;
+  isSaving = false;
   
   reconciliation = {
     reconciliationDate: new Date().toISOString().split('T')[0],
@@ -309,19 +310,31 @@ export class RegisterReconciliationComponent implements OnInit {
       transactionIds: Array.from(this.selectedMovementIds)
     };
 
+    this.isSaving = true;
+
     if (this.reconciliationId) {
-      this.bankingService.updateReconciliation(this.reconciliationId, payload).subscribe(() => {
-        alert('Conciliación actualizada exitosamente');
-        this.router.navigate(['/bank-reconciliations']);
-      }, err => {
-        alert(err.error?.message || 'Error al guardar');
+      this.bankingService.updateReconciliation(this.reconciliationId, payload).subscribe({
+        next: () => {
+          alert('Conciliación actualizada exitosamente');
+          if (close) {
+            this.router.navigate(['/reconciliations']);
+          } else {
+            this.isSaving = false;
+          }
+        },
+        error: () => this.isSaving = false
       });
     } else {
-      this.bankingService.createReconciliation(payload).subscribe(() => {
-        alert('Conciliación guardada exitosamente');
-        this.router.navigate(['/bank-reconciliations']);
-      }, err => {
-        alert(err.error?.message || 'Error al guardar');
+      this.bankingService.createReconciliation(payload).subscribe({
+        next: () => {
+          alert('Conciliación registrada exitosamente');
+          if (close) {
+            this.router.navigate(['/reconciliations']);
+          } else {
+            this.isSaving = false;
+          }
+        },
+        error: () => this.isSaving = false
       });
     }
   }

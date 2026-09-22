@@ -5,8 +5,8 @@ import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
 import { BankingService } from '../../core/services/banking.service';
 import { AccountService } from '../../core/services/account.service';
-import { AccountSelectorModalComponent } from '../../components/account-selector-modal/account-selector-modal.component';
-import { Account } from '../../models/account.model';
+import { BankAccountSelectorModalComponent } from '../../components/bank-account-selector-modal/bank-account-selector-modal.component';
+import { BankAccount } from '../../models/banking.model';
 import * as XLSX from 'xlsx';
 
 export interface BankStatementLine {
@@ -20,7 +20,7 @@ export interface BankStatementLine {
 @Component({
   selector: 'app-register-reconciliation',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, AccountSelectorModalComponent],
+  imports: [CommonModule, FormsModule, RouterModule, BankAccountSelectorModalComponent],
   templateUrl: './register-reconciliation.component.html',
   styleUrl: './register-reconciliation.component.scss'
 })
@@ -114,9 +114,9 @@ export class RegisterReconciliationComponent implements OnInit {
     this.isAccountModalVisible = true;
   }
 
-  onAccountSelected(account: Account) {
+  onAccountSelected(account: BankAccount) {
     this.reconciliation.bankAccountId = account.id;
-    this.reconciliation.accountName = account.name;
+    this.reconciliation.accountName = account.name || account.bankName || '';
     this.isAccountModalVisible = false;
     
     this.bankingService.getAccountStatement(account.id, undefined, this.reconciliation.reconciliationDate).subscribe(statement => {

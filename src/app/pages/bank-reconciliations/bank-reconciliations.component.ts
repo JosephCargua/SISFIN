@@ -3,13 +3,12 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { BankingService } from '../../core/services/banking.service';
-import { AccountService } from '../../core/services/account.service';
-import { AccountSelectorModalComponent } from '../../components/account-selector-modal/account-selector-modal.component';
+import { BankAccountSelectorModalComponent } from '../../components/bank-account-selector-modal/bank-account-selector-modal.component';
 
 @Component({
   selector: 'app-bank-reconciliations',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, AccountSelectorModalComponent],
+  imports: [CommonModule, RouterModule, FormsModule, BankAccountSelectorModalComponent],
   templateUrl: './bank-reconciliations.component.html',
   styleUrl: './bank-reconciliations.component.scss'
 })
@@ -32,7 +31,7 @@ export class BankReconciliationsComponent implements OnInit {
 
   onAccountSelected(account: any) {
     this.filters.bankId = account.id;
-    this.filters.bankName = account.name;
+    this.filters.bankName = account.name || account.bankName || '';
     this.isAccountModalVisible = false;
   }
   isDeleteModalVisible = false;
@@ -40,15 +39,13 @@ export class BankReconciliationsComponent implements OnInit {
 
   constructor(
     private bankingService: BankingService,
-    private accountService: AccountService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
     this.loadReconciliations();
-    // Usually bank accounts would be loaded, but since reconciliation saves bankAccountId as string,
-    // we'll try to map it using AccountService.
-    this.accountService.getAll().subscribe(accs => {
+    // Fetch bank accounts instead of accounting accounts
+    this.bankingService.getBankAccounts().subscribe(accs => {
       this.bankAccounts = accs;
       this.mapAccountNames();
     });
@@ -87,8 +84,8 @@ export class BankReconciliationsComponent implements OnInit {
   mapAccountNames() {
     if (this.bankAccounts.length > 0 && this.reconciliations.length > 0) {
       this.reconciliations.forEach(r => {
-        const acc = this.bankAccounts.find(a => a.id === r.bankAccountId || a.name === r.bankAccountId);
-        r.accountName = acc ? acc.name : r.bankAccountId; // Fallback if uuid is stored or name is stored
+        const acc = this.bankAccounts.find(a => a.id === r.bankAccountId || a.bankName === r.bankAccountId);
+        r.accountName = acc ? (acc.name || acc.bankName) : r.bankAccountId; // Fallback if uuid is stored or name is stored
       });
     }
   }

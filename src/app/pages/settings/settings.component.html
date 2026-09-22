@@ -1,0 +1,94 @@
+<div class="container mx-auto p-4">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold text-gray-800">Configuración de Empresa</h1>
+    <button 
+      (click)="save()" 
+      [disabled]="isSaving"
+      class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2">
+      <i class="fas fa-save"></i>
+      {{ isSaving ? 'Guardando...' : 'Guardar Cambios' }}
+    </button>
+  </div>
+
+  <div *ngIf="isLoading" class="flex justify-center p-8">
+    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+  </div>
+
+  <div *ngIf="!isLoading && settings" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Información General -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-lg font-semibold mb-4 border-b pb-2">Información General</h2>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Razón Social</label>
+          <input type="text" [(ngModel)]="settings.companyName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">RUC</label>
+          <input type="text" [(ngModel)]="settings.ruc" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+        </div>
+      </div>
+    </div>
+
+    <!-- Firmas -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-lg font-semibold mb-4 border-b pb-2">Firmas para Reportes</h2>
+      <div class="space-y-4">
+        <div *ngFor="let sig of settings.signatures; let i = index" class="flex gap-4">
+          <div class="flex-1">
+            <label class="block text-xs text-gray-500">Cargo</label>
+            <input type="text" [(ngModel)]="sig.role" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm">
+          </div>
+          <div class="flex-1">
+            <label class="block text-xs text-gray-500">Nombre</label>
+            <input type="text" [(ngModel)]="sig.name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm text-sm">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Auto Contabilización -->
+    <div class="bg-white rounded-lg shadow p-6 md:col-span-2">
+      <h2 class="text-lg font-semibold mb-4 border-b pb-2">Cuentas por Defecto (Auto-Contabilización)</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        
+        <!-- Cuentas por Cobrar -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Cuenta de Cuentas por Cobrar</label>
+          <select [(ngModel)]="settings.defaultAccounts.receivableAccountId" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            <option [value]="null">-- Seleccionar --</option>
+            <option *ngFor="let acc of accounts" [value]="acc.id">{{acc.code}} - {{acc.name}}</option>
+          </select>
+        </div>
+
+        <!-- Cuentas por Pagar -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Cuenta de Cuentas por Pagar</label>
+          <select [(ngModel)]="settings.defaultAccounts.payableAccountId" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            <option [value]="null">-- Seleccionar --</option>
+            <option *ngFor="let acc of accounts" [value]="acc.id">{{acc.code}} - {{acc.name}}</option>
+          </select>
+        </div>
+
+        <!-- Ingreso por Ventas -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Cuenta de Ingreso por Ventas</label>
+          <select [(ngModel)]="settings.defaultAccounts.salesAccountId" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            <option [value]="null">-- Seleccionar --</option>
+            <option *ngFor="let acc of accounts" [value]="acc.id">{{acc.code}} - {{acc.name}}</option>
+          </select>
+        </div>
+
+        <!-- Gastos Administrativos -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Cuenta de Gastos Comunes</label>
+          <select [(ngModel)]="settings.defaultAccounts.expenseAccountId" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            <option [value]="null">-- Seleccionar --</option>
+            <option *ngFor="let acc of accounts" [value]="acc.id">{{acc.code}} - {{acc.name}}</option>
+          </select>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

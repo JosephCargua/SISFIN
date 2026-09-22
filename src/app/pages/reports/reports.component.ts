@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
+import { SettingsService } from '../../core/services/settings.service';
 
 @Component({
   selector: 'app-reports',
@@ -57,6 +58,7 @@ export class ReportsComponent implements OnInit {
   constructor(
     private api: ApiService,
     private route: ActivatedRoute,
+    private settingsService: SettingsService
   ) {}
 
   ngOnInit() {
@@ -64,6 +66,14 @@ export class ReportsComponent implements OnInit {
     if (type === 'balance-sheet' || type === 'income-statement') {
       this.reportType = type;
     }
+
+    this.settingsService.getSettings().subscribe(settings => {
+      if (settings && settings.signatures) {
+        // If settings has signatures from backend, map them to row1 and row2
+        // Just as an example. But if we use JSON directly from backend, we can just replace it if it matches the format
+        // Or we pass them to the backend in the download request
+      }
+    });
   }
 
   downloadPDF() {

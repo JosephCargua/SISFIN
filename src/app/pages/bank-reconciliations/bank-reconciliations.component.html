@@ -89,11 +89,11 @@
   </section>
 </div>
 
-<app-account-selector-modal 
+<app-bank-account-selector-modal 
   [isVisible]="isAccountModalVisible" 
   (close)="isAccountModalVisible = false"
   (accountSelected)="onAccountSelected($event)">
-</app-account-selector-modal>
+</app-bank-account-selector-modal>
 
 <!-- Modal de Confirmación de Eliminación -->
 <div class="modal-overlay" *ngIf="isDeleteModalVisible">

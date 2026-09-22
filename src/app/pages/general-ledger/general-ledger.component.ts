@@ -125,8 +125,8 @@ export class GeneralLedgerComponent {
     ];
 
     const dataToExport = this.ledgerData.movements.map((mov: any) => ({
-      Fecha: new Date(mov.date).toLocaleDateString(),
-      Comprobante: mov.reference,
+      Fecha: new Date(mov.journalEntry?.date || new Date()).toLocaleDateString(),
+      Comprobante: mov.reference || mov.journalEntry?.entryNumber || '-',
       Detalle: mov.description || '-',
       Debe: mov.debit > 0 ? Number(mov.debit) : 0,
       Haber: mov.credit > 0 ? Number(mov.credit) : 0,
@@ -149,8 +149,8 @@ export class GeneralLedgerComponent {
     doc.text(`Periodo: ${this.startDate} a ${this.endDate}`, 14, 22);
 
     const tableData = this.ledgerData.movements.map((mov: any) => [
-      new Date(mov.date).toLocaleDateString(),
-      mov.reference,
+      new Date(mov.journalEntry?.date || new Date()).toLocaleDateString(),
+      mov.reference || mov.journalEntry?.entryNumber || '-',
       mov.description,
       (mov.debit > 0 ? mov.debit : 0).toFixed(2),
       (mov.credit > 0 ? mov.credit : 0).toFixed(2),

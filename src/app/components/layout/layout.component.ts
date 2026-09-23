@@ -80,7 +80,8 @@ export class LayoutComponent implements OnInit {
         { label: 'Retenciones', route: '/retentions', icon: 'description' },
         { label: 'ATS', route: '/ats', icon: 'file_copy' },
       ]
-    }
+    },
+    { label: 'Configuración', route: '/settings', icon: 'settings' }
   ];
 
   constructor(private router: Router) {}

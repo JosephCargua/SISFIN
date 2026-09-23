@@ -18,7 +18,7 @@ export class ReportsComponent implements OnInit {
   startDate = new Date(new Date().getFullYear(), 0, 1).toISOString().split('T')[0];
   endDate = new Date().toISOString().split('T')[0];
 
-  signatures = {
+  signatures: any = {
     row1: [
       {
         name: 'Hno. Miguel Angel Cargua',

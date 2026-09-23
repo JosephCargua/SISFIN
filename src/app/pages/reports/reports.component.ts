@@ -18,7 +18,7 @@ export class ReportsComponent implements OnInit {
   startDate = new Date(new Date().getFullYear(), 0, 1).toISOString().split('T')[0];
   endDate = new Date().toISOString().split('T')[0];
 
-  signatures = {
+  signatures: any = {
     row1: [
       {
         name: 'Hno. Miguel Angel Cargua',
@@ -68,10 +68,16 @@ export class ReportsComponent implements OnInit {
     }
 
     this.settingsService.getSettings().subscribe(settings => {
-      if (settings && settings.signatures) {
-        // If settings has signatures from backend, map them to row1 and row2
-        // Just as an example. But if we use JSON directly from backend, we can just replace it if it matches the format
-        // Or we pass them to the backend in the download request
+      if (settings && settings.signatures && Array.isArray(settings.signatures)) {
+        const flatSigs = settings.signatures;
+        this.signatures.row1 = [];
+        this.signatures.row2 = [];
+        
+        if (flatSigs.length > 0) this.signatures.row1.push(flatSigs[0]);
+        if (flatSigs.length > 1) this.signatures.row1.push(flatSigs[1]);
+        if (flatSigs.length > 2) this.signatures.row2.push(flatSigs[2]);
+        if (flatSigs.length > 3) this.signatures.row2.push(flatSigs[3]);
+        if (flatSigs.length > 4) this.signatures.row2.push(flatSigs[4]);
       }
     });
   }
@@ -82,7 +88,10 @@ export class ReportsComponent implements OnInit {
 
     if (this.reportType === 'balance-sheet') {
       endpoint = 'reports/balance-sheet/pdf';
-      params = { date: this.date };
+      params = { 
+        date: this.date,
+        signatures: JSON.stringify(this.signatures) 
+      };
     } else if (this.reportType === 'income-statement') {
       endpoint = 'reports/income-statement/pdf';
       params = { 

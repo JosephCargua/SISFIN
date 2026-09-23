@@ -27,7 +27,7 @@ export class SettingsComponent implements OnInit {
 
   loadData() {
     this.isLoading = true;
-    this.accountService.getAccounts().subscribe(accounts => {
+    this.accountService.getAll().subscribe((accounts: any[]) => {
       this.accounts = accounts;
       
       this.settingsService.getSettings().subscribe(settings => {

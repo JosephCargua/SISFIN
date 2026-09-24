@@ -86,5 +86,9 @@ export class BankingService {
   updateTransaction(id: string, transaction: CreateBankTransactionDto): Observable<BankTransaction> {
     return this.api.put<BankTransaction>(`bank-transactions/${id}`, transaction);
   }
+
+  searchDocument(documentNumber: string): Observable<any> {
+    return this.api.get<any>(`financial-documents/search/${documentNumber}`);
+  }
 }
 

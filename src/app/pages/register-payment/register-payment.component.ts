@@ -101,6 +101,31 @@ export class RegisterPaymentComponent implements OnInit {
       documentLabel: '', issueDate: this.issueDate, type: 'Factura', value: 0, balance: 0, amountToPay: 0
     });
   }
+  
+  onDocumentLabelChange(doc: any) {
+    if (!doc.documentLabel) return;
+    this.bankingService.searchDocument(doc.documentLabel).subscribe({
+      next: (foundDoc) => {
+        if (foundDoc) {
+          if (foundDoc.issueDate) {
+             const dateObj = new Date(foundDoc.issueDate);
+             if (!isNaN(dateObj.getTime())) {
+                doc.issueDate = dateObj.toISOString().split('T')[0];
+             }
+          }
+          doc.type = foundDoc.documentCategory === 'INVOICE' ? 'Factura' : doc.type;
+          doc.value = foundDoc.total || 0;
+          doc.balance = foundDoc.total || 0; // Assuming initial balance is total
+          doc.amountToPay = doc.balance;
+          this.recalcTotal();
+        }
+      },
+      error: () => {
+        // Document not found or error, do nothing so user can enter manually
+      }
+    });
+  }
+
   removeDocument(index: number) {
     this.documents.splice(index, 1);
     this.recalcTotal();

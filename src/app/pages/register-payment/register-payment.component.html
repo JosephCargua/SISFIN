@@ -160,7 +160,7 @@
                   <span class="material-icons">delete</span>
                 </button>
               </td>
-              <td><input type="text" [(ngModel)]="doc.documentLabel" placeholder="Ej. FAC-001"></td>
+              <td><input type="text" [(ngModel)]="doc.documentLabel" placeholder="Ej. FAC-001" (change)="onDocumentLabelChange(doc)"></td>
               <td><input type="date" [(ngModel)]="doc.issueDate"></td>
               <td>
                 <select [(ngModel)]="doc.type">

@@ -132,8 +132,8 @@
           <td>{{ p.cuentaStr }}</td>
           <td style="text-align: right;">{{ formatCurrency(p.total) }}</td>
           <td class="actions">
-            <button class="btn-icon btn-blue" title="Editar"><span class="material-icons">edit_square</span></button>
-            <button class="btn-icon btn-blue" title="Eliminar"><span class="material-icons">delete</span></button>
+            <button class="btn-icon btn-blue" title="Editar" (click)="editPayment(p)"><span class="material-icons">edit_square</span></button>
+            <button class="btn-icon btn-blue" title="Eliminar" (click)="deletePayment(p)"><span class="material-icons">delete</span></button>
           </td>
         </tr>
         <tr *ngIf="payments.length === 0">

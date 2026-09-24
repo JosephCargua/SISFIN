@@ -110,4 +110,45 @@ export class PaymentRecordsComponent implements OnInit {
   onPersonaSelected(persona: Persona) {
     this.filters.persona = persona.nombre;
   }
+
+  editPayment(p: any) {
+    // Determine the type to navigate
+    if (p.tipoTransaccion === 'Cobro/Pago Masivo') {
+      this.router.navigate(['/register-mass-payment', p.id]);
+    } else if (p.tipoTransaccion === 'Cruce') {
+      this.router.navigate(['/document-crossing', p.id]);
+    } else {
+      this.router.navigate(['/register-payment', p.id]);
+    }
+  }
+
+  deletePayment(p: any) {
+    import('sweetalert2').then(module => {
+      const Swal = module.default;
+      Swal.fire({
+        title: '¿Eliminar transacción?',
+        text: '¿Está seguro de eliminar esta transacción? Esta acción revertirá los pagos asociados.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Import BankingService dynamically or use a generic API call if BankingService is not injected
+          this.apiService.delete<void>(`bank-transactions/${p.id}`).subscribe({
+            next: () => {
+              Swal.fire('Eliminada', 'La transacción ha sido eliminada correctamente.', 'success');
+              this.loadPayments();
+            },
+            error: (err) => {
+              Swal.fire('Error', 'No se pudo eliminar la transacción.', 'error');
+              console.error(err);
+            }
+          });
+        }
+      });
+    });
+  }
 }

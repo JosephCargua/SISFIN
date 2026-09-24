@@ -6,6 +6,7 @@ import { BankingService } from '../../core/services/banking.service';
 import { BankAccount } from '../../models/banking.model';
 import { PersonaSelectorModalComponent } from '../../components/persona-selector-modal/persona-selector-modal.component';
 import { Persona } from '../../models/persona.model';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-bank-movements',
@@ -125,5 +126,31 @@ export class BankMovementsComponent implements OnInit {
 
   onPersonaSelected(persona: Persona) {
     this.filters.persona = persona.nombre;
+  }
+
+  deleteMovement(m: any) {
+    Swal.fire({
+      title: '¿Eliminar transacción?',
+      text: '¿Está seguro de eliminar esta transacción? Esta acción no se puede deshacer.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.bankingService.deleteTransaction(m.id).subscribe({
+          next: () => {
+            Swal.fire('Eliminada', 'La transacción ha sido eliminada correctamente.', 'success');
+            this.loadMovements();
+          },
+          error: (err) => {
+            Swal.fire('Error', 'No se pudo eliminar la transacción.', 'error');
+            console.error(err);
+          }
+        });
+      }
+    });
   }
 }

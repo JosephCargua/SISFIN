@@ -82,6 +82,13 @@ export const routes: Routes = [
           ).then((m) => m.RegisterPaymentComponent),
       },
       {
+        path: 'register-payment/:id',
+        loadComponent: () =>
+          import(
+            './pages/register-payment/register-payment.component'
+          ).then((m) => m.RegisterPaymentComponent),
+      },
+      {
         path: 'register-mass-payment',
         loadComponent: () =>
           import(

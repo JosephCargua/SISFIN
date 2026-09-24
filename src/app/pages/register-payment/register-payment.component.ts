@@ -56,6 +56,8 @@ export class RegisterPaymentComponent implements OnInit {
     return ['Caja', 'Transferencia', 'Cheque', 'Tarjeta de Crédito', 'Dinero electrónico'];
   }
 
+  editingId: string | null = null;
+
   constructor(
     private route: ActivatedRoute, 
     private router: Router,
@@ -65,6 +67,68 @@ export class RegisterPaymentComponent implements OnInit {
 
   ngOnInit() {
     this.bankingService.getBankAccounts().subscribe(accs => this.bankAccounts = accs);
+    
+    this.route.paramMap.subscribe(params => {
+      const id = params.get('id');
+      if (id) {
+        this.editingId = id;
+        this.loadTransactionForEditing(id);
+      }
+    });
+  }
+
+  loadTransactionForEditing(id: string) {
+    this.bankingService.getTransactionById(id).subscribe({
+      next: (tx: any) => {
+        this.transactionType = tx.transactionType || (tx.type === 'Egreso' ? 'Pago' : 'Cobro');
+        this.paymentMethod = tx.paymentMethod || 'Caja';
+        this.issueDate = typeof tx.date === 'string' ? tx.date.split('T')[0] : tx.date;
+        this.selectedPersonId = tx.personaId || '';
+        this.personSearch = tx.personName || '';
+        this.bankAccount = tx.bankAccountId || '';
+        this.checkNumber = tx.checkNumber || '';
+        this.description = tx.description || '';
+        
+        // Reset arrays
+        this.documents = [];
+        this.advances = [];
+        this.accounts = [];
+        
+        if (tx.details && tx.details.length > 0) {
+          tx.details.forEach((d: any) => {
+            if (d.sourceType === 'DOCUMENT') {
+              this.documents.push({
+                documentLabel: d.documentNumber || d.accountName,
+                documentType: d.documentType,
+                issueDate: d.documentIssueDate ? (typeof d.documentIssueDate === 'string' ? d.documentIssueDate.split('T')[0] : d.documentIssueDate) : this.issueDate,
+                total: d.amount, // Just to show
+                balance: d.amount,
+                amountToPay: Number(d.amount)
+              });
+            } else if (d.sourceType === 'ANTICIPO') {
+              this.advances.push({
+                advanceLabel: d.documentNumber || d.accountName,
+                issueDate: this.issueDate,
+                balance: Math.abs(d.amount),
+                amountToApply: Math.abs(d.amount)
+              });
+            } else if (d.sourceType === 'ACCOUNT') {
+              this.accounts.push({
+                accountCode: d.accountName,
+                accountName: d.accountName,
+                description: '',
+                amount: Number(d.amount)
+              });
+            }
+          });
+        }
+        
+        this.recalcTotal();
+      },
+      error: () => {
+        // Fallback or show error
+      }
+    });
   }
 
   onTransactionTypeChange() {
@@ -254,17 +318,40 @@ export class RegisterPaymentComponent implements OnInit {
       details: payloadDetails
     };
 
-    this.bankingService.createTransaction(payload).subscribe({
-      next: () => {
-        Swal.fire('Éxito', 'Transacción guardada correctamente', 'success').then(() => {
-          this.router.navigate(['/payment-records']);
-        });
-        this.saving = false;
-      },
-      error: () => {
-        Swal.fire('Error', 'Hubo un problema al guardar la transacción', 'error');
-        this.saving = false;
-      }
-    });
+    if (this.editingId) {
+      this.bankingService.updateTransaction(this.editingId, payload).subscribe({
+        next: () => {
+          import('sweetalert2').then(module => {
+            module.default.fire('Éxito', 'Transacción actualizada correctamente', 'success').then(() => {
+              this.router.navigate(['/payment-records']);
+            });
+          });
+          this.saving = false;
+        },
+        error: () => {
+          import('sweetalert2').then(module => {
+            module.default.fire('Error', 'Hubo un problema al actualizar', 'error');
+          });
+          this.saving = false;
+        }
+      });
+    } else {
+      this.bankingService.createTransaction(payload).subscribe({
+        next: () => {
+          import('sweetalert2').then(module => {
+            module.default.fire('Éxito', 'Transacción guardada correctamente', 'success').then(() => {
+              this.router.navigate(['/payment-records']);
+            });
+          });
+          this.saving = false;
+        },
+        error: () => {
+          import('sweetalert2').then(module => {
+            module.default.fire('Error', 'Hubo un problema al guardar la transacción', 'error');
+          });
+          this.saving = false;
+        }
+      });
+    }
   }
 }

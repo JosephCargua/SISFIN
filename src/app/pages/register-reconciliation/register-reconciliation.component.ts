@@ -210,8 +210,7 @@ export class RegisterReconciliationComponent implements OnInit {
     const str = typeof dateStr === 'string' ? dateStr : new Date(dateStr).toISOString();
     const part = str.split('T')[0];
     const [year, month, day] = part.split('-');
-    return ${day}//;
-  });
+    return `${day}/${month}/${year}`;
   }
 
   // --- Bank Statement Import Logic ---
@@ -369,4 +368,3 @@ export class RegisterReconciliationComponent implements OnInit {
     return this.reconciliation.reconciliationDate || this.reconciliationId;
   }
 }
-

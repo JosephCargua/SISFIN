@@ -164,7 +164,7 @@ export class ConsultDocumentsComponent implements OnInit {
     this.router.navigate(['/register-payment'], {
       queryParams: {
         document: doc.documentLabel,
-        personId: doc.personId || doc.supplierId,
+        personId: (doc as any).personId || (doc as any).supplierId,
         amount: this.getRemainingBalance(doc)
       }
     });

@@ -75,7 +75,7 @@ export class RegisterPaymentComponent implements OnInit {
           this.selectedPersonId = qParams['personId'];
           this.personaService.getPersona(this.selectedPersonId).subscribe({
              next: (p) => {
-                if (p) this.personSearch = p.razonSocial || p.nombres || p.nombre || '';
+                if (p) this.personSearch = p.nombre || '';
              }
           });
         }

@@ -68,6 +68,28 @@ export class RegisterPaymentComponent implements OnInit {
   ngOnInit() {
     this.bankingService.getBankAccounts().subscribe(accs => this.bankAccounts = accs);
     
+    this.route.queryParams.subscribe(qParams => {
+      if (qParams['document']) {
+        this.transactionType = 'Pago';
+        if (qParams['personId']) {
+          this.selectedPersonId = qParams['personId'];
+          this.personaService.searchPersonas('').subscribe(personas => {
+             const p = personas.find(x => x.id === this.selectedPersonId);
+             if (p) this.personSearch = p.razonSocial || p.nombres;
+          });
+        }
+        this.documents = [{
+          documentLabel: qParams['document'],
+          issueDate: this.issueDate,
+          type: 'Factura',
+          value: Number(qParams['amount']) || 0,
+          balance: Number(qParams['amount']) || 0,
+          amountToPay: Number(qParams['amount']) || 0
+        }];
+        this.recalcTotal();
+      }
+    });
+
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
       if (id) {
@@ -355,3 +377,4 @@ export class RegisterPaymentComponent implements OnInit {
     }
   }
 }
+

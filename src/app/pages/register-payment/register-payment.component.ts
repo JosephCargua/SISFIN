@@ -272,7 +272,7 @@ export class RegisterPaymentComponent implements OnInit {
   }
 
   resetForm() {
-    this.transactionType = 'Cobro';
+    this.transactionType = 'Pago';
     this.paymentMethod = 'Caja';
     this.issueDate = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
     this.personSearch = '';

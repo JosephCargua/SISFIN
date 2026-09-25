@@ -90,5 +90,9 @@ export class BankingService {
   searchDocument(documentNumber: string): Observable<any> {
     return this.api.get<any>(`financial-documents/search/${documentNumber}`);
   }
+
+  getFinancialDocumentById(id: string): Observable<any> {
+    return this.api.get<any>(`financial-documents/${id}`);
+  }
 }
 

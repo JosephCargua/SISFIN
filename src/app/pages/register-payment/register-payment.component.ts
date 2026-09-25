@@ -19,6 +19,7 @@ import { Account } from '../../models/account.model';
 })
 export class RegisterPaymentComponent implements OnInit {
   transactionType = 'Pago';
+  previousTransactionType = 'Pago';
   paymentMethod = 'Caja';
   issueDate = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
   
@@ -71,6 +72,7 @@ export class RegisterPaymentComponent implements OnInit {
     this.route.queryParams.subscribe(qParams => {
       if (qParams['document']) {
         this.transactionType = 'Pago';
+      this.previousTransactionType = 'Pago';
         if (qParams['personId']) {
           this.selectedPersonId = qParams['personId'];
           this.personaService.getPersona(this.selectedPersonId).subscribe({
@@ -156,6 +158,8 @@ export class RegisterPaymentComponent implements OnInit {
   }
 
   onTransactionTypeChange() {
+    if (this.transactionType === this.previousTransactionType) return;
+    this.previousTransactionType = this.transactionType;
     this.paymentMethod = 'Caja';
     this.documents = [];
     this.advances = [];
@@ -273,6 +277,7 @@ export class RegisterPaymentComponent implements OnInit {
 
   resetForm() {
     this.transactionType = 'Pago';
+  this.previousTransactionType = 'Pago';
     this.paymentMethod = 'Caja';
     this.issueDate = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
     this.personSearch = '';

@@ -18,7 +18,7 @@ import { Account } from '../../models/account.model';
   styleUrls: ['./register-payment.component.scss']
 })
 export class RegisterPaymentComponent implements OnInit {
-  transactionType = 'Cobro';
+  transactionType = 'Pago';
   paymentMethod = 'Caja';
   issueDate = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
   

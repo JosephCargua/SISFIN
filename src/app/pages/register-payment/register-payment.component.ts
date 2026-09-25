@@ -86,6 +86,7 @@ export class RegisterPaymentComponent implements OnInit {
           balance: Number(qParams['amount']) || 0,
           amountToPay: Number(qParams['amount']) || 0
         }];
+        this.onDocumentLabelChange(this.documents[0]);
         this.recalcTotal();
       }
     });
@@ -200,8 +201,8 @@ export class RegisterPaymentComponent implements OnInit {
              }
           }
           doc.type = foundDoc.documentCategory === 'INVOICE' ? 'Factura' : doc.type;
-          doc.value = foundDoc.total || 0;
-          doc.balance = foundDoc.total || 0; // Assuming initial balance is total
+          const prevPaid = Number(foundDoc.amountPaid) || 0; doc.value = Number(foundDoc.total) || 0;
+          doc.balance = Math.max(0, doc.value - prevPaid);
           doc.amountToPay = doc.balance;
           this.recalcTotal();
         }
@@ -377,4 +378,7 @@ export class RegisterPaymentComponent implements OnInit {
     }
   }
 }
+
+
+
 

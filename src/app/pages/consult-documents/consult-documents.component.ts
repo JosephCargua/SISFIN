@@ -160,6 +160,16 @@ export class ConsultDocumentsComponent implements OnInit {
     }
   }
 
+  pagarDocumento(doc: DocumentConsultItem) {
+    this.router.navigate(['/register-payment'], {
+      queryParams: {
+        document: doc.documentLabel,
+        personId: doc.personId || doc.supplierId,
+        amount: this.getRemainingBalance(doc)
+      }
+    });
+  }
+
   editDocument(doc: DocumentConsultItem) {
     // Check if it's an electronic document and it's not homologated (REVIEWED means Homologado)
     if (doc.reviewStatus && doc.reviewStatus !== 'REVIEWED') {

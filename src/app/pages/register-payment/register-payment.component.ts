@@ -73,9 +73,10 @@ export class RegisterPaymentComponent implements OnInit {
         this.transactionType = 'Pago';
         if (qParams['personId']) {
           this.selectedPersonId = qParams['personId'];
-          this.personaService.searchPersonas('').subscribe(personas => {
-             const p = personas.find(x => x.id === this.selectedPersonId);
-             if (p) this.personSearch = p.razonSocial || p.nombres;
+          this.personaService.getPersona(this.selectedPersonId).subscribe({
+             next: (p) => {
+                if (p) this.personSearch = p.razonSocial || p.nombres || p.nombre || '';
+             }
           });
         }
         this.documents = [{
@@ -378,6 +379,7 @@ export class RegisterPaymentComponent implements OnInit {
     }
   }
 }
+
 
 
 

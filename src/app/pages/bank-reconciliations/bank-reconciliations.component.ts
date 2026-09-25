@@ -100,8 +100,10 @@ export class BankReconciliationsComponent implements OnInit {
 
   formatDate(dateStr: string): string {
     if (!dateStr) return '';
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const str = typeof dateStr === 'string' ? dateStr : new Date(dateStr).toISOString();
+    const part = str.split('T')[0];
+    const [year, month, day] = part.split('-');
+    return `${day}/${month}/${year}`;
   }
 
   editReconciliation(id: string) {

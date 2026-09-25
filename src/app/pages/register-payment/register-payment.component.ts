@@ -68,6 +68,30 @@ export class RegisterPaymentComponent implements OnInit {
   ngOnInit() {
     this.bankingService.getBankAccounts().subscribe(accs => this.bankAccounts = accs);
     
+    this.route.queryParams.subscribe(qParams => {
+      if (qParams['document']) {
+        this.transactionType = 'Pago';
+        if (qParams['personId']) {
+          this.selectedPersonId = qParams['personId'];
+          this.personaService.getPersona(this.selectedPersonId).subscribe({
+             next: (p) => {
+                if (p) this.personSearch = p.nombre || '';
+             }
+          });
+        }
+        this.documents = [{
+          documentLabel: qParams['document'],
+          issueDate: this.issueDate,
+          type: 'Factura',
+          value: Number(qParams['amount']) || 0,
+          balance: Number(qParams['amount']) || 0,
+          amountToPay: Number(qParams['amount']) || 0
+        }];
+        this.onDocumentLabelChange(this.documents[0]);
+        this.recalcTotal();
+      }
+    });
+
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
       if (id) {
@@ -178,8 +202,8 @@ export class RegisterPaymentComponent implements OnInit {
              }
           }
           doc.type = foundDoc.documentCategory === 'INVOICE' ? 'Factura' : doc.type;
-          doc.value = foundDoc.total || 0;
-          doc.balance = foundDoc.total || 0; // Assuming initial balance is total
+          const prevPaid = Number(foundDoc.amountPaid) || 0; doc.value = Number(foundDoc.total) || 0;
+          doc.balance = Math.max(0, doc.value - prevPaid);
           doc.amountToPay = doc.balance;
           this.recalcTotal();
         }
@@ -355,3 +379,8 @@ export class RegisterPaymentComponent implements OnInit {
     }
   }
 }
+
+
+
+
+

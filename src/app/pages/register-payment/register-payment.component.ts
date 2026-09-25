@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BankingService } from '../../core/services/banking.service';
 import { PersonaService } from '../../core/services/persona.service';
+import { FinancialDocumentService } from '../../core/services/financial-document.service';
+import { DocumentConsultService } from '../../core/services/document-consult.service';
 import Swal from 'sweetalert2';
 import { PersonaSelectorModalComponent } from '../../components/persona-selector-modal/persona-selector-modal.component';
 import { AccountSelectorModalComponent } from '../../components/account-selector-modal/account-selector-modal.component';
@@ -63,16 +65,29 @@ export class RegisterPaymentComponent implements OnInit {
     private route: ActivatedRoute, 
     private router: Router,
     private bankingService: BankingService,
-    private personaService: PersonaService
+    private personaService: PersonaService,
+    private documentService: FinancialDocumentService,
+    private documentConsultService: DocumentConsultService
   ) {}
 
   ngOnInit() {
     this.bankingService.getBankAccounts().subscribe(accs => this.bankAccounts = accs);
     
     this.route.queryParams.subscribe(qParams => {
-      if (qParams['document']) {
+      const id = qParams['id'];
+      if (id) {
+        this.documentConsultService.getById(id).subscribe({
+          next: (doc: any) => this.populateFromCrossing(doc),
+          error: () => {
+            this.documentService.getById(id).subscribe({
+              next: (doc: any) => this.populateFromCrossing(doc),
+              error: () => {}
+            });
+          }
+        });
+      } else if (qParams['document']) {
         this.transactionType = 'Pago';
-      this.previousTransactionType = 'Pago';
+        this.previousTransactionType = 'Pago';
         if (qParams['personId']) {
           this.selectedPersonId = qParams['personId'];
           this.personaService.getPersona(this.selectedPersonId).subscribe({
@@ -101,6 +116,31 @@ export class RegisterPaymentComponent implements OnInit {
         this.loadTransactionForEditing(id);
       }
     });
+  }
+
+
+  populateFromCrossing(doc: any) {
+    this.transactionType = 'Pago';
+    this.previousTransactionType = 'Pago';
+    this.personSearch = doc.personName || doc.supplierName || '';
+    if (doc.personId) this.selectedPersonId = doc.personId;
+    
+    const cat = doc.documentCategory === 'INVOICE' || doc.documentTypeCode === '01' ? 'FAC' : 'DOC';
+    const documentLabel = cat + ' ' + doc.documentNumber;
+    
+    const prevPaid = Number(doc.amountPaid) || 0;
+    const value = Number(doc.total) || 0;
+    const balance = Math.max(0, value - prevPaid);
+    
+    this.documents = [{
+      documentLabel: documentLabel,
+      issueDate: doc.issueDate || this.issueDate,
+      type: cat === 'FAC' ? 'Factura' : 'Documento',
+      value: value,
+      balance: balance,
+      amountToPay: balance
+    }];
+    this.recalcTotal();
   }
 
   loadTransactionForEditing(id: string) {

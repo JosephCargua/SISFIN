@@ -23,7 +23,7 @@ export class GeneralLedgerComponent {
   accountName = '';
   isAccountModalVisible = false;
   startDate = new Date(new Date().getFullYear(), 0, 1).toISOString().split('T')[0];
-  endDate = new Date().toISOString().split('T')[0];
+  endDate = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
   ledgerData: any = null;
   loading = false;
 

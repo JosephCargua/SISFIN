@@ -34,7 +34,7 @@ export class ReceivablesComponent implements OnInit {
 
   newInvoice: CreateInvoiceDto = {
     customerId: '',
-    issueDate: new Date().toISOString().split('T')[0],
+    issueDate: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0],
     dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
       .toISOString()
       .split('T')[0],
@@ -45,7 +45,7 @@ export class ReceivablesComponent implements OnInit {
   newPayment: CreatePaymentDto = {
     invoiceId: '',
     amount: 0,
-    paymentDate: new Date().toISOString().split('T')[0],
+    paymentDate: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0],
     paymentMethod: 'CASH',
   };
 
@@ -146,7 +146,7 @@ export class ReceivablesComponent implements OnInit {
   resetInvoiceForm() {
     this.newInvoice = {
       customerId: '',
-      issueDate: new Date().toISOString().split('T')[0],
+      issueDate: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0],
       dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
         .toISOString()
         .split('T')[0],
@@ -159,7 +159,7 @@ export class ReceivablesComponent implements OnInit {
     this.newPayment = {
       invoiceId: '',
       amount: 0,
-      paymentDate: new Date().toISOString().split('T')[0],
+      paymentDate: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0],
       paymentMethod: 'CASH',
     };
   }

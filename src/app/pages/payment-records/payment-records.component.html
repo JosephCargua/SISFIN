@@ -114,7 +114,7 @@
       <tbody>
         <tr *ngFor="let p of payments">
           <td style="text-align: center;"><input type="checkbox"></td>
-          <td>{{ p.emision | date:'dd/MM/yyyy' }}</td>
+          <td>{{ p.emision | date: 'dd/MM/yyyy':'UTC' }}</td>
           <td>
             <a href="javascript:void(0)" class="link-blue">{{ p.comprobante }}</a><br>
             <span class="type-indicator" [ngClass]="p.tipoTransaccion === 'Ingreso' ? 'text-blue' : 'text-red'">

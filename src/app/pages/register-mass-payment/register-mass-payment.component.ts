@@ -17,14 +17,14 @@ import { Persona } from '../../models/persona.model';
 export class RegisterMassPaymentComponent implements OnInit {
   transactionType = 'Pago';
   paymentMethod = 'Cheque - Cheque propio';
-  issueDate = new Date().toISOString().split('T')[0];
+  issueDate = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
   
   payToOrderOf = '';
   bankAccount = '';
   bankAccounts: any[] = [];
   
   checkNumber = '';
-  checkDate = new Date().toISOString().split('T')[0];
+  checkDate = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
   description = '';
   isAnnulled = false;
   
@@ -100,11 +100,11 @@ export class RegisterMassPaymentComponent implements OnInit {
   resetForm() {
     this.transactionType = 'Pago';
     this.paymentMethod = 'Cheque - Cheque propio';
-    this.issueDate = new Date().toISOString().split('T')[0];
+    this.issueDate = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
     this.payToOrderOf = '';
     this.bankAccount = '';
     this.checkNumber = '';
-    this.checkDate = new Date().toISOString().split('T')[0];
+    this.checkDate = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
     this.description = '';
     this.isAnnulled = false;
     this.documents = [];

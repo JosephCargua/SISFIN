@@ -27,7 +27,7 @@ export class RegisterTransactionComponent implements OnInit {
     tipoMovimiento: 'Ingreso',
     metodo: 'Transacción', 
     anulado: false,
-    fechaEmision: new Date().toISOString().split('T')[0],
+    fechaEmision: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0],
     cuentaBancaria: '', 
     persona: '',
     personaId: '',

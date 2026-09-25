@@ -51,7 +51,7 @@ export class RegisterPurchaseExpenseComponent implements OnInit {
   history: any[] = [];
   documentId = '';
 
-  issueDate = new Date().toISOString().split('T')[0];
+  issueDate = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
   personType: DocumentPersonType = 'SUPPLIER';
   documentCategory: DocumentCategory = 'INVOICE';
   documentNumber = '';
@@ -67,7 +67,7 @@ export class RegisterPurchaseExpenseComponent implements OnInit {
   pettyCashAccountId = '';
   ice = 0;
 
-  retentionEmissionDate = new Date().toISOString().split('T')[0];
+  retentionEmissionDate = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
   retentionFiscalMonth = new Date().getMonth() + 1;
   retentionFiscalYear = new Date().getFullYear();
   retentionEmissionType: RetentionEmissionType = 'PHYSICAL';
@@ -808,7 +808,7 @@ export class RegisterPurchaseExpenseComponent implements OnInit {
   }
 
   resetForm() {
-    this.issueDate = new Date().toISOString().split('T')[0];
+    this.issueDate = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
     this.personType = 'SUPPLIER';
     this.documentCategory = 'INVOICE';
     this.documentNumber = '';

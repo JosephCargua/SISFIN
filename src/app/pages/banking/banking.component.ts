@@ -43,7 +43,7 @@ export class BankingComponent implements OnInit {
     bankAccountId: '',
     type: 'DEPOSIT',
     amount: 0,
-    date: new Date().toISOString().split('T')[0],
+    date: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0],
   };
 
   constructor(private bankingService: BankingService) {}
@@ -152,7 +152,7 @@ export class BankingComponent implements OnInit {
       bankAccountId: '',
       type: 'DEPOSIT',
       amount: 0,
-      date: new Date().toISOString().split('T')[0],
+      date: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0],
     };
   }
 

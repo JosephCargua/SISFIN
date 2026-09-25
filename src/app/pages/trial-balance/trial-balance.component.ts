@@ -167,7 +167,7 @@ export class TrialBalanceComponent implements OnInit {
     this.excelService.exportToExcel({
       title: 'Balance de Comprobación',
       subtitle: `Período: ${this.filters.dateFrom || '-'} a ${this.filters.dateTo || '-'}`,
-      fileName: `Balance_Comprobacion_${new Date().toISOString().split('T')[0]}`,
+      fileName: `Balance_Comprobacion_${new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0]}`,
       columns: columns,
       data: dataToExport
     });

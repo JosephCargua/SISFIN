@@ -20,7 +20,7 @@ import { Account } from '../../models/account.model';
 export class RegisterPaymentComponent implements OnInit {
   transactionType = 'Cobro';
   paymentMethod = 'Caja';
-  issueDate = new Date().toISOString().split('T')[0];
+  issueDate = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
   
   personSearch = '';
   selectedPersonId = '';
@@ -250,7 +250,7 @@ export class RegisterPaymentComponent implements OnInit {
   resetForm() {
     this.transactionType = 'Cobro';
     this.paymentMethod = 'Caja';
-    this.issueDate = new Date().toISOString().split('T')[0];
+    this.issueDate = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
     this.personSearch = '';
     this.selectedPersonId = '';
     this.bankAccount = '';

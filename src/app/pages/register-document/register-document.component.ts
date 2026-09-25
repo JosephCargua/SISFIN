@@ -283,6 +283,16 @@ export class RegisterDocumentComponent implements OnInit {
     this.recalcTotals();
   }
 
+  getDocumentLabel(): string {
+    const docType = this.documentCategory;
+    if (docType === 'INVOICE') return 'FAC ' + this.documentNumber;
+    if (docType === 'CREDIT_NOTE') return 'NC ' + this.documentNumber;
+    if (docType === 'DEBIT_NOTE') return 'ND ' + this.documentNumber;
+    if (docType === 'RETENTION') return 'RET ' + this.documentNumber;
+    
+    return this.documentNumber;
+  }
+
   get personOptions(): PersonOption[] {
     const source =
       this.personType === 'CUSTOMER' ? this.customers : this.suppliers;
@@ -624,3 +634,4 @@ export class RegisterDocumentComponent implements OnInit {
     return Math.round(value * 100) / 100;
   }
 }
+

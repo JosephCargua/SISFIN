@@ -173,7 +173,7 @@
       <div class="balance-sheet-section card">
         <h2>
           <span class="material-icons">assessment</span>
-          Balance General ({{ dashboardData.date | date: 'dd/MM/yyyy' }})
+          Balance General ({{ dashboardData.date | date: 'dd/MM/yyyy':'UTC' }})
         </h2>
         <div class="balance-sheet-grid">
           <div class="balance-column">

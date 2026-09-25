@@ -248,7 +248,7 @@ export class ConsultDocumentsComponent implements OnInit {
     this.excelService.exportToExcel({
       title: 'Consulta de Documentos',
       subtitle: `Período: ${this.filters.dateFrom || '-'} a ${this.filters.dateTo || '-'}`,
-      fileName: `Consulta_Documentos_${new Date().toISOString().split('T')[0]}`,
+      fileName: `Consulta_Documentos_${new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0]}`,
       columns: columns,
       data: dataToExport
     });

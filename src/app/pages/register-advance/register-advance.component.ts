@@ -30,13 +30,13 @@ export class RegisterAdvanceComponent implements OnInit {
     tipoMovimiento: 'Egreso', // usually advance is an egreso
     tipoAnticipo: 'Proveedor',
     metodo: 'Cheque', 
-    fechaEmision: new Date().toISOString().split('T')[0],
+    fechaEmision: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0],
     cuentaBancaria: '', 
     persona: '',
     personaId: '',
     paguese: '',
     numeroCheque: '',
-    fechaCheque: new Date().toISOString().split('T')[0],
+    fechaCheque: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0],
     descripcion: ''
   };
 

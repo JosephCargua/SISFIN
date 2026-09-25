@@ -30,13 +30,13 @@ export class RegisterBankMovementComponent implements OnInit {
     tipoMovimiento: 'Egreso',
     metodo: 'Movimiento', // Default based on component
     anulado: false,
-    fechaEmision: new Date().toISOString().split('T')[0],
+    fechaEmision: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0],
     cuentaBancaria: '', 
     persona: '',
     personaId: '',
     paguese: '',
     numeroCheque: '',
-    fechaCheque: new Date().toISOString().split('T')[0],
+    fechaCheque: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0],
     descripcion: ''
   };
 

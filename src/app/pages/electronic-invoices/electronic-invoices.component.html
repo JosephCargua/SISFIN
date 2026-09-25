@@ -100,11 +100,11 @@
                   (change)="toggleSelect(doc.id)"
                 />
               </td>
-              <td>{{ doc.issueDate | date: 'dd/MM/yyyy' }}</td>
+              <td>{{ doc.issueDate | date: 'dd/MM/yyyy':'UTC' }}</td>
               <td>
                 {{
                   doc.authorizationDate
-                    ? (doc.authorizationDate | date: 'dd/MM/yyyy')
+                    ? (doc.authorizationDate | date: 'dd/MM/yyyy':'UTC')
                     : '-'
                 }}
               </td>

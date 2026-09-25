@@ -31,7 +31,7 @@ export class RegisterReconciliationComponent implements OnInit {
   isSaving = false;
   
   reconciliation = {
-    reconciliationDate: new Date().toISOString().split('T')[0],
+    reconciliationDate: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0],
     bankAccountId: '',
     accountName: '',
     description: '',

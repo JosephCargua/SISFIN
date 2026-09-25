@@ -44,7 +44,7 @@
           Libro Mayor - {{ ledgerData.account?.code }} - {{ ledgerData.account?.name }}
         </h2>
         <p style="margin: 4px 0 0 0; color: #64748b; font-size: 14px;">
-          Período: {{ startDate | date: 'dd/MM/yyyy' }} - {{ endDate | date: 'dd/MM/yyyy' }}
+          Período: {{ startDate | date: 'dd/MM/yyyy':'UTC' }} - {{ endDate | date: 'dd/MM/yyyy':'UTC' }}
         </p>
       </div>
       <div class="export-actions" style="display: flex; gap: 8px;">
@@ -72,7 +72,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let movement of ledgerData.movements">
-            <td>{{ movement.journalEntry?.date | date: 'dd/MM/yyyy' }}</td>
+            <td>{{ movement.journalEntry?.date | date: 'dd/MM/yyyy':'UTC' }}</td>
             <td>{{ movement.journalEntry?.entryNumber }}</td>
             <td>{{ movement.description || '-' }}</td>
             <td class="text-right">{{ movement.debit | number: '1.2-2' }}</td>

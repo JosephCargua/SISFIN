@@ -166,8 +166,8 @@
           <tr *ngFor="let invoice of invoices">
             <td>{{ invoice.invoiceNumber }}</td>
             <td>{{ invoice.supplier?.name }}</td>
-            <td>{{ invoice.issueDate | date: 'dd/MM/yyyy' }}</td>
-            <td>{{ invoice.dueDate | date: 'dd/MM/yyyy' }}</td>
+            <td>{{ invoice.issueDate | date: 'dd/MM/yyyy':'UTC' }}</td>
+            <td>{{ invoice.dueDate | date: 'dd/MM/yyyy':'UTC' }}</td>
             <td>{{ invoice.total | number: '1.2-2' }}</td>
             <td>{{ invoice.paidAmount | number: '1.2-2' }}</td>
             <td>{{ invoice.balance | number: '1.2-2' }}</td>

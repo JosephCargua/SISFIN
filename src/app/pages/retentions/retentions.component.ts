@@ -17,7 +17,7 @@ export class RetentionsComponent implements OnInit {
   isSaving = false;
 
   newRetention: CreateRetentionDto = {
-    issueDate: new Date().toISOString().split('T')[0],
+    issueDate: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0],
     supplierIdentification: '',
     supplierName: '',
     retentionCode: '312',
@@ -67,7 +67,7 @@ export class RetentionsComponent implements OnInit {
 
   resetForm() {
     this.newRetention = {
-      issueDate: new Date().toISOString().split('T')[0],
+      issueDate: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0],
       supplierIdentification: '',
       supplierName: '',
       retentionCode: '312',

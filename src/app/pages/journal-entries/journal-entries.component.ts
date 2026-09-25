@@ -48,7 +48,7 @@ export class JournalEntriesComponent implements OnInit {
   JournalEntryStatus = JournalEntryStatus;
 
   newEntry: CreateJournalEntryDto = {
-    date: new Date().toISOString().split('T')[0],
+    date: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0],
     description: '',
     lines: [
       { accountId: '', accountName: '', debit: 0, credit: 0 },
@@ -309,7 +309,7 @@ export class JournalEntriesComponent implements OnInit {
 
   resetForm() {
     this.newEntry = {
-      date: new Date().toISOString().split('T')[0],
+      date: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0],
       description: '',
       lines: [
         { accountId: '', accountName: '', debit: 0, credit: 0 },
@@ -380,7 +380,7 @@ export class JournalEntriesComponent implements OnInit {
     });
 
     this.excelService.exportRawDataToExcel({
-      fileName: `Libro_Diario_${new Date().toISOString().split('T')[0]}`,
+      fileName: `Libro_Diario_${new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0]}`,
       data: wsData,
       sheetName: 'Libro Diario'
     });
@@ -449,7 +449,7 @@ export class JournalEntriesComponent implements OnInit {
       theme: 'grid'
     });
     
-    doc.save(`Libro_Diario_${new Date().toISOString().split('T')[0]}.pdf`);
+    doc.save(`Libro_Diario_${new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0]}.pdf`);
   }
 }
 

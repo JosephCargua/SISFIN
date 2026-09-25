@@ -1,4 +1,4 @@
-ï»¿<div class="modal-backdrop" *ngIf="isVisible" (click)="closeModal()">
+<div class="modal-backdrop" *ngIf="isVisible" (click)="closeModal()">
   <div class="modal-content" (click)="$event.stopPropagation()">
     <div class="modal-header">
       <h2>Crear {{ personType === 'CUSTOMER' ? 'Cliente' : 'Proveedor' }}</h2>
@@ -7,23 +7,23 @@
     
     <div class="modal-body">
       <div class="form-group">
-        <label class="required">IdentificaciÃ³n (RUC/CÃ©dula)</label>
+        <label class="required">Identificación (RUC/Cédula)</label>
         <input type="text" [(ngModel)]="identification" placeholder="Ej. 0999999999001" />
       </div>
       <div class="form-group">
-        <label class="required">RazÃ³n Social / Nombre Comercial</label>
+        <label class="required">Razón Social / Nombre Comercial</label>
         <input type="text" [(ngModel)]="name" placeholder="Ej. Empresa S.A." />
       </div>
       <div class="form-group">
-        <label>Correo ElectrÃ³nico</label>
+        <label>Correo Electrónico</label>
         <input type="email" [(ngModel)]="email" placeholder="correo@ejemplo.com" />
       </div>
       <div class="form-group">
-        <label>TelÃ©fono</label>
+        <label>Teléfono</label>
         <input type="text" [(ngModel)]="phone" placeholder="0999999999" />
       </div>
       <div class="form-group">
-        <label>DirecciÃ³n</label>
+        <label>Dirección</label>
         <input type="text" [(ngModel)]="address" placeholder="Av. Principal" />
       </div>
     </div>

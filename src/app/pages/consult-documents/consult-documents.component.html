@@ -152,7 +152,7 @@
             <td style="text-align: center;">
               <input type="checkbox" [checked]="selectedIds.has(doc.id)" (change)="toggleSelect(doc.id)" />
             </td>
-            <td style="padding: 8px;">{{ doc.issueDate | date: 'dd/MM/yyyy' }}</td>
+            <td style="padding: 8px;">{{ doc.issueDate | date: 'dd/MM/yyyy':'UTC' }}</td>
             <td class="person-cell" style="padding: 8px;">
               <div class="person-info" style="display: flex; flex-direction: column;">
                 <span class="person-name" style="color: #334155;">{{ doc.supplierName }}</span>

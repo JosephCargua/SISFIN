@@ -179,7 +179,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let movement of movements">
-            <td>{{ movement.date | date: 'dd/MM/yyyy' }}</td>
+            <td>{{ movement.date | date: 'dd/MM/yyyy':'UTC' }}</td>
             <td>{{ movement.product?.name }}</td>
             <td>
               <span class="badge">

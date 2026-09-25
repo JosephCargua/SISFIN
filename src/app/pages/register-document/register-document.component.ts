@@ -53,7 +53,7 @@ export class RegisterDocumentComponent implements OnInit {
   history: any[] = [];
   documentId = '';
 
-  issueDate = new Date().toISOString().split('T')[0];
+  issueDate = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
   personType: DocumentPersonType = 'CUSTOMER';
   documentCategory: DocumentCategory = 'INVOICE';
   documentNumber = '';
@@ -595,7 +595,7 @@ export class RegisterDocumentComponent implements OnInit {
   }
 
   resetForm() {
-    this.issueDate = new Date().toISOString().split('T')[0];
+    this.issueDate = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
     this.personType = 'CUSTOMER';
     this.documentCategory = 'INVOICE';
     this.documentNumber = '';

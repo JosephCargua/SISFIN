@@ -36,7 +36,7 @@ export class InventoryComponent implements OnInit {
     type: 'IN',
     quantity: 0,
     unitCost: 0,
-    date: new Date().toISOString().split('T')[0],
+    date: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0],
   };
 
   constructor(private inventoryService: InventoryService) {}
@@ -113,7 +113,7 @@ export class InventoryComponent implements OnInit {
       type: 'IN',
       quantity: 0,
       unitCost: 0,
-      date: new Date().toISOString().split('T')[0],
+      date: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0],
     };
   }
 

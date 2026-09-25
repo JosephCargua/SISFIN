@@ -108,7 +108,7 @@
         <tbody>
           <tr *ngFor="let retention of retentions">
             <td>{{ retention.retentionNumber }}</td>
-            <td>{{ retention.issueDate | date: 'dd/MM/yyyy' }}</td>
+            <td>{{ retention.issueDate | date: 'dd/MM/yyyy':'UTC' }}</td>
             <td>{{ retention.supplierName }}</td>
             <td>{{ retention.retentionCode }}</td>
             <td>{{ retention.retentionBase | number: '1.2-2' }}</td>

@@ -140,7 +140,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let transaction of transactions">
-            <td>{{ transaction.date | date: 'dd/MM/yyyy' }}</td>
+            <td>{{ transaction.date | date: 'dd/MM/yyyy':'UTC' }}</td>
             <td>{{ transaction.bankAccount?.accountNumber }}</td>
             <td>
               <span class="badge">

@@ -85,8 +85,9 @@ export class RegisterReconciliationComponent implements OnInit {
       this.initialBalance = Number(recon.initialBalance) || 0;
       
       if (recon.bankAccountId) {
-        this.accountService.getById(recon.bankAccountId).subscribe(acc => {
-          this.reconciliation.accountName = acc ? acc.name : recon.bankAccountId;
+        this.bankingService.getBankAccounts().subscribe(banks => {
+          const b = banks.find(x => x.id === recon.bankAccountId);
+          this.reconciliation.accountName = b ? (b.name || b.bankName || recon.bankAccountId) : recon.bankAccountId;
         });
       }
       

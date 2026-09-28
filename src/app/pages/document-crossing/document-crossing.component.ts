@@ -144,11 +144,28 @@ export class DocumentCrossingComponent implements OnInit {
       paymentMethod: this.transactionMethod,
       payToOrderOf: this.personName,
       personName: this.personName,
-      details: this.documents.map(d => ({
-        accountName: d.documentLabel || 'S/N',
-        amount: d.amountToPay,
-        costCenter: 'N/A'
-      }))
+      details: [
+        ...this.documents.map(d => ({
+          sourceType: 'DOCUMENT',
+          documentNumber: d.documentLabel || 'S/N',
+          accountName: d.documentLabel || 'S/N',
+          amount: d.amountToPay,
+          costCenter: 'N/A'
+        })),
+        ...this.advances.map(a => ({
+          sourceType: 'ANTICIPO',
+          documentNumber: a.advance ? 'Anticipo ' + a.advance : 'Anticipo',
+          accountName: a.advance ? 'Anticipo ' + a.advance : 'Anticipo',
+          amount: a.amountToPay,
+          costCenter: 'N/A'
+        })),
+        ...this.accounts.map(a => ({
+          sourceType: 'ACCOUNT',
+          accountName: a.accountName,
+          amount: a.amountToPay,
+          costCenter: 'N/A'
+        }))
+      ]
     };
 
     this.bankingService.createTransaction(bankPayload).subscribe({

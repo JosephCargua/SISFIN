@@ -36,6 +36,8 @@ export class DocumentCrossingComponent implements OnInit {
   showAccountModal = false;
   showPersonaModal = false;
   targetPersonaIndex: number = -1; // -1 for main person, >=0 for advances
+  bankAccounts: any[] = [];
+  bankAccount: string = '';
 
   constructor(
     private route: ActivatedRoute, 
@@ -47,6 +49,7 @@ export class DocumentCrossingComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    this.bankingService.getBankAccounts().subscribe(accounts => this.bankAccounts = accounts);
     this.route.queryParams.subscribe(params => {
       const id = params['id'];
       if (id) {
@@ -135,7 +138,7 @@ export class DocumentCrossingComponent implements OnInit {
     
     // Preparar transacción bancaria de tipo 'Cruce'
     const bankPayload: any = {
-      bankAccountId: null, // As it is a crossing, might not hit a bank account directly, or could be mapped
+      bankAccountId: this.bankAccount || null,
       date: this.issueDate,
       description: this.description,
       amount: totalPaid,
@@ -144,11 +147,28 @@ export class DocumentCrossingComponent implements OnInit {
       paymentMethod: this.transactionMethod,
       payToOrderOf: this.personName,
       personName: this.personName,
-      details: this.documents.map(d => ({
-        accountName: d.documentLabel || 'S/N',
-        amount: d.amountToPay,
-        costCenter: 'N/A'
-      }))
+      details: [
+        ...this.documents.map(d => ({
+          sourceType: 'DOCUMENT',
+          documentNumber: d.documentLabel || 'S/N',
+          accountName: d.documentLabel || 'S/N',
+          amount: d.amountToPay,
+          costCenter: 'N/A'
+        })),
+        ...this.advances.map(a => ({
+          sourceType: 'ANTICIPO',
+          documentNumber: a.advance ? 'Anticipo ' + a.advance : 'Anticipo',
+          accountName: a.advance ? 'Anticipo ' + a.advance : 'Anticipo',
+          amount: a.amountToPay,
+          costCenter: 'N/A'
+        })),
+        ...this.accounts.map(a => ({
+          sourceType: 'ACCOUNT',
+          accountName: a.accountName,
+          amount: a.amountToPay,
+          costCenter: 'N/A'
+        }))
+      ]
     };
 
     this.bankingService.createTransaction(bankPayload).subscribe({

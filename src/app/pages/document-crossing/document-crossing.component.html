@@ -9,6 +9,12 @@
 
     <div class="form-grid" style="display: grid; grid-template-columns: 140px 1fr; gap: 12px; align-items: center; max-width: 600px;">
       
+      <label style="text-align: right; color: #64748b; font-size: 13px;">Cuenta Bancaria:</label>
+      <select [(ngModel)]="bankAccount" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; width: 100%; max-width: 400px; outline: none;">
+        <option value="">Seleccione una cuenta bancaria</option>
+        <option *ngFor="let acc of bankAccounts" [value]="acc.id">{{ acc.name }}</option>
+      </select>
+
       <label style="text-align: right; color: #64748b; font-size: 13px;">Fecha de Emisión:</label>
       <input type="date" [(ngModel)]="issueDate" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; width: 200px;" />
 

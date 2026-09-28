@@ -35,9 +35,13 @@
 
   <!-- Dashboard Resumen -->
   <div class="summary-dashboard card">
-    <div class="summary-item">
-      <span class="label">Saldo Inicial</span>
-      <span class="value">{{ formatCurrency(initialBalance) }}</span>
+        <div class="summary-item" style="display: flex; flex-direction: column; align-items: center;">
+      <span class="label">SALDO INICIAL</span>
+      <div style="display: flex; align-items: center; justify-content: center; margin-top: 4px;">
+        <span class="value" style="margin-right: 4px;">$</span>
+        <input type="number" [(ngModel)]="initialBalance" (ngModelChange)="filterMovements()"
+               style="background: transparent; border: none; border-bottom: 1px dashed rgba(255,255,255,0.5); color: #f8fafc; font-size: 20px; font-weight: 700; width: 110px; text-align: center; outline: none;" />
+      </div>
     </div>
     <div class="summary-operator">+</div>
     <div class="summary-item success">

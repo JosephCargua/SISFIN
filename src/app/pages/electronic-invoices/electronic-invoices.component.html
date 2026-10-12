@@ -395,19 +395,7 @@
                           <span class="material-icons">sync_alt</span>
                           Nota de Crédito Vinculada (Resta al saldo)
                         </h4>
-                        <div style="margin-bottom: 10px;">
-                          <label style="display: inline-flex; align-items: center; gap: 6px; background-color: #0284c7; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 500;">
-                            <span class="material-icons" style="font-size: 16px;">upload_file</span>
-                            Subir XML de Nota de Crédito para esta factura
-                            <input
-                              type="file"
-                              accept=".xml,application/xml,text/xml"
-                              hidden
-                              (change)="onUploadCreditNoteForInvoice($event, doc)"
-                            />
-                          </label>
-                        </div>
-                        <div class="form-group">
+                        <div class="form-group" style="margin-bottom: 8px;">
                           <label>N° Nota de Crédito que afecta esta factura</label>
                           <input
                             type="text"
@@ -416,6 +404,27 @@
                             [name]="'invNc_' + doc.id"
                             placeholder="Ej: 001-002-000004466 (opcional)"
                           />
+                        </div>
+
+                        <!-- ZONA DEDICADA PARA SUBIR EL XML DE LA NOTA DE CRÉDITO -->
+                        <div class="nc-upload-card" style="margin: 10px 0 14px 0; padding: 12px; border: 2px dashed #0284c7; border-radius: 8px; background-color: #f0f9ff; text-align: center;">
+                          <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 4px;">
+                            <span class="material-icons" style="color: #0284c7; font-size: 24px;">cloud_upload</span>
+                            <strong style="color: #0369a1; font-size: 13px;">¿Tienes el XML de la Nota de Crédito?</strong>
+                          </div>
+                          <p style="margin: 0 0 8px 0; font-size: 11px; color: #475569;">
+                            Súbelo aquí para autocompletar el número y descontar el valor de la factura en automático
+                          </p>
+                          <label style="background-color: #0284c7; color: white; border: none; padding: 6px 16px; border-radius: 6px; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-weight: 500;">
+                            <span class="material-icons" style="font-size: 16px;">upload_file</span>
+                            Subir XML de Nota de Crédito
+                            <input
+                              type="file"
+                              accept=".xml,application/xml,text/xml"
+                              hidden
+                              (change)="onUploadCreditNoteForInvoice($event, doc)"
+                            />
+                          </label>
                         </div>
                         <div class="financial-balance-card" *ngIf="doc.total">
                           <div class="balance-line">

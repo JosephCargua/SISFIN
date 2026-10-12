@@ -111,14 +111,30 @@
               <td>{{ doc.documentNumber }}</td>
               <td class="supplier-cell">{{ doc.supplierName }}</td>
               <td>
-                <button
-                  type="button"
-                  class="doc-link"
-                  (click)="viewXml(doc)"
-                  [title]="doc.fileName || ''"
-                >
-                  {{ doc.documentLabel }}
-                </button>
+                <div class="doc-badge-group">
+                  <span
+                    class="doc-type-badge"
+                    [ngClass]="{
+                      'badge-nc': isCreditNote(doc),
+                      'badge-nd': isDebitNote(doc),
+                      'badge-ret': isRetention(doc),
+                      'badge-fac': !isCreditNote(doc) && !isDebitNote(doc) && !isRetention(doc)
+                    }"
+                  >
+                    {{ isCreditNote(doc) ? 'Nota de Crédito' : (isDebitNote(doc) ? 'Nota de Débito' : (isRetention(doc) ? 'Retención' : 'Factura')) }}
+                  </span>
+                  <button
+                    type="button"
+                    class="doc-link"
+                    (click)="viewXml(doc)"
+                    [title]="doc.fileName || ''"
+                  >
+                    {{ doc.documentLabel }}
+                  </button>
+                  <span class="nc-applied-chip" *ngIf="doc.creditNoteAmount && doc.creditNoteAmount > 0" title="Nota de Crédito cruzada">
+                    NC: -{{ formatCurrency(doc.creditNoteAmount) }}
+                  </span>
+                </div>
               </td>
               <td>
                 <span
@@ -128,7 +144,12 @@
                   {{ getReviewLabel(doc.reviewStatus) }}
                 </span>
               </td>
-              <td class="reason-cell">{{ doc.reason || '-' }}</td>
+              <td class="reason-cell">
+                <span *ngIf="doc.modifiedDocumentNumber" class="mod-doc-tag">
+                  Modifica: {{ doc.modifiedDocumentNumber }}
+                </span>
+                {{ doc.reason || '-' }}
+              </td>
               <td class="actions-cell">
                 <button
                   type="button"
@@ -170,11 +191,111 @@
                     >
                       <span class="material-icons">sync</span>
                       {{
-                        homologatingId === doc.id ? 'Procesando...' : 'Homologar'
+                        homologatingId === doc.id
+                          ? 'Procesando...'
+                          : (isCreditNote(doc) ? 'Homologar y Cruzar NC' : 'Homologar')
                       }}
                     </button>
                   </div>
-                  <div class="homologation-columns">
+
+                  <!-- ============================================== -->
+                  <!-- SECCIÓN ESPECIAL PARA NOTA DE CRÉDITO           -->
+                  <!-- ============================================== -->
+                  <div *ngIf="isCreditNote(doc)" class="credit-note-panel-body">
+                    <div class="nc-alert-banner">
+                      <span class="material-icons nc-icon">price_check</span>
+                      <div class="nc-alert-content">
+                        <strong>Nota de Crédito Electrónica: {{ formatCurrency(doc.total) }}</strong>
+                        <p>
+                          Este documento rebaja el valor de la factura modificada. Al homologar, el sistema 
+                          <strong>restará automáticamente {{ formatCurrency(doc.total) }}</strong> del saldo de la factura referenciada.
+                          Si la factura ya está pagada o no se especifica, quedará registrado como <strong>Saldo a Favor</strong> del proveedor.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div class="homologation-columns">
+                      <div class="homologation-col">
+                        <div class="form-group">
+                          <label>Factura que Modifica / Factura a Cruzar *</label>
+                          <input
+                            type="text"
+                            class="text-input"
+                            [(ngModel)]="getForm(doc.id).modifiedDocumentNumber"
+                            [name]="'modDoc_' + doc.id"
+                            placeholder="Ej: 001-002-000149695"
+                          />
+                          <div class="available-invoices-hint" *ngIf="getAvailableInvoices(doc.supplierIdentification).length > 0">
+                            <span class="hint-title">Facturas del proveedor disponibles para cruzar:</span>
+                            <div class="invoice-chips">
+                              <button
+                                type="button"
+                                *ngFor="let inv of getAvailableInvoices(doc.supplierIdentification)"
+                                class="btn-inv-chip"
+                                [class.selected]="getForm(doc.id).modifiedDocumentNumber === inv.documentNumber"
+                                (click)="getForm(doc.id).modifiedDocumentNumber = inv.documentNumber"
+                              >
+                                {{ inv.documentNumber }} (Total: {{ formatCurrency(inv.total) }})
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="form-group">
+                          <label>Motivo de la Modificación</label>
+                          <input
+                            type="text"
+                            class="text-input"
+                            [(ngModel)]="getForm(doc.id).modificationReason"
+                            [name]="'modReason_' + doc.id"
+                            placeholder="Ej: Devolución de mercadería / Descuento concedido"
+                          />
+                        </div>
+                      </div>
+
+                      <div class="homologation-col">
+                        <div class="form-group">
+                          <label>Cuenta Contable (Devolución / Descuento / Proveedor) *</label>
+                          <app-searchable-select
+                            [(ngModel)]="getForm(doc.id).payableAccountId"
+                            [name]="'payable_' + doc.id"
+                            [options]="accounts"
+                            bindValue="id"
+                            placeholder="Buscar cuenta..."
+                          ></app-searchable-select>
+                        </div>
+                        <div class="form-group">
+                          <label>Centro de Costo</label>
+                          <app-searchable-select
+                            [(ngModel)]="getForm(doc.id).costCenterId"
+                            [name]="'cost_' + doc.id"
+                            [options]="costCenters"
+                            bindValue="id"
+                            placeholder="Buscar centro..."
+                          ></app-searchable-select>
+                        </div>
+                        <div class="nc-financial-card">
+                          <div class="nc-card-row">
+                            <span>Valor Nota de Crédito:</span>
+                            <strong class="text-danger">-{{ formatCurrency(doc.total) }}</strong>
+                          </div>
+                          <div class="nc-card-row">
+                            <span>Factura Destino:</span>
+                            <span>{{ getForm(doc.id).modifiedDocumentNumber || 'Sin factura vinculada (Saldo a favor)' }}</span>
+                          </div>
+                          <div class="nc-card-footer">
+                            <span class="material-icons">info</span>
+                            <span>Se cruzará automáticamente al homologar</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- ============================================== -->
+                  <!-- SECCIÓN ESTÁNDAR PARA FACTURAS                 -->
+                  <!-- ============================================== -->
+                  <div *ngIf="!isCreditNote(doc)" class="homologation-columns">
                     <div class="homologation-col">
                       <div class="form-group">
                         <label>Cuenta Por Pagar *</label>
@@ -267,6 +388,38 @@
                         />
                         Actualizar datos en la persona
                       </label>
+
+                      <!-- VINCULACIÓN Y RESUMEN DE NOTAS DE CRÉDITO -->
+                      <div class="invoice-nc-crossing-box">
+                        <h4 class="section-title nc-title">
+                          <span class="material-icons">sync_alt</span>
+                          Nota de Crédito Vinculada (Resta al saldo)
+                        </h4>
+                        <div class="form-group">
+                          <label>N° Nota de Crédito que afecta esta factura</label>
+                          <input
+                            type="text"
+                            class="text-input"
+                            [(ngModel)]="getForm(doc.id).modifiedDocumentNumber"
+                            [name]="'invNc_' + doc.id"
+                            placeholder="Ej: 001-002-000004466 (opcional)"
+                          />
+                        </div>
+                        <div class="financial-balance-card" *ngIf="doc.total">
+                          <div class="balance-line">
+                            <span>Total Factura:</span>
+                            <span>{{ formatCurrency(doc.total) }}</span>
+                          </div>
+                          <div class="balance-line nc-discount" *ngIf="doc.creditNoteAmount && doc.creditNoteAmount > 0">
+                            <span>Nota de Crédito aplicada:</span>
+                            <span>-{{ formatCurrency(doc.creditNoteAmount) }}</span>
+                          </div>
+                          <div class="balance-line net-total">
+                            <span>Saldo Neto a Pagar:</span>
+                            <strong>{{ formatCurrency((doc.total || 0) - (doc.creditNoteAmount || 0)) }}</strong>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
 

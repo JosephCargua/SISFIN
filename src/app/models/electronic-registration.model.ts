@@ -31,6 +31,15 @@ export interface ElectronicDocumentRegistration {
   retentionIvaCode: string | null;
   generateRetention: boolean;
   updatePersonData: boolean;
+  modifiedDocumentNumber?: string | null;
+  modifiedDocumentType?: string | null;
+  modificationReason?: string | null;
+  modifiedDocumentId?: string | null;
+  creditNoteAmount?: number;
+  retentionAmountApplied?: number;
+  debitNoteAmount?: number;
+  amountPaid?: number;
+  balance?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -45,6 +54,8 @@ export interface HomologateDocumentDto {
   retentionIvaCode?: string;
   generateRetention?: boolean;
   updatePersonData?: boolean;
+  modifiedDocumentNumber?: string;
+  modificationReason?: string;
 }
 
 export interface AccountOption {
@@ -112,4 +123,6 @@ export interface DocumentHomologationForm {
   retentionIvaCode: string;
   generateRetention: boolean;
   updatePersonData: boolean;
+  modifiedDocumentNumber: string;
+  modificationReason: string;
 }

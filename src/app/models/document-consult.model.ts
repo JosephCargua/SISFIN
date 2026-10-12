@@ -25,6 +25,9 @@ export interface DocumentConsultItem {
   isPaid?: boolean;
   amountPaid?: number;
   balance?: number;
+  creditNoteAmount?: number;
+  debitNoteAmount?: number;
+  modifiedDocumentNumber?: string;
   isReconciled?: boolean;
   isEmailed?: boolean;
 }

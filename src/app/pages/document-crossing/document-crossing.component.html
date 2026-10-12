@@ -63,6 +63,7 @@
     <div class="tabs" role="tablist" style="display: flex; border-bottom: 1px solid #e2e8f0; background: #f8fafc; padding: 8px 16px 0; gap: 16px;">
       <button type="button" class="tab" [class.active]="activeTab === 'Documentos'" (click)="activeTab = 'Documentos'" [ngStyle]="{'padding': '8px 16px', 'border': 'none', 'background': activeTab === 'Documentos' ? 'white' : 'transparent', 'border-top': activeTab === 'Documentos' ? '2px solid #0ea5e9' : 'none', 'border-left': activeTab === 'Documentos' ? '1px solid #e2e8f0' : 'none', 'border-right': activeTab === 'Documentos' ? '1px solid #e2e8f0' : 'none', 'border-bottom': activeTab === 'Documentos' ? '1px solid white' : 'none', 'margin-bottom': '-1px', 'color': activeTab === 'Documentos' ? '#0ea5e9' : '#64748b', 'font-weight': activeTab === 'Documentos' ? '500' : 'normal', 'cursor': 'pointer'}">Documentos</button>
       <button type="button" class="tab" [class.active]="activeTab === 'Anticipos'" (click)="activeTab = 'Anticipos'" [ngStyle]="{'padding': '8px 16px', 'border': 'none', 'background': activeTab === 'Anticipos' ? 'white' : 'transparent', 'border-top': activeTab === 'Anticipos' ? '2px solid #0ea5e9' : 'none', 'border-left': activeTab === 'Anticipos' ? '1px solid #e2e8f0' : 'none', 'border-right': activeTab === 'Anticipos' ? '1px solid #e2e8f0' : 'none', 'border-bottom': activeTab === 'Anticipos' ? '1px solid white' : 'none', 'margin-bottom': '-1px', 'color': activeTab === 'Anticipos' ? '#0ea5e9' : '#64748b', 'font-weight': activeTab === 'Anticipos' ? '500' : 'normal', 'cursor': 'pointer'}">Anticipos</button>
+      <button type="button" class="tab" [class.active]="activeTab === 'Notas de Crédito'" (click)="activeTab = 'Notas de Crédito'" [ngStyle]="{'padding': '8px 16px', 'border': 'none', 'background': activeTab === 'Notas de Crédito' ? 'white' : 'transparent', 'border-top': activeTab === 'Notas de Crédito' ? '2px solid #0ea5e9' : 'none', 'border-left': activeTab === 'Notas de Crédito' ? '1px solid #e2e8f0' : 'none', 'border-right': activeTab === 'Notas de Crédito' ? '1px solid #e2e8f0' : 'none', 'border-bottom': activeTab === 'Notas de Crédito' ? '1px solid white' : 'none', 'margin-bottom': '-1px', 'color': activeTab === 'Notas de Crédito' ? '#0ea5e9' : '#64748b', 'font-weight': activeTab === 'Notas de Crédito' ? '500' : 'normal', 'cursor': 'pointer'}">Notas de Crédito</button>
       <button type="button" class="tab" [class.active]="activeTab === 'Cuentas contables'" (click)="activeTab = 'Cuentas contables'" [ngStyle]="{'padding': '8px 16px', 'border': 'none', 'background': activeTab === 'Cuentas contables' ? 'white' : 'transparent', 'border-top': activeTab === 'Cuentas contables' ? '2px solid #0ea5e9' : 'none', 'border-left': activeTab === 'Cuentas contables' ? '1px solid #e2e8f0' : 'none', 'border-right': activeTab === 'Cuentas contables' ? '1px solid #e2e8f0' : 'none', 'border-bottom': activeTab === 'Cuentas contables' ? '1px solid white' : 'none', 'margin-bottom': '-1px', 'color': activeTab === 'Cuentas contables' ? '#0ea5e9' : '#64748b', 'font-weight': activeTab === 'Cuentas contables' ? '500' : 'normal', 'cursor': 'pointer'}">Cuentas contables</button>
     </div>
 
@@ -149,6 +150,54 @@
         </div>
         <button type="button" (click)="addAdvance()" class="btn btn-primary btn-sm" style="background-color: #0ea5e9; border: none; color: white; padding: 6px 12px; border-radius: 4px; margin-top: 16px; display: inline-flex; align-items: center; gap: 4px; font-size: 13px; cursor: pointer;">
           <span class="material-icons" style="font-size: 16px;">add_circle</span> Agregar Detalle
+        </button>
+      </div>
+
+      <!-- Notas de Crédito Tab -->
+      <div *ngIf="activeTab === 'Notas de Crédito'">
+        <div class="table-scroll" style="overflow-x: auto;">
+          <table class="detail-table" style="width: 100%; border-collapse: collapse; min-width: 800px; font-size: 13px;">
+            <thead>
+              <tr style="background-color: #f1f5f9; text-align: left; color: #475569;">
+                <th style="padding: 8px; border: 1px solid #e2e8f0; width: 40px; text-align: center;"></th>
+                <th style="padding: 8px; border: 1px solid #e2e8f0;">Persona / Proveedor</th>
+                <th style="padding: 8px; border: 1px solid #e2e8f0;">N° Nota de Crédito / Saldo</th>
+                <th style="padding: 8px; border: 1px solid #e2e8f0;">Fecha Emisión</th>
+                <th style="padding: 8px; border: 1px solid #e2e8f0; text-align: right;">Valor</th>
+                <th style="padding: 8px; border: 1px solid #e2e8f0; text-align: right;">Saldo Disp.</th>
+                <th style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; width: 120px;">Valor a Aplicar</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let nc of creditNotes; let i = index" style="border-bottom: 1px solid #e2e8f0;">
+                <td style="padding: 8px; text-align: center; border-right: 1px solid #e2e8f0;">
+                  <button type="button" (click)="creditNotes.splice(i, 1)" class="btn-icon btn-danger" style="color: #ef4444; border: none; background: none; cursor: pointer;"><span class="material-icons" style="font-size: 16px;">delete</span></button>
+                </td>
+                <td style="padding: 8px; border-right: 1px solid #e2e8f0;">
+                  <input type="text" [(ngModel)]="nc.person" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px;" />
+                </td>
+                <td style="padding: 8px; border-right: 1px solid #e2e8f0;">
+                  <input type="text" [(ngModel)]="nc.documentNumber" placeholder="001-001-000000001" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px;" />
+                </td>
+                <td style="padding: 8px; border-right: 1px solid #e2e8f0;">
+                  <input type="date" [(ngModel)]="nc.issueDate" style="border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px;" />
+                </td>
+                <td style="padding: 8px; border-right: 1px solid #e2e8f0; text-align: right;">
+                  <input type="number" [(ngModel)]="nc.value" (ngModelChange)="nc.balance = nc.value; nc.amountToPay = nc.value" style="width: 80px; padding: 4px; text-align: right; border: 1px solid #cbd5e1; border-radius: 4px;" />
+                </td>
+                <td style="padding: 8px; border-right: 1px solid #e2e8f0; text-align: right;">{{ formatCurrency(nc.balance) }}</td>
+                <td style="padding: 8px; display: flex; align-items: center; justify-content: flex-end; gap: 4px;">
+                  <input type="number" [(ngModel)]="nc.amountToPay" style="width: 80px; padding: 4px; text-align: right; border: 1px solid #cbd5e1; border-radius: 4px;" />
+                </td>
+              </tr>
+              <tr *ngIf="creditNotes.length === 0">
+                <td colspan="7" style="padding: 16px; text-align: center; color: #64748b;">Sin notas de crédito aplicadas</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <button type="button" (click)="addCreditNote()" class="btn btn-primary btn-sm" style="background-color: #0ea5e9; border: none; color: white; padding: 6px 12px; border-radius: 4px; margin-top: 16px; display: inline-flex; align-items: center; gap: 4px; font-size: 13px; cursor: pointer;">
+          <span class="material-icons" style="font-size: 16px;">add_circle</span> Agregar Nota de Crédito
         </button>
       </div>
 

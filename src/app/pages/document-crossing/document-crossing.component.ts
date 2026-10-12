@@ -31,6 +31,7 @@ export class DocumentCrossingComponent implements OnInit {
 
   documents: any[] = [];
   advances: any[] = [];
+  creditNotes: any[] = [];
   accounts: any[] = [];
   activeTab = 'Documentos';
   showAccountModal = false;
@@ -108,6 +109,17 @@ export class DocumentCrossingComponent implements OnInit {
     });
   }
 
+  addCreditNote() {
+    this.creditNotes.push({
+      person: this.personName,
+      documentNumber: '',
+      issueDate: this.issueDate,
+      value: 0,
+      balance: 0,
+      amountToPay: 0
+    });
+  }
+
   addAccount() {
     this.showAccountModal = true;
   }
@@ -153,6 +165,13 @@ export class DocumentCrossingComponent implements OnInit {
           documentNumber: d.documentLabel || 'S/N',
           accountName: d.documentLabel || 'S/N',
           amount: d.amountToPay,
+          costCenter: 'N/A'
+        })),
+        ...this.creditNotes.map(nc => ({
+          sourceType: 'CREDIT_NOTE',
+          documentNumber: nc.documentNumber ? 'NC ' + nc.documentNumber : 'Nota de Crédito',
+          accountName: nc.documentNumber ? 'NC ' + nc.documentNumber : 'Nota de Crédito',
+          amount: nc.amountToPay,
           costCenter: 'N/A'
         })),
         ...this.advances.map(a => ({

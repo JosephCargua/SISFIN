@@ -130,6 +130,8 @@ export class ElectronicInvoicesComponent implements OnInit {
       retentionIvaCode: doc.retentionIvaCode || '',
       generateRetention: doc.generateRetention || false,
       updatePersonData: doc.updatePersonData || false,
+      modifiedDocumentNumber: doc.modifiedDocumentNumber || '',
+      modificationReason: doc.modificationReason || '',
     };
   }
 
@@ -157,6 +159,8 @@ export class ElectronicInvoicesComponent implements OnInit {
       retentionIvaCode: '',
       generateRetention: false,
       updatePersonData: false,
+      modifiedDocumentNumber: '',
+      modificationReason: '',
     };
   }
 
@@ -317,21 +321,49 @@ export class ElectronicInvoicesComponent implements OnInit {
               }
             });
 
+            const tipoClean = (tipo || '').toLowerCase();
+            let codDoc = '01';
+            let rootTag = 'factura';
+            let infoTag = 'infoFactura';
+            let totalTag = 'importeTotal';
+
+            if (tipoClean.includes('crédito') || tipoClean.includes('credito') || tipoClean.includes('04')) {
+              codDoc = '04';
+              rootTag = 'notaCredito';
+              infoTag = 'infoNotaCredito';
+              totalTag = 'valorModificacion';
+            } else if (tipoClean.includes('débito') || tipoClean.includes('debito') || tipoClean.includes('05')) {
+              codDoc = '05';
+              rootTag = 'notaDebito';
+              infoTag = 'infoNotaDebito';
+              totalTag = 'valorTotal';
+            } else if (tipoClean.includes('retenci') || tipoClean.includes('07')) {
+              codDoc = '07';
+              rootTag = 'comprobanteRetencion';
+              infoTag = 'infoCompRetencion';
+              totalTag = 'total';
+            } else if (tipoClean.includes('liquidac') || tipoClean.includes('03')) {
+              codDoc = '03';
+              rootTag = 'liquidacionCompra';
+              infoTag = 'infoLiquidacionCompra';
+              totalTag = 'importeTotal';
+            }
+
             const xml = `
-            <factura>
+            <${rootTag}>
               <infoTributaria>
                 <ruc>${ruc}</ruc>
                 <razonSocial>${escapeXml(razonSocial)}</razonSocial>
-                <codDoc>01</codDoc>
+                <codDoc>${codDoc}</codDoc>
                 <estab>${estab}</estab>
                 <ptoEmi>${ptoEmi}</ptoEmi>
                 <secuencial>${secuencial}</secuencial>
                 <claveAcceso>${clave}</claveAcceso>
               </infoTributaria>
-              <infoFactura>
+              <${infoTag}>
                 <fechaEmision>${fEmi}</fechaEmision>
-                <importeTotal>${total}</importeTotal>
-              </infoFactura>
+                <${totalTag}>${total}</${totalTag}>
+              </${infoTag}>
               <fechaAutorizacion>${fAuto}</fechaAutorizacion>
               <detalles>
                 <detalle>
@@ -346,7 +378,7 @@ export class ElectronicInvoicesComponent implements OnInit {
                   </impuestos>
                 </detalle>
               </detalles>
-            </factura>`;
+            </${rootTag}>`;
             
             const xmlBlob = new Blob([xml], { type: 'application/xml' });
             const xmlFile = new File([xmlBlob], `${clave}.xml`, { type: 'application/xml' });
@@ -423,6 +455,9 @@ export class ElectronicInvoicesComponent implements OnInit {
 
   homologate(docId: string) {
     const form = this.getForm(docId);
+    const doc = [...this.partialDocuments, ...this.pendingDocuments, ...this.processedDocuments].find(
+      (d) => d.id === docId,
+    );
 
     this.homologatingId = docId;
     this.registrationService
@@ -436,11 +471,16 @@ export class ElectronicInvoicesComponent implements OnInit {
         retentionIvaCode: form.retentionIvaCode || undefined,
         generateRetention: form.generateRetention,
         updatePersonData: form.updatePersonData,
+        modifiedDocumentNumber: form.modifiedDocumentNumber || undefined,
+        modificationReason: form.modificationReason || undefined,
       })
       .subscribe({
         next: () => {
           this.homologatingId = null;
           this.expandedId = null;
+          const msg = doc && this.isCreditNote(doc)
+            ? 'La Nota de Crédito fue procesada y cruzada correctamente'
+            : 'El documento fue procesado correctamente';
           Swal.fire({
             toast: true,
             position: 'top-end',
@@ -448,7 +488,7 @@ export class ElectronicInvoicesComponent implements OnInit {
             timer: 3000,
             timerProgressBar: true,
             icon: 'success',
-            title: 'La factura fue procesada correctamente'
+            title: msg,
           });
           this.loadDocuments();
         },
@@ -506,7 +546,45 @@ export class ElectronicInvoicesComponent implements OnInit {
     alert(
       `Documento: ${doc.documentLabel}\nProveedor: ${doc.supplierName}\n` +
         (doc.accessKey ? `Clave: ${doc.accessKey}\n` : '') +
-        (doc.total != null ? `Total: $${doc.total}` : ''),
+        (doc.total != null ? `Total: $${doc.total}\n` : '') +
+        (doc.modifiedDocumentNumber ? `Modifica: ${doc.modifiedDocumentNumber}\n` : '') +
+        (doc.creditNoteAmount ? `NC Aplicada: -$${doc.creditNoteAmount}\n` : ''),
+    );
+  }
+
+  isCreditNote(doc: ElectronicDocumentRegistration): boolean {
+    return doc.documentTypeCode === '04' || (doc.documentLabel ? doc.documentLabel.startsWith('NC') : false);
+  }
+
+  isDebitNote(doc: ElectronicDocumentRegistration): boolean {
+    return doc.documentTypeCode === '05' || (doc.documentLabel ? doc.documentLabel.startsWith('ND') : false);
+  }
+
+  isRetention(doc: ElectronicDocumentRegistration): boolean {
+    return doc.documentTypeCode === '07' || (doc.documentLabel ? doc.documentLabel.startsWith('RET') : false);
+  }
+
+  formatCurrency(val?: number | null): string {
+    if (val === undefined || val === null || isNaN(val)) return '$0.00';
+    return new Intl.NumberFormat('es-EC', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+    }).format(val);
+  }
+
+  getAvailableInvoices(supplierIdentification?: string | null): ElectronicDocumentRegistration[] {
+    const all = [...this.partialDocuments, ...this.pendingDocuments, ...this.processedDocuments];
+    return all.filter(d => 
+      (d.documentTypeCode === '01' || d.documentLabel.startsWith('FAC')) &&
+      (!supplierIdentification || d.supplierIdentification === supplierIdentification)
+    );
+  }
+
+  getLinkedCreditNotes(invoiceDocNumber: string): ElectronicDocumentRegistration[] {
+    const all = [...this.partialDocuments, ...this.pendingDocuments, ...this.processedDocuments];
+    return all.filter(d => 
+      this.isCreditNote(d) && d.modifiedDocumentNumber === invoiceDocNumber
     );
   }
 
@@ -522,9 +600,10 @@ export class ElectronicInvoicesComponent implements OnInit {
   getReviewClass(status: DocumentReviewStatus): string {
     const classes: Record<DocumentReviewStatus, string> = {
       REVIEWED: 'status-reviewed',
+      NOT_NOT_REVIEWED: 'status-not-reviewed',
       NOT_REVIEWED: 'status-not-reviewed',
       PENDING_REVIEW: 'status-pending-review',
-    };
+    } as any;
     return classes[status];
   }
 }

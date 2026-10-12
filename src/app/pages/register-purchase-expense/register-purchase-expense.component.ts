@@ -350,7 +350,10 @@ export class RegisterPurchaseExpenseComponent implements OnInit {
         this.authorization = parsed.authorization || '';
         this.personName = parsed.personName;
         this.personIdentification = parsed.personIdentification || '';
-        this.documentCategory = 'INVOICE';
+        this.documentCategory = (parsed as any).documentCategory || 'INVOICE';
+        if ((parsed as any).modifiedDocumentNumber) {
+          this.reference = `Modifica: ${(parsed as any).modifiedDocumentNumber}`;
+        }
 
         const matched = this.suppliers.find(
           (s) => s.identification === parsed.personIdentification,

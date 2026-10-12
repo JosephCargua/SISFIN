@@ -170,6 +170,12 @@
                 <span class="material-icons" style="font-size: 14px; margin-right: 4px;">{{ getStatusIcon(doc) }}</span>
                 {{ getDisplayStatus(doc) }}
               </span>
+              <span *ngIf="doc.creditNoteAmount && doc.creditNoteAmount > 0" style="font-size: 11px; color: #16a34a; font-weight: 500; display: block; margin-top: 2px;">
+                NC: -{{ formatCurrency(doc.creditNoteAmount) }}
+              </span>
+              <span *ngIf="doc.documentTypeCode === '04' && doc.modifiedDocumentNumber" style="font-size: 11px; color: #0284c7; font-weight: 500; display: block; margin-top: 2px;">
+                Modifica: {{ doc.modifiedDocumentNumber }}
+              </span>
             </td>
             <td style="text-align: center; padding: 8px;">
               <span class="material-icons" style="color: #16a34a; font-size: 16px; font-weight: bold;" *ngIf="doc.isAccounted">check</span>

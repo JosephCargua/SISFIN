@@ -439,12 +439,21 @@ export class ElectronicInvoicesComponent implements OnInit {
     this.registrationService.uploadDocument(file).subscribe({
       next: (res: any) => {
         this.uploading = false;
+        const ncNumber = res?.documentNumber || file.name;
+        const ncTotal = res?.total ? Number(res.total) : 0;
+
+        // Asignar de inmediato en el formulario visual de la factura
+        this.getForm(invoiceDoc.id).modifiedDocumentNumber = ncNumber;
+        if (ncTotal > 0) {
+          invoiceDoc.creditNoteAmount = ncTotal;
+        }
+
         Swal.fire({
           icon: 'success',
-          title: 'Nota de Crédito subida',
-          text: `La Nota de Crédito fue subida y vinculada a la factura ${invoiceDoc.documentNumber}.`,
-          timer: 3000,
-          showConfirmButton: false,
+          title: 'Nota de Crédito Vinculada',
+          html: `La Nota de Crédito <b>${ncNumber}</b> fue subida y descontada de la factura <b>${invoiceDoc.documentNumber}</b>.<br><br>Valor aplicado: <b>$${ncTotal.toFixed(2)}</b>`,
+          timer: 4000,
+          showConfirmButton: true,
         });
         this.loadDocuments();
       },

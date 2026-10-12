@@ -430,6 +430,36 @@ export class ElectronicInvoicesComponent implements OnInit {
     });
   }
 
+  onUploadCreditNoteForInvoice(event: Event, invoiceDoc: ElectronicDocumentRegistration) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+    const file = input.files[0];
+    
+    this.uploading = true;
+    this.registrationService.uploadDocument(file).subscribe({
+      next: (res: any) => {
+        this.uploading = false;
+        Swal.fire({
+          icon: 'success',
+          title: 'Nota de Crédito subida',
+          text: `La Nota de Crédito fue subida y vinculada a la factura ${invoiceDoc.documentNumber}.`,
+          timer: 3000,
+          showConfirmButton: false,
+        });
+        this.loadDocuments();
+      },
+      error: (err: any) => {
+        this.uploading = false;
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al subir Nota de Crédito',
+          text: err.error?.message || 'No se pudo procesar el archivo XML de la Nota de Crédito.',
+        });
+      }
+    });
+    input.value = '';
+  }
+
   toggleSelect(id: string) {
     if (this.selectedIds.has(id)) {
       this.selectedIds.delete(id);

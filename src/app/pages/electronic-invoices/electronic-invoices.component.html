@@ -3,7 +3,7 @@
     <h1>Registro Electrónico</h1>
     <label class="btn btn-primary upload-btn">
       <span class="material-icons">upload_file</span>
-      Subir XML / TXT Masivo
+      Subir Comprobantes (XML / TXT SRI)
       <input
         type="file"
         accept=".xml,application/xml,text/xml,.txt,text/plain,*/*"
@@ -23,7 +23,7 @@
     (dragleave)="onDragLeave()"
   >
     <span class="material-icons upload-icon">cloud_upload</span>
-    <p>Arrastre archivos XML o un archivo TXT de facturas masivas aquí, o use el botón de subida</p>
+    <p>Arrastre aquí sus <strong>Facturas, Notas de Crédito, Notas de Débito o Retenciones</strong> (archivos XML individuales o el archivo TXT descargado del SRI), o use el botón de subida</p>
     <span class="upload-hint" *ngIf="uploading">Procesando archivos...</span>
     <span class="upload-error" *ngIf="uploadError">{{ uploadError }}</span>
   </div>
@@ -395,6 +395,18 @@
                           <span class="material-icons">sync_alt</span>
                           Nota de Crédito Vinculada (Resta al saldo)
                         </h4>
+                        <div style="margin-bottom: 10px;">
+                          <label style="display: inline-flex; align-items: center; gap: 6px; background-color: #0284c7; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 500;">
+                            <span class="material-icons" style="font-size: 16px;">upload_file</span>
+                            Subir XML de Nota de Crédito para esta factura
+                            <input
+                              type="file"
+                              accept=".xml,application/xml,text/xml"
+                              hidden
+                              (change)="onUploadCreditNoteForInvoice($event, doc)"
+                            />
+                          </label>
+                        </div>
                         <div class="form-group">
                           <label>N° Nota de Crédito que afecta esta factura</label>
                           <input

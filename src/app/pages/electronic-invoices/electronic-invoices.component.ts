@@ -436,7 +436,7 @@ export class ElectronicInvoicesComponent implements OnInit {
     const file = input.files[0];
     
     this.uploading = true;
-    this.registrationService.uploadDocument(file).subscribe({
+    this.registrationService.uploadDocument(file, invoiceDoc.documentNumber).subscribe({
       next: (res: any) => {
         this.uploading = false;
         const ncNumber = res?.documentNumber || file.name;

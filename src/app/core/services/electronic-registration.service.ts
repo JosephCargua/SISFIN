@@ -26,9 +26,12 @@ export class ElectronicRegistrationService {
     );
   }
 
-  uploadDocument(file: File): Observable<ElectronicDocumentRegistration> {
+  uploadDocument(file: File, targetInvoiceNumber?: string): Observable<ElectronicDocumentRegistration> {
+    const url = targetInvoiceNumber
+      ? `electronic-document-registrations/upload?targetInvoiceNumber=${encodeURIComponent(targetInvoiceNumber)}`
+      : 'electronic-document-registrations/upload';
     return this.api.uploadFile<ElectronicDocumentRegistration>(
-      'electronic-document-registrations/upload',
+      url,
       file,
     );
   }
